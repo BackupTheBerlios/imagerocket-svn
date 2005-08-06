@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN"
+"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<!-- Created with Sodipodi ("http://www.sodipodi.com/") -->
+<svg
+   id="svg602"
+   sodipodi:version="0.34"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   width="210mm"
+   height="297mm"
+   xml:space="preserve"
+   sodipodi:docbase="/mnt/wesley/source/ImageRocket/app/pixmaps"
+   sodipodi:docname="/mnt/wesley/source/ImageRocket/app/pixmaps/questionMark.svg"><defs
+   id="defs604"><linearGradient
+   id="linearGradient623"><stop
+   style="stop-color:#423acd;stop-opacity:1;"
+   offset="0"
+   id="stop624" /><stop
+   style="stop-color:#1f17a7;stop-opacity:1;"
+   offset="1"
+   id="stop625" /></linearGradient><linearGradient
+   id="linearGradient615"><stop
+   style="stop-color:#bf1715;stop-opacity:1;"
+   offset="0"
+   id="stop616" /><stop
+   style="stop-color:#7f0000;stop-opacity:1;"
+   offset="1"
+   id="stop617" /></linearGradient><linearGradient
+   id="linearGradient610"><stop
+   style="stop-color:#000;stop-opacity:1;"
+   offset="0"
+   id="stop611" /><stop
+   style="stop-color:#fff;stop-opacity:1;"
+   offset="1"
+   id="stop612" /></linearGradient><linearGradient
+   xlink:href="#linearGradient623"
+   id="linearGradient613" /><linearGradient
+   xlink:href="#linearGradient623"
+   id="linearGradient614"
+   x1="1.08046031"
+   y1="0.81242073"
+   x2="-0.40229851"
+   y2="0.1874993" /></defs><sodipodi:namedview
+   id="base" /><text
+   style="fill:url(#linearGradient614);stroke:#000063;font-family:Bitstream Charter;font-style:normal;font-weight:bold;font-size:72;fill-opacity:1;stroke-opacity:1;stroke-width:1pt;stroke-linejoin:miter;stroke-linecap:butt;text-anchor:start;writing-mode:lr;"
+   x="-687.638579"
+   y="-1098.10041"
+   id="text618"
+   sodipodi:linespacing="100%"
+   xml:space="preserve"
+   transform="scale(1.31378,1.150845)"><tspan
+   x="-687.63855"
+   y="-1098.10046"
+   sodipodi:role="line"
+   id="tspan636"
+   style="stroke:#000063;stroke-opacity:1;">?</tspan></text><rect
+   style="font-size:12;fill:none;fill-rule:evenodd;stroke-width:1;stroke:#000063;stroke-opacity:1;"
+   id="rect638"
+   width="57.4524689"
+   height="77.7818069"
+   x="-911.283798"
+   y="-1328.82016" /></svg>
