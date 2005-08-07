@@ -169,6 +169,7 @@ void RocketWindow::initGUI() {
     dPalette->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
     dPalette->setFeatures(QDockWidget::DockWidgetMovable);
     toolbox = new RocketToolBox(dPalette);
+    connect(toolbox, SIGNAL(itemClicked(QListWidgetItem *)), SLOT(toolClicked(QListWidgetItem *)));
     toolbox->setFrameStyle(QFrame::Box|QFrame::Plain);
     dPalette->setWidget(toolbox);
     addDockWidget(Qt::RightDockWidgetArea, dPalette);
@@ -248,7 +249,9 @@ void RocketWindow::loadPlugins(QString dirPath) {
                 plugins.append(i);
                 ToolInterface *i2 = qobject_cast< ToolInterface * >(plugin->instance());
                 if (i2) {
-                    i2->createListEntry(toolbox);
+                    QListWidgetItem *i = i2->createListEntry(toolbox);
+                    i->setData(Qt::UserRole, toolbox->count());
+                    toolbox->updateMinimumSize();
                 }
             }
         }
@@ -404,6 +407,10 @@ void RocketWindow::zoomFitToggled(bool value) {
     if (!value) {
         setZoom(1.0);
     }
+}
+
+void RocketWindow::toolClicked(QListWidgetItem *item) {
+    QMessageBox::warning(this, "Message", QString::number(item->data(Qt::UserRole).toInt()));
 }
 
 void RocketWindow::aboutClicked() {

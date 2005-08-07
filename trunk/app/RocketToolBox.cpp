@@ -3,6 +3,14 @@
 RocketToolBox::RocketToolBox(QWidget *parent) : QListWidget(parent) {
 }
 
+void RocketToolBox::updateMinimumSize() {
+    int fitWidth = 0;
+    for (int a=0;a<count();a++) {
+        fitWidth += std::max(visualItemRect(item(a)).width(), fitWidth);
+    }
+    setMinimumWidth(fitWidth + 10);
+}
+
 QSize RocketToolBox::sizeHint() const {
-    return QSize(100, 50);
+    return QSize(30, 50);
 }

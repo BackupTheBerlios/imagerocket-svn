@@ -70,6 +70,8 @@ protected slots:
     
     void aboutClicked();
     
+    void toolClicked(QListWidgetItem *item);
+    
     void updateGui();
     
 public:
