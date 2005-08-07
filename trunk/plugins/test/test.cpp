@@ -1,7 +1,7 @@
 #include "test.h"
 #include <iostream>
 
-void Test::init(QString &fileName, lua_State *L, QVector < PluginInterface * > &plugins) {
+void Test::init(QString &fileName, lua_State *L) {
     Test::fileName = fileName;
     
     QFile script(":/test.lua");
@@ -17,8 +17,10 @@ void Test::init(QString &fileName, lua_State *L, QVector < PluginInterface * > &
 }
 
 QImage *Test::activate(QPixmap *pix) {
-    Test::pix = pix;
-    return NULL;
+    QImage img(pix->toImage());
+    img.detach();
+    img.invertPixels(QImage::InvertRgb);
+    return new QImage(img);
 }
 
 QImage *Test::activate(QImage *img) {
@@ -36,7 +38,7 @@ QListWidgetItem *Test::createListEntry(QListWidget *parent) {
     //take the abs path of library and get the icon in the same directory
     QString name(QDir(QFileInfo(fileName).absoluteDir()).filePath("test.png"));
     QIcon icon(name);
-    QListWidgetItem *item = new QListWidgetItem(tr("Brightness"), parent);
+    QListWidgetItem *item = new QListWidgetItem(tr("Invert"), parent);
     item->setIcon(icon);
     item->setFlags(Qt::ItemIsEnabled);
     return item;

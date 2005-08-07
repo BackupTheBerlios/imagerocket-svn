@@ -7,7 +7,7 @@
 class RocketImage : public QObject {
 Q_OBJECT
 protected:
-    QPixmap thumbnail, pix;
+    QPixmap thumbnail;
     QPixmap xIcon, clickToShowIcon, loadingIcon;
     QString fileName, shortName;
     static int thumbnailSize;
@@ -15,11 +15,13 @@ protected:
     bool transparency;
     void setSelected(bool value);
     friend void RocketImageList::setIndex(int index);
+    QStack < QPixmap > changes;
 public:
     enum StatusIcon {TooLarge = 1, Broken, Loading};
     RocketImage(QString fileName);
     ~RocketImage();
-    QPixmap getPixmap() {return pix;}
+    QPixmap getPixmap() {return changes.top();}
+    void addChange(QPixmap pix);
     void setActive(bool value);
     bool hasTransparency() {return transparency;}
     QPixmap getThumbnail() {return thumbnail;}

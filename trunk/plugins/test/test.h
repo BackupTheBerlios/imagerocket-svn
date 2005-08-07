@@ -11,7 +11,7 @@ protected:
     QPixmap *pix;
     void run();
 public:
-    virtual void init(QString &fileName, lua_State *L, QVector < PluginInterface * > &plugins);
+    virtual void init(QString &fileName, lua_State *L);
     virtual QImage *activate(QPixmap *pix);
     virtual QImage *activate(QImage *img);
     virtual void reset();

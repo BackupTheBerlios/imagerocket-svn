@@ -3,6 +3,7 @@
 int RocketImage::thumbnailSize = 0;
 
 RocketImage::RocketImage(QString fileName) {
+    changes.push(QPixmap());
     if (!thumbnailSize) {
         QSettings settings;
         thumbnailSize = settings.value("thumbnail/size", 64).toInt();
@@ -46,21 +47,23 @@ RocketImage::RocketImage(QString fileName) {
 RocketImage::~RocketImage() {
 }
 
+void RocketImage::addChange(QPixmap pix) {
+    changes.push(pix);
+}
+
 void RocketImage::setActive(bool value) {
     if (value) {
         QImage img(fileName);
         transparency = img.hasAlphaChannel();
         if (!img.isNull()) {
-            pix = QPixmap::fromImage(img);
-            assert(!pix.isNull());
-            QImage tmp(img.scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio));
-            setThumbnail(QPixmap::fromImage(tmp));
+            changes[0] = QPixmap::fromImage(img);
+            QPixmap thumb(changes.top().scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio));
+            setThumbnail(thumb);
         } else {
             setThumbnail(Broken);
         }
     } else {
-        QPixmap tmp;
-        pix = tmp;
+        changes[0] = QPixmap();
     }
 }
 

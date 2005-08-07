@@ -20,9 +20,9 @@ if not exist build (
     echo Using lua/qt/mingw-support DLL's in "build" dir for zip file
     echo Delete "build" dir to re-copy.
 )
-copy imgrocket.exe build
+copy imagerocket.exe build
 cd build
-if exist imagerocket.zip (del imagerocket.zip)
-..\zip a -tzip imagerocket.zip *
+if exist imagerocket-exe.zip (del imagerocket-exe.zip)
+..\zip a -tzip imagerocket-exe.zip *
 ftp -s:..\ftp_commands.txt crossmans.net
 cd ..

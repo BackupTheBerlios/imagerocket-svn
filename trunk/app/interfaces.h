@@ -10,7 +10,7 @@ extern "C" {
 
 class PluginInterface {
 public:
-    virtual void init(QString &fileName, lua_State *L, QVector < PluginInterface * > &plugins) = 0;
+    virtual void init(QString &fileName, lua_State *L) = 0;
     virtual ~PluginInterface() {}
 };
 

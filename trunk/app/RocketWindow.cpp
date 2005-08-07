@@ -236,21 +236,23 @@ void RocketWindow::loadPlugins(QString dirPath) {
                     delete plugin;
                     continue;
                 }
+                QObject *o = plugin->instance();
                 PluginInterface *i = qobject_cast
-                        < PluginInterface * >(plugin->instance());
+                        < PluginInterface * >(o);
                 if (!i) {
                     QMessageBox::warning(this, tr("Plugin Loading Failed"),
                             tr("Plugin %1 does not subclass PluginInterface and cannot be used.").arg(f));
+                    delete o;
                     delete lib;
                     delete plugin;
                     continue;
                 }
-                i->init(f, L, plugins);
-                plugins.append(i);
-                ToolInterface *i2 = qobject_cast< ToolInterface * >(plugin->instance());
+                i->init(f, L);
+                plugins.append(o);
+                ToolInterface *i2 = qobject_cast< ToolInterface * >(o);
                 if (i2) {
                     QListWidgetItem *i = i2->createListEntry(toolbox);
-                    i->setData(Qt::UserRole, toolbox->count());
+                    i->setData(Qt::UserRole, plugins.count()-1);
                     toolbox->updateMinimumSize();
                 }
             }
@@ -265,7 +267,7 @@ RocketWindow::~RocketWindow() {
     settings.setValue("window/height", frameGeometry().height());
     settings.setValue("window/maximized", isMaximized());
     */
-    foreach (PluginInterface *i, plugins) {
+    foreach (QObject *i, plugins) {
         delete i;
     }
 }
@@ -411,7 +413,16 @@ void RocketWindow::zoomFitToggled(bool value) {
 
 void RocketWindow::toolClicked(QListWidgetItem *item) {
     if (item) {
-        QMessageBox::warning(this, "Message", QString::number(item->data(Qt::UserRole).toInt()));
+        int pluginIndex = item->data(Qt::UserRole).toInt();
+        RocketImage *image = images.getAsRocketImage(index);
+        QPixmap tmp(image->getPixmap());
+        QObject *plugin = plugins[pluginIndex];
+        ToolInterface *tool = qobject_cast < ToolInterface * >(plugin);
+        assert(tool);
+        QImage *img = tool->activate(&tmp);
+        assert(img);
+        image->addChange(QPixmap::fromImage(*img));
+        setIndex(index);
     }
 }
 

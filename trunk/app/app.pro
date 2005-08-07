@@ -1,5 +1,5 @@
 TEMPLATE = app
-TARGET = imgrocket
+TARGET = imagerocket
 DESTDIR = ..
 HEADERS =   RocketWindow.h \
             RocketAboutDialog.h \

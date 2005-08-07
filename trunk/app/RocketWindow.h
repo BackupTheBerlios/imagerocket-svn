@@ -25,7 +25,7 @@ protected:
     RocketView *view;
     RocketImageList images;
     lua_State *L;
-    QVector < PluginInterface * > plugins;
+    QVector < QObject * > plugins;
     unsigned int index;
     QLabel *statusFile, *statusZoom, *statusSize;
     QMenu *mFile, *mEdit, *mView, *mHelp;
