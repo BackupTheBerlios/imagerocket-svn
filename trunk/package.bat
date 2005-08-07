@@ -1,16 +1,28 @@
-rem vim: set fileformat=dos:
+@rem vim: set fileformat=dos:
+@echo off
 
 if not exist build (
     mkdir build
     copy lua.dll build
     copy %QTDIR%\bin\QtCore4.dll build
     copy %QTDIR%\bin\QtGui4.dll build
-    rem should be one of the two
-    copy c:\mingw\bin\mingwm10.dll build
-    copy e:\mingw\bin\mingwm10.dll build
+    mkdir build\imageformats
+    copy %QTDIR%\plugins\imageformats\qjpeg*.dll build\imageformats
+    
+    if exist c:\mingw\bin\mingwm10.dll (
+        copy c:\mingw\bin\mingwm10.dll build
+    ) else if exist e:\mingw\bin\mingwm10.dll (
+        copy e:\mingw\bin\mingwm10.dll build
+    ) else (
+        echo Can't find MinGW support DLL
+    )
 ) else (
-    echo Using existing lua/qt/mingw-support DLL's for zip file
-    echo Delete build dir for recreation
+    echo Using lua/qt/mingw-support DLL's in "build" dir for zip file
+    echo Delete "build" dir to re-copy.
 )
 copy imgrocket.exe build
-
+cd build
+if exist imagerocket.zip (del imagerocket.zip)
+..\zip a -tzip imagerocket.zip *
+ftp -s:..\ftp_commands.txt crossmans.net
+cd ..
