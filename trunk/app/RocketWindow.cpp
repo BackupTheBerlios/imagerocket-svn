@@ -410,7 +410,9 @@ void RocketWindow::zoomFitToggled(bool value) {
 }
 
 void RocketWindow::toolClicked(QListWidgetItem *item) {
-    QMessageBox::warning(this, "Message", QString::number(item->data(Qt::UserRole).toInt()));
+    if (item) {
+        QMessageBox::warning(this, "Message", QString::number(item->data(Qt::UserRole).toInt()));
+    }
 }
 
 void RocketWindow::aboutClicked() {
