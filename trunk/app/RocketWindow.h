@@ -13,8 +13,6 @@ extern "C" {
 class PluginInterface;
 #include <QtCore>
 #include <QtGui>
-#include <vector>
-#include <string>
 
 class QAction;
 
@@ -25,7 +23,7 @@ protected:
     RocketView *view;
     RocketImageList images;
     lua_State *L;
-    QVector < QObject * > plugins;
+    QList < QObject * > plugins;
     unsigned int index;
     QLabel *statusFile, *statusZoom, *statusSize;
     QMenu *mFile, *mEdit, *mView, *mHelp;

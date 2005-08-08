@@ -19,7 +19,27 @@ void Test::init(QString &fileName, lua_State *L) {
 QImage *Test::activate(QPixmap *pix) {
     QImage img(pix->toImage());
     img.detach();
-    img.invertPixels(QImage::InvertRgb);
+    //img.invertPixels(QImage::InvertRgb);
+    assert(img.depth() == 32);
+    for (int y=0;y<img.height();y++) {
+        uint *line = reinterpret_cast< uint * >(img.scanLine(y));
+        if (img.hasAlphaChannel()) {
+            for (int x=0;x<img.width();x++) {
+                uint *pixel = line + x;
+                *pixel = qRgba(std::min(qRed(*pixel)+20,255),
+                              std::min(qGreen(*pixel)+20,255),
+                              std::min(qBlue(*pixel)+20,255),
+                              qAlpha(*pixel));
+            }
+        } else {
+            for (int x=0;x<img.width();x++) {
+                uint *pixel = line + x;
+                *pixel = qRgb(std::min(qRed(*pixel)+20,255),
+                              std::min(qGreen(*pixel)+20,255),
+                              std::min(qBlue(*pixel)+20,255));
+            }
+        }
+    }
     return new QImage(img);
 }
 
@@ -38,7 +58,7 @@ QListWidgetItem *Test::createListEntry(QListWidget *parent) {
     //take the abs path of library and get the icon in the same directory
     QString name(QDir(QFileInfo(fileName).absoluteDir()).filePath("test.png"));
     QIcon icon(name);
-    QListWidgetItem *item = new QListWidgetItem(tr("Invert"), parent);
+    QListWidgetItem *item = new QListWidgetItem(tr("Brighten"), parent);
     item->setIcon(icon);
     item->setFlags(Qt::ItemIsEnabled);
     return item;

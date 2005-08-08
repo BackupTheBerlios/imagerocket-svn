@@ -1,16 +1,16 @@
 #ifndef ROCKET_IMAGE_SQUARE_CONTAINER_H
 #define ROCKET_IMAGE_SQUARE_CONTAINER_H
 
-#include <qimage.h>
-#include <qobject.h>
+#include <QObject>
+#include <QVector>
 #include <QPixmap>
-#include <vector>
+#include <QImage>
 
 class RocketImageSquareContainer : public QObject {
 Q_OBJECT
 protected:
     
-    std::vector < QPixmap * > pieces;
+    QVector < QPixmap * > pieces;
     QPixmap *source;
     QPixmap *transparent;
     int pieceSize, pieceCount, scaledH, scaledW;

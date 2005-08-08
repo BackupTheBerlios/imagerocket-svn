@@ -288,8 +288,10 @@ void RocketWindow::updateGui() {
     aZoom100->setEnabled(notNull);
     aZoomOut->setEnabled(notNull && view->getZoom() / 2 > 0.01);
     aZoomFit->setEnabled(notNull);
-    aUndo->setEnabled(false);
-    aRedo->setEnabled(false);
+    RocketImage *img = images.getAsRocketImage(index);
+    aUndo->setEnabled(img ? img->canUndo() : FALSE);
+    aRedo->setEnabled(img ? img->canRedo() : FALSE);
+    toolbox->setEnabled(notNull);
     statusZoom->setText(tr("%L1%", "zoom percentage - %L1 is the number")
             .arg(view->getZoom()*100.0, 0, 'f', 1));
     QSize size = view->imageSize();
@@ -372,11 +374,15 @@ void RocketWindow::lastClicked() {
 }
 
 void RocketWindow::undoClicked() {
-    
+    RocketImage *image = images.getAsRocketImage(index);
+    image->undo();
+    setIndex(index);
 }
 
 void RocketWindow::redoClicked() {
-    
+    RocketImage *image = images.getAsRocketImage(index);
+    image->redo();
+    setIndex(index);
 }
 
 void RocketWindow::zoomInClicked() {

@@ -1,12 +1,8 @@
 #include "RocketImageSquareContainer.h"
 #include <QPainter>
-#include <QPixmap>
 #include <QSettings>
 #include <QTime>
-#include <iostream>
-
-#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
-#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
+#include <limits>
 
 /*!
   \class RocketImageSquareContainer
@@ -66,7 +62,7 @@ RocketImageSquareContainer::~RocketImageSquareContainer() {
     if (transparent) {
         delete transparent;
     }
-    for (unsigned int a=0;a<pieces.size();a++) {
+    for (int a=0;a<pieces.size();a++) {
         delete pieces[a];
         pieces[a] = NULL;
     }
@@ -129,7 +125,7 @@ void RocketImageSquareContainer::setCached(int x, int y, bool newState) {
 //! This deletes all current pieces and sets the zoom.
 void RocketImageSquareContainer::setZoom(double z) {
     zoom = z;
-    for (unsigned int a=0;a<pieces.size();a++) {
+    for (int a=0;a<pieces.size();a++) {
         delete pieces[a];
         pieces[a] = NULL;
     }
@@ -137,7 +133,7 @@ void RocketImageSquareContainer::setZoom(double z) {
     pieceCount = (getGridWidth()-1) * getGridHeight()
             + (getGridHeight()-1) + 1;
     pieces.resize(getPieceCount());
-    for (unsigned int a=0;a<pieces.size();a++) {
+    for (int a=0;a<pieces.size();a++) {
         pieces[a] = NULL;
     }
     scaledW = 0;
