@@ -1,4 +1,5 @@
 #include "test.h"
+#include <assert.h>
 #include <iostream>
 
 void Test::init(QString &fileName, lua_State *L) {
@@ -56,7 +57,8 @@ void Test::reset() {
 
 QListWidgetItem *Test::createListEntry(QListWidget *parent) {
     //take the abs path of library and get the icon in the same directory
-    QString name(QDir(QFileInfo(fileName).absoluteDir()).filePath("test.png"));
+    QDir thisDir(QFileInfo(fileName).absoluteDir());
+    QString name(thisDir.filePath("test.png"));
     QIcon icon(name);
     QListWidgetItem *item = new QListWidgetItem(tr("Brighten"), parent);
     item->setIcon(icon);

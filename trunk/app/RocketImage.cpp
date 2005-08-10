@@ -1,4 +1,5 @@
 #include "RocketImage.h"
+#include <assert.h>
 
 int RocketImage::thumbnailSize = 0;
 

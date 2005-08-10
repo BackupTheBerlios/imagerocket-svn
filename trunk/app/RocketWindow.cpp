@@ -5,6 +5,7 @@
 
 #include "interfaces.h"
 #include "consts.h"
+#include <assert.h>
 #include <iostream>
 
 #define PIECE_SIZE 192

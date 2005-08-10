@@ -3,6 +3,7 @@
 #include <QSettings>
 #include <QTime>
 #include <limits>
+#include <assert.h>
 
 /*!
   \class RocketImageSquareContainer
