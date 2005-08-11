@@ -166,12 +166,12 @@ void RocketWindow::initGUI() {
     filePreviewArea = new RocketFilePreviewArea(dFiles, thumbnailSize, &images);
     int scrollBarWidth = filePreviewArea->verticalScrollBar()->sizeHint().width();
     dFiles->setMinimumSize(
-            filePreviewArea->getThumbnailSize()+scrollBarWidth+40, 100);
+            filePreviewArea->getThumbnailSize()+scrollBarWidth+40, 132);
     connect(filePreviewArea, SIGNAL(clicked(int)), this, SLOT(previewClicked(int)));
-    dFiles->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
-    dFiles->setFeatures(QDockWidget::DockWidgetMovable|QDockWidget::DockWidgetClosable);
+    dFiles->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea|Qt::BottomDockWidgetArea);
+    dFiles->setFeatures(QDockWidget::DockWidgetClosable);
     dFiles->setWidget(filePreviewArea);
-    addDockWidget(Qt::LeftDockWidgetArea, dFiles);
+    addDockWidget(Qt::BottomDockWidgetArea, dFiles);
     
     dPalette = new QDockWidget(this);
     dPalette->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
@@ -184,6 +184,7 @@ void RocketWindow::initGUI() {
     
     view = new RocketView(this, PIECE_SIZE);
     setCentralWidget(view);
+    view->setFocus(Qt::OtherFocusReason);
     connect(view, SIGNAL(zoomChanged(double)), this, SLOT(updateGui()));
     
     updateGui();

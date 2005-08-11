@@ -8,10 +8,11 @@ class RocketFilePreviewWidget : public QWidget {
 Q_OBJECT
 protected:
     QPixmap trashIcon, trashLitIcon, xIcon, loadingIcon;
+    QFont font;
     RocketImage *img;
     int thumbnailSize;
     bool onTrash, onWidget;
-    bool active;
+    bool active, usingHorizontalLayout;
     QSize oldPrefSize;
     void paintEvent(QPaintEvent *event);
     void leaveEvent(QEvent *event);
@@ -26,6 +27,10 @@ public:
     void setActive(bool value);
     bool getActive() {
         return active;
+    }
+    void setOrientation(bool horizontal);
+    bool usingHorizontalOrientation() {
+        return usingHorizontalLayout;
     }
 public slots:
     void updatePreview();

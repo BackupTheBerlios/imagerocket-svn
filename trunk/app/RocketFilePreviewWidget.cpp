@@ -12,9 +12,10 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
     this->thumbnailSize = thumbnailSize;
     this->img = img;
     connect(img, SIGNAL(thumbnailChanged(QPixmap)), this, SLOT(updatePreview()));
-    onTrash = onWidget = active = false;
+    onTrash = onWidget = active = usingHorizontalLayout = false;
     QString file(":/pixmaps/trash.png");
     QString file2(":/pixmaps/trashLit.png");
+    font.setPointSize(8);
     if (!QPixmapCache::find(file, trashIcon)
          || !QPixmapCache::find(file2, trashLitIcon)) {
         trashIcon.load(file);
@@ -23,6 +24,9 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
         QPixmapCache::insert(file2, trashLitIcon);
     }
     setMouseTracking(true);
+    QPalette palette;
+    palette.setBrush(QPalette::Base, QBrush());
+    setPalette(palette);
     updatePreview();
 }
 
@@ -39,8 +43,6 @@ void RocketFilePreviewWidget::updatePreview() {
 void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     //There's plenty of sloppy coding here. Cleanup is in order. - WJC
     QPainter p(this);
-    QFont font;
-    font.setPointSize(8);
     p.setFont(font);
     QFontMetrics metrics(font);
     int cx = width()/2 - img->getThumbnail().width()/2;
@@ -70,6 +72,14 @@ void RocketFilePreviewWidget::setActive(bool value) {
         update();
     }
     active = value;
+}
+
+void RocketFilePreviewWidget::setOrientation(bool horizontal) {
+    usingHorizontalLayout = horizontal;
+    setMinimumSize(sizeHint());
+    resize(sizeHint());
+    emit updateSize();
+    oldPrefSize = sizeHint();
 }
 
 void RocketFilePreviewWidget::leaveEvent(QEvent *event) {
@@ -113,6 +123,13 @@ QRect RocketFilePreviewWidget::buttonRect(int num) {
 }
 
 QSize RocketFilePreviewWidget::sizeHint() {
-    return QSize(std::max(img->getThumbnail().width()+4, thumbnailSize),
-                 std::max(img->getThumbnail().height()+thumbnailSize/2, thumbnailSize));
+    if (usingHorizontalLayout) {
+        QFontMetrics metrics(font);
+        QRect textRect(metrics.boundingRect(img->getShortFileName()));
+        return QSize(std::max(img->getThumbnail().width()+15, textRect.width()+15),
+                     thumbnailSize+textRect.height() + 6);
+    } else {
+        return QSize(std::max(img->getThumbnail().width()+4, thumbnailSize),
+                     std::max(img->getThumbnail().height()+thumbnailSize/2, thumbnailSize));
+    }
 }

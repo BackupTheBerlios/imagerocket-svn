@@ -1,6 +1,7 @@
 #include "RocketToolBox.h"
 
 RocketToolBox::RocketToolBox(QWidget *parent) : QListWidget(parent) {
+    setFocusPolicy(Qt::NoFocus);
 }
 
 void RocketToolBox::updateMinimumSize() {

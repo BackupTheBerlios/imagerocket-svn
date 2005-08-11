@@ -42,7 +42,7 @@ RocketImage::RocketImage(QString fileName) {
     QPixmap tmp(thumbnailWidth, thumbnailHeight);
     tmp.fill(QColor(0, 0, 0, 0));
     QPainter p(&tmp);
-    p.setPen(Qt::darkGray);
+    p.setPen(Qt::black);
     p.drawText(0, 0, thumbnailWidth, thumbnailHeight,
                Qt::AlignHCenter|Qt::AlignVCenter, tr("Click to\nShow"));
     p.end();

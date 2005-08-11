@@ -12,6 +12,7 @@ Q_OBJECT
         RocketImageList *images;
         QVector < RocketFilePreviewWidget * > previews;
         int index, thumbnailSize;
+        bool usingHorizontalLayout;
         void resizeEvent(QResizeEvent *event);
         void centerOnPosition();
     protected slots:
@@ -25,6 +26,8 @@ Q_OBJECT
         void clearEntries();
         void setActive(int index);
         int getThumbnailSize() {return thumbnailSize;}
+        void setOrientation(bool horizontal);
+        QSize RocketFilePreviewArea::sizeHint() const;
     signals:
         void clicked(int index);
 };
