@@ -10,7 +10,7 @@ HEADERS =   RocketWindow.h \
             RocketImageList.h \
             RocketImage.h \
             RocketToolBox.h \
-            ThreadedThumbnailGenerator.h \
+            ThreadedImageLoader.h \
             interfaces.h \
             consts.h
 SOURCES =   main.cpp \
@@ -23,7 +23,7 @@ SOURCES =   main.cpp \
             RocketImageList.cpp \
             RocketToolBox.cpp \
             RocketImage.cpp \
-            ThreadedThumbnailGenerator.cpp
+            ThreadedImageLoader.cpp
             
 FORMS =     aboutdialog.ui
 RESOURCES = pixmaps.qrc app.qrc

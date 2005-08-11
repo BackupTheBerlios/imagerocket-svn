@@ -1,10 +1,10 @@
-#include "ThreadedThumbnailGenerator.h"
+#include "ThreadedImageLoader.h"
 
-ThreadedThumbnailGenerator::ThreadedThumbnailGenerator() {
+ThreadedImageLoader::ThreadedImageLoader() {
     qRegisterMetaType<QImage>("QImage");
 }
 
-ThreadedThumbnailGenerator::~ThreadedThumbnailGenerator() {
+ThreadedImageLoader::~ThreadedImageLoader() {
     mutex.lock();
     restart = true;
     end = true;
@@ -18,7 +18,7 @@ ThreadedThumbnailGenerator::~ThreadedThumbnailGenerator() {
     msleep(100);
 }
 
-void ThreadedThumbnailGenerator::run() {
+void ThreadedImageLoader::run() {
     forever {
         QMutexLocker locker(&mutex);
         if (end) {
@@ -32,9 +32,9 @@ void ThreadedThumbnailGenerator::run() {
         int thumbnailSize = size;
         if (!img.isNull() && !restart) {
             //scaled = img.scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio);
-            emit thumbnailGenerated(f, img);
+            emit imageLoaded(f, img);
         } else if (!restart) {
-            emit thumbnailGenerated(f, scaled);
+            emit imageLoaded(f, scaled);
         }
         if (!restart) {
             condition.wait(&mutex);
@@ -42,7 +42,7 @@ void ThreadedThumbnailGenerator::run() {
     }
 }
 
-void ThreadedThumbnailGenerator::makeThumbnail(QString fileName, int size) {
+void ThreadedImageLoader::makeThumbnail(QString fileName, int size) {
     QMutexLocker locker(&mutex);
     this->fileName = fileName;
     this->size = size;

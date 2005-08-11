@@ -1,6 +1,11 @@
 #include "RocketFilePreviewArea.h"
 #include "RocketFilePreviewWidget.h"
 
+/*!
+  \class RocketFilePreviewArea
+  \short This widget displays thumbnails of images in a #RocketImageList.
+*/
+
 RocketFilePreviewArea::RocketFilePreviewArea(QWidget *parent, int thumbnailSize,
             RocketImageList *list) : QScrollArea(parent) {
     index = 0;

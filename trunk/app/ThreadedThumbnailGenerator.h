@@ -1,9 +1,9 @@
-#ifndef THREADED_THUMBNAIL_GENERATOR
-#define THREADED_THUMBNAIL_GENERATOR
+#ifndef THREADED_IMAGE_LOADER
+#define THREADED_IMAGE_LOADER
 
 #include <QtGui>
 
-class ThreadedThumbnailGenerator : public QThread {
+class ThreadedImageLoader : public QThread {
 Q_OBJECT
 protected:
     QString fileName;
@@ -13,11 +13,11 @@ protected:
     QMutex mutex;
     void run();
 public:
-    ThreadedThumbnailGenerator();
-    ~ThreadedThumbnailGenerator();
+    ThreadedImageLoader();
+    ~ThreadedImageLoader();
     void makeThumbnail(QString fileName, int size);
 signals:
-    void thumbnailGenerated(QString, QImage);
+    void imageLoaded(QString, QImage);
 };
 
 #endif

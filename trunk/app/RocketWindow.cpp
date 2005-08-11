@@ -10,6 +10,13 @@
 
 #define PIECE_SIZE 192
 
+/*!
+  \class RocketWindow
+  \short The main application class with shows the main window and does miscellanous stuff.
+   
+   This class, apart from its primary function, manages the image list and plugins.
+*/
+
 RocketWindow::RocketWindow(lua_State *L) : QMainWindow() {
     this->L = L;
     initGUI();

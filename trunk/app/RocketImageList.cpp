@@ -1,10 +1,16 @@
 #include "RocketImageList.h"
 #include "RocketImage.h"
 
+/*!
+  \class RocketImageList
+  \short This class is a smart container for images, using the #RocketImage class.
+  Thumbnail generation is done within this class and #ThreadedImageLoader.
+*/
+
 RocketImageList::RocketImageList() {
-    generator = new ThreadedThumbnailGenerator();
+    generator = new ThreadedImageLoader();
     qRegisterMetaType<QImage>("QImage");
-    connect(generator, SIGNAL(thumbnailGenerated(const QString, const QImage)),
+    connect(generator, SIGNAL(imageLoaded(const QString, const QImage)),
             this, SLOT(updateThumbnail(const QString, const QImage)));
 }
 
