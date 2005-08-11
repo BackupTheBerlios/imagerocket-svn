@@ -7,7 +7,6 @@ class ThreadedImageLoader : public QThread {
 Q_OBJECT
 protected:
     QString fileName;
-    int size;
     bool end, restart;
     QWaitCondition condition;
     QMutex mutex;
@@ -15,7 +14,7 @@ protected:
 public:
     ThreadedImageLoader();
     ~ThreadedImageLoader();
-    void makeThumbnail(QString fileName, int size);
+    void loadImage(QString fileName);
 signals:
     void imageLoaded(QString, QImage);
 };

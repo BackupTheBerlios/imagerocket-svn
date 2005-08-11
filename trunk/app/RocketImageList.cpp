@@ -58,7 +58,7 @@ void RocketImageList::continueThumbnailGeneration() {
             if (info.size() > maxFileSize) {
                 i->setThumbnail(RocketImage::TooLarge);
             } else {
-                generator->makeThumbnail(i->getFileName(), thumbnailSize);
+                generator->loadImage(i->getFileName());
                 block = true;
             }
         }

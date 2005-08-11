@@ -1,7 +1,7 @@
 #ifndef ROCKET_IMAGE_LIST
 #define ROCKET_IMAGE_LIST
 
-#include "ThreadedThumbnailGenerator.h"
+#include "ThreadedImageLoader.h"
 class RocketImage;
 #include <QtGui>
 
@@ -11,7 +11,7 @@ protected:
     QString location;
     int index;
     QVector < RocketImage * > list;
-    ThreadedThumbnailGenerator *generator;
+    ThreadedImageLoader *generator;
     void continueThumbnailGeneration();
 public:
     RocketImageList();

@@ -28,13 +28,8 @@ void ThreadedImageLoader::run() {
         restart = false;
         QString f(fileName);
         QImage img(f);
-        QImage scaled;
-        int thumbnailSize = size;
-        if (!img.isNull() && !restart) {
-            //scaled = img.scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio);
+        if (!restart) {
             emit imageLoaded(f, img);
-        } else if (!restart) {
-            emit imageLoaded(f, scaled);
         }
         if (!restart) {
             condition.wait(&mutex);
@@ -42,10 +37,9 @@ void ThreadedImageLoader::run() {
     }
 }
 
-void ThreadedImageLoader::makeThumbnail(QString fileName, int size) {
+void ThreadedImageLoader::loadImage(QString fileName) {
     QMutexLocker locker(&mutex);
     this->fileName = fileName;
-    this->size = size;
     end = false;
     restart = false;
     if (!isRunning()) {
