@@ -1,5 +1,11 @@
 #include "ThreadedImageLoader.h"
 
+/*!
+   \class ThreadedImageLoader
+   \short This class loads an image in its thread and emits a signal when it finishes.
+    The internal thread is not stopped until the instance is deleted.
+*/
+
 ThreadedImageLoader::ThreadedImageLoader() {
     qRegisterMetaType<QImage>("QImage");
 }
@@ -28,14 +34,18 @@ void ThreadedImageLoader::run() {
         restart = false;
         QString f(fileName);
         QImage img(f);
-        if (!restart) {
-            emit imageLoaded(f, img);
-        }
+        emit imageLoaded(f, img);
         if (!restart) {
             condition.wait(&mutex);
         }
     }
 }
+
+//! This loads the image given as filename. If there is a current operation, this will block while it completes.
+/*! I'm not sure that, if this is called several times quickly, any call before the last is guaranteed to
+    work. I'm not a threading expert. It's best not to do this anyway, since it blocks. Call it again in a
+    a slot connected to #imageLoaded. -- WJC
+*/
 
 void ThreadedImageLoader::loadImage(QString fileName) {
     QMutexLocker locker(&mutex);

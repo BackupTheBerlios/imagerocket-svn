@@ -189,6 +189,7 @@ void RocketWindow::initGUI() {
     updateGui();
 }
 
+//!This does the delayed setup for the class.
 void RocketWindow::initObject() {
     if (images.size()) {
         setIndex(0);
@@ -214,6 +215,7 @@ void RocketWindow::initObject() {
     //QTimer::singleShot(random() % 100, this, SLOT(close())); //debugging crash test - use with prog_test.sh
 }
 
+//!This iterates the given directory and looks in its child directories for plugins.
 void RocketWindow::loadPlugins(QString dirPath) {
     //This could use some cleanup. The error handling code could be streamlined. - WJC
     QDir dir(dirPath);
@@ -280,6 +282,7 @@ RocketWindow::~RocketWindow() {
     }
 }
 
+//! This loads the images in the given directory.
 void RocketWindow::setDirectory(QString dirName) {
     images.setLocation(dirName);
     setIndex(0);
@@ -307,6 +310,7 @@ void RocketWindow::updateGui() {
     statusSize->setText(s);
 }
 
+//! This sets the zoom in the #RocketView and the GUI.
 void RocketWindow::setZoom(double zoom) {
     view->setZoom(zoom);
     updateGui();
@@ -338,12 +342,6 @@ void RocketWindow::setIndex(unsigned int index) {
 
 void RocketWindow::previewClicked(int index) {
     setIndex(index);
-}
-
-void RocketWindow::addToPalette(QString name, QIcon &icon) {
-    QListWidgetItem *item = new QListWidgetItem(name, toolbox);
-    item->setIcon(icon);
-    toolbox->addItem(item);
 }
 
 void RocketWindow::openFolderClicked() {

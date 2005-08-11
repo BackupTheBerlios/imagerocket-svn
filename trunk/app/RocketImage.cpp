@@ -3,6 +3,11 @@
 
 int RocketImage::thumbnailSize = 0;
 
+/*!
+   \class RocketImage
+   \short The image class which manages undo/redo, thumbnails, and image loading on a per-image basis.
+*/
+
 RocketImage::RocketImage(QString fileName) {
     changes.append(QPixmap());
     index = 0;

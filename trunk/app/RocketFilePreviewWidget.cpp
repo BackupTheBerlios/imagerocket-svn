@@ -1,6 +1,12 @@
 #include "RocketFilePreviewWidget.h"
 #include "RocketFilePreviewArea.h"
 
+/*!
+   \class RocketFilePreviewWidget
+   \short The widget is the list entry in the #RocketFilePreviewArea.
+   These use #RocketImage for thumbnail and file info.
+*/
+
 RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *img,
             int thumbnailSize) : QWidget(parent) {
     this->thumbnailSize = thumbnailSize;

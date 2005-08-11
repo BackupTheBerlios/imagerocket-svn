@@ -80,7 +80,6 @@ public:
     
 public slots:
     
-    void addToPalette(QString name, QIcon &icon);
     void previewClicked(int index);
 };
 
