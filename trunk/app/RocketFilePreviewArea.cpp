@@ -18,7 +18,8 @@ RocketFilePreviewArea::RocketFilePreviewArea(QWidget *parent, int thumbnailSize,
     listChanged();
     connect(list, SIGNAL(listChanged()), SLOT(listChanged()));
     QPalette palette;
-    palette.setColor(QPalette::Background, Qt::darkGray);
+    QColor background(QApplication::palette().background().color());
+    palette.setColor(QPalette::Background, background.dark(125));
     palette.setBrush(QPalette::Base, QBrush());
     setPalette(palette);
 }
@@ -75,14 +76,14 @@ void RocketFilePreviewArea::updateSize() {
 
 void RocketFilePreviewArea::setActive(int index) {
     RocketFilePreviewArea::index = index;
-    for (int a=0;a<previews.size();a++) {
+    for (int a=0;a<previews.size();++a) {
         previews[a]->setActive(a == index);
     }
     centerOnPosition();
 }
 
 void RocketFilePreviewArea::clickedEvent(QWidget *w) {
-    for (int a=0;a<previews.size();a++) {
+    for (int a=0;a<previews.size();++a) {
         if (previews[a] == w) {
             emit clicked(a);
             break;

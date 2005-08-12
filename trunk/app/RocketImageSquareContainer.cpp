@@ -21,8 +21,8 @@ int inMemory = 0;
 //DEBUG class to check pixmap usage
 class RocketPixmap : public QPixmap {
 public:
-    RocketPixmap(int w, int h) : QPixmap(w, h) {inMemory++;}
-    RocketPixmap(QPixmap pix) : QPixmap(pix) {inMemory++;}
+    RocketPixmap(int w, int h) : QPixmap(w, h) {++inMemory;}
+    RocketPixmap(QPixmap pix) : QPixmap(pix) {++inMemory;}
     ~RocketPixmap() {inMemory--;}
 };
 
@@ -46,8 +46,8 @@ RocketImageSquareContainer::RocketImageSquareContainer(QPixmap *source,
         int squares = settings.value("canvas/squareCount", 16).toInt();
         int size = pieceSize/squares;
         p.fillRect(0, 0, pieceSize, pieceSize, first);
-        for (int x=0;x<squares;x++) {
-            for (int y=0;y<squares;y++) {
+        for (int x=0;x<squares;++x) {
+            for (int y=0;y<squares;++y) {
                 if ( (x+y) % 2 ) {
                     p.fillRect(x*size, y*size, size, size, second);
                 }
@@ -63,7 +63,7 @@ RocketImageSquareContainer::~RocketImageSquareContainer() {
     if (transparent) {
         delete transparent;
     }
-    for (int a=0;a<pieces.size();a++) {
+    for (int a=0;a<pieces.size();++a) {
         delete pieces[a];
         pieces[a] = NULL;
     }
@@ -126,7 +126,7 @@ void RocketImageSquareContainer::setCached(int x, int y, bool newState) {
 //! This deletes all current pieces and sets the zoom.
 void RocketImageSquareContainer::setZoom(double z) {
     zoom = z;
-    for (int a=0;a<pieces.size();a++) {
+    for (int a=0;a<pieces.size();++a) {
         delete pieces[a];
         pieces[a] = NULL;
     }
@@ -134,15 +134,15 @@ void RocketImageSquareContainer::setZoom(double z) {
     pieceCount = (getGridWidth()-1) * getGridHeight()
             + (getGridHeight()-1) + 1;
     pieces.resize(getPieceCount());
-    for (int a=0;a<pieces.size();a++) {
+    for (int a=0;a<pieces.size();++a) {
         pieces[a] = NULL;
     }
     scaledW = 0;
-    for (int x=0;x<getGridWidth();x++) {
+    for (int x=0;x<getGridWidth();++x) {
         scaledW += getSize(x, 0).width();
     }
     scaledH = 0;
-    for (int y=0;y<getGridHeight();y++) {
+    for (int y=0;y<getGridHeight();++y) {
         scaledH += getSize(0, y).height();
     }
     emit zoomChanged();

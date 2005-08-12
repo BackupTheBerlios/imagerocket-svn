@@ -42,7 +42,7 @@ RocketImage::RocketImage(QString fileName) {
     QPixmap tmp(thumbnailWidth, thumbnailHeight);
     tmp.fill(QColor(0, 0, 0, 0));
     QPainter p(&tmp);
-    p.setPen(Qt::black);
+    p.setPen(QColor(64, 64, 64)); //not quite black
     p.drawText(0, 0, thumbnailWidth, thumbnailHeight,
                Qt::AlignHCenter|Qt::AlignVCenter, tr("Click to\nShow"));
     p.end();
@@ -69,7 +69,7 @@ void RocketImage::undo() {
 
 void RocketImage::redo() {
     assert(canRedo());
-    index++;
+    ++index;
 }
 
 void RocketImage::setActive(bool value) {

@@ -357,7 +357,7 @@ void RocketView::resetZoomAndPosition() {
 void RocketView::scrollingTestTimeout() {
     //broken
 #ifdef DRAWING_SPEED_TEST
-    for (int a=0;a<10;a++) {
+    for (int a=0;a<10;++a) {
         if ( (contentsY() >= pix->height() - visibleHeight())
              && scrollingDown) {
             scrollingDown = false;
@@ -445,8 +445,8 @@ void RocketView::paintEvent(QPaintEvent *e) {
         preloadPoints.clear();
         preloadSize = squares->getGridSize();
         //create squares
-        for (int x=0;x<squares->getGridWidth();x++) {
-            for (int y=0;y<squares->getGridHeight();y++) {
+        for (int x=0;x<squares->getGridWidth();++x) {
+            for (int y=0;y<squares->getGridHeight();++y) {
                 QSize size(squares->getSize(x, y));
                 QRect sr(x * ps, y * ps, size.width(), size.height());
                 if (contents.intersects(sr)) {
@@ -479,8 +479,8 @@ QPixmap *RocketView::makeTransparentTile(
     //paint.setPen(first);
     paint.fillRect(0, 0, size*squares, size*squares, first);
     //paint.setPen(second);
-    for (unsigned int x=0;x<squares;x++) {
-        for (unsigned int y=0;y<squares;y++) {
+    for (unsigned int x=0;x<squares;++x) {
+        for (unsigned int y=0;y<squares;++y) {
             if ( (x+y) % 2 ) {
                 paint.fillRect(x*size, y*size, size, size, second);
             }

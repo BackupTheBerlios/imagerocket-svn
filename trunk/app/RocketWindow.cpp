@@ -166,7 +166,7 @@ void RocketWindow::initGUI() {
     filePreviewArea = new RocketFilePreviewArea(dFiles, thumbnailSize, &images);
     int scrollBarWidth = filePreviewArea->verticalScrollBar()->sizeHint().width();
     dFiles->setMinimumSize(
-            filePreviewArea->getThumbnailSize()+scrollBarWidth+40, 132);
+            filePreviewArea->getThumbnailSize()+scrollBarWidth+40, 133);
     connect(filePreviewArea, SIGNAL(clicked(int)), this, SLOT(previewClicked(int)));
     dFiles->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea|Qt::BottomDockWidgetArea);
     dFiles->setFeatures(QDockWidget::DockWidgetClosable);

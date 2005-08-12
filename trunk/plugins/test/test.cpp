@@ -22,10 +22,10 @@ QImage *Test::activate(QPixmap *pix) {
     img.detach();
     //img.invertPixels(QImage::InvertRgb);
     assert(img.depth() == 32);
-    for (int y=0;y<img.height();y++) {
+    for (int y=0;y<img.height();++y) {
         uint *line = reinterpret_cast< uint * >(img.scanLine(y));
         if (img.hasAlphaChannel()) {
-            for (int x=0;x<img.width();x++) {
+            for (int x=0;x<img.width();++x) {
                 uint *pixel = line + x;
                 *pixel = qRgba(std::min(qRed(*pixel)+20,255),
                               std::min(qGreen(*pixel)+20,255),
@@ -33,7 +33,7 @@ QImage *Test::activate(QPixmap *pix) {
                               qAlpha(*pixel));
             }
         } else {
-            for (int x=0;x<img.width();x++) {
+            for (int x=0;x<img.width();++x) {
                 uint *pixel = line + x;
                 *pixel = qRgb(std::min(qRed(*pixel)+20,255),
                               std::min(qGreen(*pixel)+20,255),

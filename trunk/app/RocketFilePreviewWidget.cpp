@@ -47,10 +47,10 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     QFontMetrics metrics(font);
     int cx = width()/2 - img->getThumbnail().width()/2;
     int textHeight = metrics.boundingRect(img->getShortFileName()).height();
-    int labelHeight = textHeight + 10;
+    int labelHeight = textHeight + 5;
     int cy = height()/2 - img->getThumbnail().height()/2 - labelHeight/2;
     p.drawPixmap(cx, cy + 2, img->getThumbnail());
-    p.drawText(0, cy+img->getThumbnail().height()+10,
+    p.drawText(0, cy+img->getThumbnail().height()+5,
                width(), height()-img->getThumbnail().height(),
                Qt::AlignHCenter|Qt::AlignTop, img->getShortFileName());
     if (active) {
@@ -127,7 +127,7 @@ QSize RocketFilePreviewWidget::sizeHint() {
         QFontMetrics metrics(font);
         QRect textRect(metrics.boundingRect(img->getShortFileName()));
         return QSize(std::max(img->getThumbnail().width()+15, textRect.width()+15),
-                     thumbnailSize+textRect.height() + 6);
+                     thumbnailSize+textRect.height() + 5);
     } else {
         return QSize(std::max(img->getThumbnail().width()+4, thumbnailSize),
                      std::max(img->getThumbnail().height()+thumbnailSize/2, thumbnailSize));
