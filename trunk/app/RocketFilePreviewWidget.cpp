@@ -55,10 +55,12 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     
     int textPosition = centerY - pix.height()/2 + img->getThumbnail().height() + 5;
     int textHeight = height()-img->getThumbnail().height();
-    //the 2 is padding, since fontmetrics is a bit short with my font. I hope the bug(?) gets fixed. - WJC
-    int estimatedHeight = textPosition + fileNameRect.height() + 2;
+    //I use a little padding, partly since fontmetrics is a bit short with my font. I hope the
+    //bug(?) gets fixed. - WJC
+    int estimatedHeight = textPosition + fileNameRect.height() + 5;
     if ( estimatedHeight > height()) {
-        textPosition = height()-fileNameRect.height()-5;
+        //Here it switches to setting the position relative to the bottom of the widget.
+        textPosition = height()-fileNameRect.height()-8;
         textHeight = fileNameRect.height()+5;
         QSettings settings;
         QColor color(settings.value("thumbnail/color").value<QColor>());
@@ -72,9 +74,9 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     
     if (active) {
         QColor c(20, 30, 250, 75), c2(110, 110, 130, 255);
-        p.fillRect(1, 1, width()-2, height()-2, c);
+        p.fillRect(1, 1, width()-2, height()-4, c);
         p.setPen(c2);
-        p.drawRect(0, 0, width()-1, height()-1);
+        p.drawRect(0, 0, width()-1, height()-3);
     }
     QRect r(buttonRect(1));
     if (onTrash) {
