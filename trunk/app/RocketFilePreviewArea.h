@@ -9,6 +9,7 @@ class RocketFilePreviewArea : public QScrollArea {
 Q_OBJECT
     protected:
         QWidget *widget;
+        QTimer lazyResizer;
         RocketImageList *images;
         QVector < RocketFilePreviewWidget * > previews;
         int index, thumbnailSize;

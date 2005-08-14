@@ -17,9 +17,14 @@ RocketFilePreviewArea::RocketFilePreviewArea(QWidget *parent, int thumbnailSize,
     setOrientation(false);
     listChanged();
     connect(list, SIGNAL(listChanged()), SLOT(listChanged()));
+    connect(&lazyResizer, SIGNAL(timeout()), SLOT(updateSize()));
+    lazyResizer.setSingleShot(true);
     QPalette palette;
     QColor background(QApplication::palette().background().color());
-    palette.setColor(QPalette::Background, background.dark(125));
+    QColor backgroundColor = background.dark(125);
+    QSettings settings;
+    settings.setValue("thumbnail/color", backgroundColor);
+    palette.setColor(QPalette::Background, backgroundColor);
     palette.setBrush(QPalette::Base, QBrush());
     setPalette(palette);
 }
@@ -31,7 +36,7 @@ RocketFilePreviewArea::~RocketFilePreviewArea() {
 }
 
 QSize RocketFilePreviewArea::sizeHint() const {
-    return QSize(30, 50);
+    return QSize(30, 100);
 }
 
 void RocketFilePreviewArea::resizeEvent(QResizeEvent *event) {
@@ -40,7 +45,9 @@ void RocketFilePreviewArea::resizeEvent(QResizeEvent *event) {
     if (tmp != usingHorizontalLayout) {
         setOrientation(tmp);
     }
-    updateSize();
+    if (!lazyResizer.isActive()) {
+        lazyResizer.start(50);
+    }
 }
 
 void RocketFilePreviewArea::setOrientation(bool horizontal) {
@@ -69,6 +76,7 @@ void RocketFilePreviewArea::updateSize() {
     if (usingHorizontalLayout) {
         widget->resize(widget->layout()->minimumSize().width(), viewport()->height());
     } else {
+        //currently broken
         widget->resize(viewport()->width(), widget->layout()->minimumSize().height());
     }
     widget->layout()->update();

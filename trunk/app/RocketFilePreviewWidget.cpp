@@ -15,7 +15,7 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
     onTrash = onWidget = active = usingHorizontalLayout = false;
     QString file(":/pixmaps/trash.png");
     QString file2(":/pixmaps/trashLit.png");
-    font.setPointSize(8);
+    font.setPixelSize(11);
     if (!QPixmapCache::find(file, trashIcon)
          || !QPixmapCache::find(file2, trashLitIcon)) {
         trashIcon.load(file);
@@ -32,7 +32,11 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
 
 void RocketFilePreviewWidget::updatePreview() {
     if (sizeHint() != oldPrefSize) {
-        setMinimumSize(sizeHint());
+        if (usingHorizontalLayout) {
+            setMinimumSize(sizeHint().width(), 0);
+        } else {
+            setMinimumSize(0, sizeHint().height());
+        }
         resize(sizeHint());
         emit updateSize();
         oldPrefSize = sizeHint();
@@ -41,18 +45,31 @@ void RocketFilePreviewWidget::updatePreview() {
 }
 
 void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
-    //There's plenty of sloppy coding here. Cleanup is in order. - WJC
     QPainter p(this);
     p.setFont(font);
     QFontMetrics metrics(font);
-    int cx = width()/2 - img->getThumbnail().width()/2;
-    int textHeight = metrics.boundingRect(img->getShortFileName()).height();
-    int labelHeight = textHeight + 5;
-    int cy = height()/2 - img->getThumbnail().height()/2 - labelHeight/2;
-    p.drawPixmap(cx, cy + 2, img->getThumbnail());
-    p.drawText(0, cy+img->getThumbnail().height()+5,
-               width(), height()-img->getThumbnail().height(),
+    QRect fileNameRect = metrics.boundingRect(img->getShortFileName());
+    QPixmap pix(img->getThumbnail());
+    int centerX = width()/2, centerY = height()/2 - fileNameRect.height()/2;
+    p.drawPixmap(centerX-pix.width()/2, centerY-pix.height()/2, pix);
+    
+    int textPosition = centerY - pix.height()/2 + img->getThumbnail().height() + 5;
+    int textHeight = height()-img->getThumbnail().height();
+    //the 3 is padding, since fontmetrics is a bit short with my font. I hope the bug(?) gets fixed. - WJC
+    int estimatedHeight = textPosition+fileNameRect.height() + 3;
+    if ( estimatedHeight > height()) {
+        textPosition = height()-fileNameRect.height()-5;
+        textHeight = fileNameRect.height()+5;
+        QSettings settings;
+        QColor color(settings.value("thumbnail/color").value<QColor>());
+        p.fillRect(0, textPosition, width(), textHeight, QColor(color.red(), color.green(), color.blue(), 192));
+    }
+    p.drawText(0, textPosition, width(), textHeight,
                Qt::AlignHCenter|Qt::AlignTop, img->getShortFileName());
+    //DEBUG - shows fontmetrics return versus the actual appearance
+    p.drawText(5, 5, fileNameRect.width()+5, fileNameRect.height()+5, Qt::AlignLeft|Qt::AlignTop, img->getShortFileName());
+    p.drawRect(5, 5, fileNameRect.width(), fileNameRect.height());
+    
     if (active) {
         QColor c(20, 30, 250, 75), c2(110, 110, 130, 255);
         p.fillRect(1, 1, width()-2, height()-2, c);
@@ -76,7 +93,11 @@ void RocketFilePreviewWidget::setActive(bool value) {
 
 void RocketFilePreviewWidget::setOrientation(bool horizontal) {
     usingHorizontalLayout = horizontal;
-    setMinimumSize(sizeHint());
+    if (horizontal) {
+        setMinimumSize(sizeHint().width(), 0);
+    } else {
+        setMinimumSize(0, sizeHint().height());
+    }
     resize(sizeHint());
     emit updateSize();
     oldPrefSize = sizeHint();
