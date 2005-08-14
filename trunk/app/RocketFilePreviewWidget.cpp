@@ -55,8 +55,8 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     
     int textPosition = centerY - pix.height()/2 + img->getThumbnail().height() + 5;
     int textHeight = height()-img->getThumbnail().height();
-    //the 3 is padding, since fontmetrics is a bit short with my font. I hope the bug(?) gets fixed. - WJC
-    int estimatedHeight = textPosition+fileNameRect.height() + 3;
+    //the 2 is padding, since fontmetrics is a bit short with my font. I hope the bug(?) gets fixed. - WJC
+    int estimatedHeight = textPosition + fileNameRect.height() + 2;
     if ( estimatedHeight > height()) {
         textPosition = height()-fileNameRect.height()-5;
         textHeight = fileNameRect.height()+5;
@@ -67,8 +67,8 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     p.drawText(0, textPosition, width(), textHeight,
                Qt::AlignHCenter|Qt::AlignTop, img->getShortFileName());
     //DEBUG - shows fontmetrics return versus the actual appearance
-    p.drawText(5, 5, fileNameRect.width()+5, fileNameRect.height()+5, Qt::AlignLeft|Qt::AlignTop, img->getShortFileName());
-    p.drawRect(5, 5, fileNameRect.width(), fileNameRect.height());
+    //p.drawText(5, 5, fileNameRect.width()+5, fileNameRect.height()+5, Qt::AlignLeft|Qt::AlignTop, img->getShortFileName());
+    //p.drawRect(5, 5, fileNameRect.width(), fileNameRect.height());
     
     if (active) {
         QColor c(20, 30, 250, 75), c2(110, 110, 130, 255);

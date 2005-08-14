@@ -223,7 +223,7 @@ void RocketView::resizeEvent(QResizeEvent *e) {
 */
 void RocketView::updateZoomForSize() {
     //qDebug("updateZoomForSize");
-    QSize w(size()), i(pix->size()), padding(5, 5);
+    QSize w(size()), i(pix->size()), padding(10, 10);
     w -= padding;
     QSize tmp(i);
     tmp.scale(w, Qt::KeepAspectRatio);

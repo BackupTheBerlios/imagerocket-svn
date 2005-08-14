@@ -37,6 +37,8 @@ RocketImageSquareContainer::RocketImageSquareContainer(QPixmap *source,
     scaledH = 0;
     if (source->hasAlphaChannel()) {
         transparent = new QPixmap(pieceSize, pieceSize);
+        //TODO This should be removed and the settings should be passed with arguments,
+        //so RocketView and this class can be stand-alone classes. - WJC
         QSettings settings;
         QColor first = settings.value("canvas/bgcolor1",
                                       QColor(150, 150, 150)).value<QColor>();
