@@ -21,6 +21,8 @@ if not exist build (
     echo Delete "build" dir to re-copy.
 )
 copy imagerocket.exe build
+mkdir build\plugins
+xcopy /S plugins build\plugins
 cd build
 if exist imagerocket-exe.zip (del imagerocket-exe.zip)
 ..\zip a -tzip imagerocket-exe.zip *
