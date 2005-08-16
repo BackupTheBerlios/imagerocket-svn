@@ -160,6 +160,7 @@ void RocketWindow::initGUI() {
     
     imageNameFilters << "*.png" << "*.jpg" << "*.gif" << "*.xpm" << "*.bmp";
     dFiles = new QDockWidget(this);
+    dFiles->setWindowTitle(tr("File Thumbnails"));
     QSettings settings;
     settings.setValue("thumbnail/size", 64); //global thumbnail size set here
     int thumbnailSize = settings.value("thumbnail/size", 64).toInt();
@@ -174,8 +175,9 @@ void RocketWindow::initGUI() {
     addDockWidget(Qt::BottomDockWidgetArea, dFiles);
     
     dPalette = new QDockWidget(this);
+    dPalette->setWindowTitle(tr("Tools"));
     dPalette->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
-    dPalette->setFeatures(QDockWidget::DockWidgetMovable);
+    dPalette->setFeatures(QDockWidget::DockWidgetMovable|QDockWidget::DockWidgetClosable);
     toolbox = new RocketToolBox(dPalette);
     connect(toolbox, SIGNAL(itemClicked(QListWidgetItem *)), SLOT(toolClicked(QListWidgetItem *)));
     toolbox->setFrameStyle(QFrame::Box|QFrame::Plain);
