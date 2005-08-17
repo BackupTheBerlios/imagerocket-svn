@@ -20,13 +20,9 @@ RocketFilePreviewArea::RocketFilePreviewArea(QWidget *parent, int thumbnailSize,
     connect(&lazyResizer, SIGNAL(timeout()), SLOT(updateSize()));
     lazyResizer.setSingleShot(true);
     QPalette palette;
-    QColor background(QApplication::palette().background().color());
-    QColor backgroundColor = background.dark(125);
-    QSettings settings;
-    settings.setValue("thumbnail/color", backgroundColor);
-    palette.setColor(QPalette::Background, backgroundColor);
+    palette.setColor(QPalette::Background, QApplication::palette().base().color());
     palette.setBrush(QPalette::Base, QBrush());
-    setPalette(palette);
+    widget->setPalette(palette);
 }
 
 RocketFilePreviewArea::~RocketFilePreviewArea() {

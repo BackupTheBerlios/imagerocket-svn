@@ -189,6 +189,10 @@ void RocketWindow::initGUI() {
     view->setFocus(Qt::OtherFocusReason);
     connect(view, SIGNAL(zoomChanged(double)), this, SLOT(updateGui()));
     
+    //This works around the problem with QMainWindow in which the dock widgets get shrunk if the
+    //window is resized smaller than their height. I hope this will be fixed upstream. - WJC
+    setMinimumSize(400, 300);
+    
     updateGui();
 }
 

@@ -45,12 +45,25 @@ void RocketFilePreviewWidget::updatePreview() {
 }
 
 void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
+    QSettings settings;
+    QColor bg(QApplication::palette().base().color());
     QPainter p(this);
     p.setFont(font);
     QFontMetrics metrics(font);
     QRect fileNameRect = metrics.boundingRect(img->getShortFileName());
     QPixmap pix(img->getThumbnail());
     int centerX = width()/2, centerY = height()/2 - fileNameRect.height()/2;
+    int left = centerX-pix.width()/2, top = centerY-pix.height()/2;
+    if (!img->getStatusIconIndex()) {
+        p.setPen(bg.dark(150));
+        p.drawLine(left, top+pix.height()+1, left+pix.width()+1, top+pix.height()+1);
+        p.drawLine(left+pix.width()+1, top, left+pix.width()+1, top+pix.height()+1);
+        p.drawLine(left+1, top+pix.height()+2, left+pix.width()+2, top+pix.height()+2);
+        p.drawLine(left+pix.width()+2, top+1, left+pix.width()+2, top+pix.height()+2);
+        p.setPen(Qt::black);
+        p.drawRect(centerX-pix.width()/2-1, centerY-pix.height()/2-1, pix.width()+1, pix.height()+1);
+    }
+    p.setPen(Qt::black);
     p.drawPixmap(centerX-pix.width()/2, centerY-pix.height()/2, pix);
     
     int textPosition = centerY - pix.height()/2 + img->getThumbnail().height() + 5;
@@ -62,10 +75,10 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         //Here it switches to setting the position relative to the bottom of the widget.
         textPosition = height()-fileNameRect.height()-8;
         textHeight = fileNameRect.height()+5;
-        QSettings settings;
-        QColor color(settings.value("thumbnail/color").value<QColor>());
-        p.fillRect(0, textPosition, width(), textHeight, QColor(color.red(), color.green(), color.blue(), 192));
+        p.fillRect(0, textPosition, width(), textHeight,
+                   QColor(bg.red(), bg.green(), bg.blue(), 192));
     }
+    p.setPen(Qt::black);
     p.drawText(0, textPosition, width(), textHeight,
                Qt::AlignHCenter|Qt::AlignTop, img->getShortFileName());
     //DEBUG - shows fontmetrics return versus the actual appearance
