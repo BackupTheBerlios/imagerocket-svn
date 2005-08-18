@@ -61,10 +61,10 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         p.drawLine(left+1, top+pix.height()+2, left+pix.width()+2, top+pix.height()+2);
         p.drawLine(left+pix.width()+2, top+1, left+pix.width()+2, top+pix.height()+2);
         p.setPen(Qt::black);
-        p.drawRect(centerX-pix.width()/2-1, centerY-pix.height()/2-1, pix.width()+1, pix.height()+1);
+        p.drawRect(left-1, top-1, pix.width()+1, pix.height()+1);
     }
     p.setPen(Qt::black);
-    p.drawPixmap(centerX-pix.width()/2, centerY-pix.height()/2, pix);
+    p.drawPixmap(left, top, pix);
     
     int textPosition = centerY - pix.height()/2 + img->getThumbnail().height() + 5;
     int textHeight = height()-img->getThumbnail().height();
@@ -73,12 +73,17 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     int estimatedHeight = textPosition + fileNameRect.height() + 5;
     if ( estimatedHeight > height()) {
         //Here it switches to setting the position relative to the bottom of the widget.
-        textPosition = height()-fileNameRect.height()-8;
+        textPosition = height()-fileNameRect.height()-5;
         textHeight = fileNameRect.height()+5;
         p.fillRect(0, textPosition, width(), textHeight,
                    QColor(bg.red(), bg.green(), bg.blue(), 192));
     }
-    p.setPen(Qt::black);
+    //trying to be smart about the user's palette here
+    if (bg.toHsv().value() < 64) {
+        p.setPen(Qt::white);
+    } else {
+        p.setPen(Qt::black);
+    }
     p.drawText(0, textPosition, width(), textHeight,
                Qt::AlignHCenter|Qt::AlignTop, img->getShortFileName());
     //DEBUG - shows fontmetrics return versus the actual appearance
@@ -86,10 +91,11 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     //p.drawRect(5, 5, fileNameRect.width(), fileNameRect.height());
     
     if (active) {
-        QColor c(20, 30, 250, 75), c2(110, 110, 130, 255);
-        p.fillRect(1, 1, width()-2, height()-4, c);
-        p.setPen(c2);
-        p.drawRect(0, 0, width()-1, height()-3);
+        QColor border(QApplication::palette().highlight().color());
+        QColor fill(border.red(), border.green(), border.blue(), 75);
+        p.fillRect(1, 1, width()-2, height()-2, fill);
+        p.setPen(border);
+        p.drawRect(0, 0, width()-1, height()-1);
     }
     QRect r(buttonRect(1));
     if (onTrash) {
