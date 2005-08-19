@@ -45,7 +45,6 @@ void RocketFilePreviewWidget::updatePreview() {
 }
 
 void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
-    QSettings settings;
     QColor bg(QApplication::palette().base().color());
     QPainter p(this);
     p.setFont(font);
