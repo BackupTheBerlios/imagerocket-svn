@@ -26,7 +26,6 @@ RocketWindow::RocketWindow(lua_State *L) : QMainWindow() {
 }
 
 void RocketWindow::initGUI() {
-    setWindowTitle(PROGRAM_NAME " " VERSION);
     QIcon icon;
     //icon.addFile(":/pixmaps/rocket-24.xpm");
     icon.addFile(":/pixmaps/rocket-16.xpm");
@@ -310,11 +309,18 @@ void RocketWindow::updateGui() {
     aUndo->setEnabled(img ? img->canUndo() : FALSE);
     aRedo->setEnabled(img ? img->canRedo() : FALSE);
     toolbox->setEnabled(notNull);
-    statusZoom->setText(tr("%L1%", "zoom percentage - %L1 is the number")
+    statusZoom->setText(tr("%L1%", "zoom percentage (%L1 is the number)")
             .arg(view->getZoom()*100.0, 0, 'f', 1));
     QSize size = view->imageSize();
     QString s = tr("%1 x %2", "image dimensions").arg(size.width()).arg(size.height());
     statusSize->setText(s);
+    if (images.getLocation().isEmpty()) {
+        setWindowTitle(tr("%1 %2", "programName version").arg(PROGRAM_NAME).arg(VERSION));
+    } else {
+        QDir dir(images.getLocation());
+        setWindowTitle(tr("%1 %2 - %3", "programName version currentLocation")
+                .arg(PROGRAM_NAME).arg(VERSION).arg(dir.canonicalPath()));
+    }
 }
 
 //! This sets the zoom in the #RocketView and the GUI.
