@@ -7,7 +7,10 @@ if not exist build (
     copy %QTDIR%\bin\QtCore4.dll build
     copy %QTDIR%\bin\QtGui4.dll build
     mkdir build\imageformats
-    copy %QTDIR%\plugins\imageformats\qjpeg*.dll build\imageformats
+    rem  XXX: In the future, only the codecs for the current type of
+    rem  build (debug or release) should be included in the zip, since
+    rem  the debug codecs take up ~500 kb. - WJC
+    copy %QTDIR%\plugins\imageformats\*.dll build\imageformats
     
     if exist c:\mingw\bin\mingwm10.dll (
         copy c:\mingw\bin\mingwm10.dll build

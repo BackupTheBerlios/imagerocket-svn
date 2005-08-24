@@ -329,7 +329,7 @@ void RocketWindow::updateGui() {
     statusZoom->setText(tr("%L1%", "zoom percentage (%L1 is the number)")
             .arg(view->getZoom()*100.0, 0, 'f', 1));
     QSize size = view->imageSize();
-    QString s = tr("%1 x %2", "image dimensions").arg(size.width()).arg(size.height());
+    QString s = tr("%L1 x %L2", "image dimensions").arg(size.width()).arg(size.height());
     statusSize->setText(s);
     if (images.getLocation().isEmpty()) {
         setWindowTitle(tr("%1 %2", "programName version").arg(PROGRAM_NAME).arg(VERSION));
@@ -349,7 +349,7 @@ void RocketWindow::setZoom(double zoom) {
 //! This sets the displayed image to the image[index] in RocketImageList.
 /*! This resets the display if there are no images open.
 */
-void RocketWindow::setIndex(unsigned int index) {
+void RocketWindow::setIndex(int index) {
     if (images.size()) {
         if (this->index < images.size()) {
             //if old selection index is valid, inform old selection of its loss.

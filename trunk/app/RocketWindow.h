@@ -41,7 +41,7 @@ protected:
     RocketImageList images;
     lua_State *L;
     QList < QObject * > plugins;
-    unsigned int index;
+    int index;
     QLabel *statusFile, *statusZoom, *statusSize;
     QMenu *mFile, *mEdit, *mView, *mHelp;
     QAction *aOpenFolder, *aExit;
@@ -57,7 +57,7 @@ protected:
     RocketFilePreviewArea *filePreviewArea;
     
     virtual void setZoom(double zoom);
-    virtual void setIndex(unsigned int index);
+    virtual void setIndex(int index);
     
     void closeEvent(QCloseEvent *e);
     void loadPlugins(QString dirPath);
