@@ -27,7 +27,6 @@ protected:
     QPixmap thumbnail;
     QPixmap xIcon, clickToShowIcon, loadingIcon;
     QString fileName, shortName;
-    static int thumbnailSize;
     int statusIcon;
     bool transparency;
     void setSelected(bool value);

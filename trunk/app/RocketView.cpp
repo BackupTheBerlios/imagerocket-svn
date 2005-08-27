@@ -489,15 +489,15 @@ void RocketView::paintEvent(QPaintEvent *e) {
 
 /* This is junk code that I might decide on using after all. - WJC
 QPixmap *RocketView::makeTransparentTile(
-       unsigned int size, unsigned int squares,
+       unsigned int size, int squares,
        const QColor &first, const QColor &second) {
     QPixmap *pix = new QPixmap(size*squares, size*squares);
     QPainter paint(pix);
     //paint.setPen(first);
     paint.fillRect(0, 0, size*squares, size*squares, first);
     //paint.setPen(second);
-    for (unsigned int x=0;x<squares;++x) {
-        for (unsigned int y=0;y<squares;++y) {
+    for (int x=0;x<squares;++x) {
+        for (int y=0;y<squares;++y) {
             if ( (x+y) % 2 ) {
                 paint.fillRect(x*size, y*size, size, size, second);
             }

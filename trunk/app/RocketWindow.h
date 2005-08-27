@@ -46,6 +46,7 @@ protected:
     QMenu *mFile, *mEdit, *mView, *mHelp;
     QAction *aOpenFolder, *aExit;
     QAction *aFirst, *aBack, *aForward, *aLast;
+    QAction *aUseLargeThumbnails;
     QAction *aZoomOut, *aZoom100, *aZoomIn, *aZoomFit;
     QAction *aUndo, *aRedo;
     QAction *aAbout;
@@ -74,6 +75,8 @@ protected slots:
     void backClicked();
     void forwardClicked();
     void lastClicked();
+    
+    void useLargeThumbnailsToggled(bool);
     
     void undoClicked();
     void redoClicked();

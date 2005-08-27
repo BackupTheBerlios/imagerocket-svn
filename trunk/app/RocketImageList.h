@@ -35,13 +35,14 @@ public:
     ~RocketImageList();
     void setLocation(QString location);
     QString getLocation();
-    unsigned int size() {return list.size();}
+    int size() {return list.size();}
     const QVector < RocketImage * > *getVector() {return &list;}
     QString getAsString(int index);
     QPixmap getThumbnail(int index);
     RocketImage *getAsRocketImage(int index);
     void setIndex(int index);
     int getIndex();
+    void refreshImages();
 public slots:
     void updateThumbnail(const QString fileName, const QImage thumbnail);
 signals:

@@ -38,6 +38,14 @@ RocketImageList::~RocketImageList() {
     }
 }
 
+void RocketImageList::refreshImages() {
+    foreach (RocketImage *i, list) {
+        i->setThumbnail(RocketImage::Loading);
+    }
+    emit listChanged();
+    continueThumbnailGeneration();
+}
+
 void RocketImageList::setLocation(QString location) {
     RocketImageList::location = location;
     QStringList imageNameFilters;
@@ -67,7 +75,6 @@ void RocketImageList::setLocation(QString location) {
 void RocketImageList::continueThumbnailGeneration() {
     bool block = false;
     QSettings settings;
-    int thumbnailSize = settings.value("thumbnail/size", 64).toInt();
     int maxFileSize = settings.value("thumbnail/maxFileSize", 3000000).toInt();
     foreach (RocketImage *i, list) {
         if (!block && i->getStatusIconIndex() == RocketImage::Loading) {
@@ -112,9 +119,11 @@ void RocketImageList::updateThumbnail(const QString fileName, const QImage thumb
     foreach (RocketImage *i, list) {
         bool nameMatch = (i->getFileName() == fileName);
         if (nameMatch && !thumbnail.isNull()) {
-            QPixmap tmp(QPixmap::fromImage(
-                    thumbnail.scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio)));
-            i->setThumbnail(tmp);
+            if (i->getStatusIconIndex() == RocketImage::Loading) {
+                QPixmap tmp(QPixmap::fromImage(
+                        thumbnail.scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio)));
+                i->setThumbnail(tmp);
+            }
         } else if (nameMatch) {
             i->setThumbnail(RocketImage::Broken);
         }

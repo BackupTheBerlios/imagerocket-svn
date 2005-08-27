@@ -49,7 +49,7 @@ RocketFilePreviewArea::~RocketFilePreviewArea() {
 }
 
 QSize RocketFilePreviewArea::sizeHint() const {
-    return QSize(30, 110);
+    return QSize(30, thumbnailSize+40);
 }
 
 void RocketFilePreviewArea::resizeEvent(QResizeEvent *event) {

@@ -47,6 +47,7 @@ void RocketWindow::initGUI() {
     //icon.addFile(":/pixmaps/rocket-24.xpm");
     icon.addFile(":/pixmaps/rocket-16.xpm");
     setWindowIcon(icon);
+    dFiles = NULL;
     
     /* Saving/restoring of window position disabled due to difficulty on X11 and
     // questionable usefulness. I think Windows may do this as well also, so I
@@ -95,33 +96,33 @@ void RocketWindow::initGUI() {
     tbar->setIconSize(QSize(24, 24));
     QAction *a;
     a = aUndo = new QAction(QIcon(":/pixmaps/undo.png"),
-            tr("Undo"), this);
+            tr("&Undo"), this);
     a->setShortcut(QKeySequence("Ctrl+Z"));
     a->setStatusTip(tr("Undo the last operation"));
     connect(a, SIGNAL(triggered()), SLOT(undoClicked()));
     tbar->addAction(a);
     mEdit->addAction(a);
     a = aRedo = new QAction(QIcon(":/pixmaps/redo.png"),
-            tr("Redo"), this);
+            tr("&Redo"), this);
     a->setShortcut(QKeySequence("Ctrl+Y"));
     connect(aRedo, SIGNAL(triggered()), SLOT(redoClicked()));
     tbar->addAction(a);
     mEdit->addAction(a);
     tbar->addSeparator();
     a = aZoomIn = new QAction(QIcon(":/pixmaps/zoom-in.png"),
-            tr("Zoom In"), this);
+            tr("Zoom &In"), this);
     a->setShortcut(QKeySequence("="));
     connect(a, SIGNAL(triggered()), SLOT(zoomInClicked()));
     tbar->addAction(a);
     mView->addAction(a);
     a = aZoom100 = new QAction(QIcon(":/pixmaps/zoom-100.png"),
-            tr("Zoom to 100%"), this);
+            tr("&Zoom to 100%"), this);
     a->setShortcut(QKeySequence("_"));
     connect(a, SIGNAL(triggered()), SLOT(zoom100Clicked()));
     tbar->addAction(a);
     mView->addAction(a);
     a = aZoomOut = new QAction(QIcon(":/pixmaps/zoom-out.png"),
-            tr("Zoom Out"), this);
+            tr("Zoom &Out"), this);
     a->setShortcut(QKeySequence("-"));
     connect(a, SIGNAL(triggered()), SLOT(zoomOutClicked()));
     tbar->addAction(a);
@@ -129,13 +130,18 @@ void RocketWindow::initGUI() {
     mView->addSeparator();
     tbar->addSeparator();
     a = aZoomFit = new QAction(QIcon(":/pixmaps/zoom-fit.png"),
-                               tr("Fit to Window"), this);
+                               tr("&Fit to Window"), this);
     a->setShortcut(QKeySequence("+"));
     a->setCheckable(true);
     connect(a, SIGNAL(toggled(bool)), SLOT(zoomFitToggled(bool)));
     tbar->addAction(a);
     mView->addAction(a);
+    mView->addSeparator();
     tbar->addSeparator();
+    a = aUseLargeThumbnails = new QAction(tr("Use &Large Thumbnails"), this);
+    connect(a, SIGNAL(toggled(bool)), SLOT(useLargeThumbnailsToggled(bool)));
+    a->setCheckable(true);
+    mView->addAction(a);
     a = aOpenFolder = new QAction(tr("&Open Folder..."),
             this);
     a->setShortcut(QKeySequence("Ctrl+O"));
@@ -143,25 +149,25 @@ void RocketWindow::initGUI() {
     mFile->addAction(a);
     mFile->addSeparator();
     a = aFirst = new QAction(QIcon(":/pixmaps/first.png"),
-            tr("To First"), this);
+            tr("To &First"), this);
     a->setShortcut(QKeySequence("Home"));
     connect(a, SIGNAL(triggered()), SLOT(firstClicked()));
     tbar->addAction(a);
     mFile->addAction(a);
     a = aBack = new QAction(QIcon(":/pixmaps/back.png"),
-            tr("Back"), this);
+            tr("&Back"), this);
     a->setShortcut(QKeySequence("Backspace"));
     connect(a, SIGNAL(triggered()), SLOT(backClicked()));
     tbar->addAction(a);
     mFile->addAction(a);
     a = aForward = new QAction(QIcon(":/pixmaps/forward.png"),
-            tr("Forward"), this);
+            tr("&Forward"), this);
     a->setShortcut(QKeySequence("Space"));
     connect(a, SIGNAL(triggered()), SLOT(forwardClicked()));
     tbar->addAction(a);
     mFile->addAction(a);
     a = aLast = new QAction(QIcon(":/pixmaps/last.png"),
-            tr("To Last"), this);
+            tr("To &Last"), this);
     a->setShortcut(QKeySequence("End"));
     connect(a, SIGNAL(triggered()), SLOT(lastClicked()));
     tbar->addAction(a);
@@ -175,20 +181,8 @@ void RocketWindow::initGUI() {
     mHelp->addAction(a);
     
     imageNameFilters << "*.png" << "*.jpg" << "*.gif" << "*.xpm" << "*.bmp";
-    dFiles = new QDockWidget(this);
-    dFiles->setWindowTitle(tr("File Thumbnails"));
-    QSettings settings;
-    settings.setValue("thumbnail/size", 64); //global thumbnail size set here
-    int thumbnailSize = settings.value("thumbnail/size", 64).toInt();
-    filePreviewArea = new RocketFilePreviewArea(dFiles, thumbnailSize, &images);
-    int scrollBarWidth = filePreviewArea->verticalScrollBar()->sizeHint().width();
-    dFiles->setMinimumSize(
-            filePreviewArea->getThumbnailSize()+scrollBarWidth+40, 33);
-    connect(filePreviewArea, SIGNAL(clicked(int)), this, SLOT(previewClicked(int)));
-    dFiles->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea|Qt::BottomDockWidgetArea);
-    dFiles->setFeatures(QDockWidget::DockWidgetClosable);
-    dFiles->setWidget(filePreviewArea);
-    addDockWidget(Qt::BottomDockWidgetArea, dFiles);
+    
+    useLargeThumbnailsToggled(false);
     
     dPalette = new QDockWidget(this);
     dPalette->setWindowTitle(tr("Tools"));
@@ -451,6 +445,27 @@ void RocketWindow::zoomFitToggled(bool value) {
     if (!value) {
         setZoom(1.0);
     }
+}
+
+void RocketWindow::useLargeThumbnailsToggled(bool value) {
+    delete dFiles;
+    dFiles = new QDockWidget(this);
+    dFiles->setWindowTitle(tr("File Thumbnails"));
+    int thumbnailSize = value ? 92 : 64; //global thumbnail size determined here
+    QSettings settings;
+    settings.setValue("thumbnail/size", thumbnailSize);
+    images.refreshImages();
+    filePreviewArea = new RocketFilePreviewArea(dFiles, thumbnailSize, &images);
+    if (images.size()) {
+        //set the selected image again so thumbnail area reflects it
+        setIndex(index);
+    }
+    dFiles->setMinimumSize(64, 0);
+    connect(filePreviewArea, SIGNAL(clicked(int)), this, SLOT(previewClicked(int)));
+    dFiles->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea|Qt::BottomDockWidgetArea);
+    dFiles->setFeatures(QDockWidget::DockWidgetClosable);
+    dFiles->setWidget(filePreviewArea);
+    addDockWidget(Qt::BottomDockWidgetArea, dFiles);
 }
 
 void RocketWindow::toolClicked(QListWidgetItem *item) {
