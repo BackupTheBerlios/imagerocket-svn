@@ -32,11 +32,11 @@ Q_OBJECT
         int index, thumbnailSize;
         bool usingHorizontalLayout;
         void resizeEvent(QResizeEvent *event);
-        void centerOnPosition();
     protected slots:
         void clickedEvent(QWidget *w);
         void listChanged();
         void updateSize();
+        void centerOnPosition();
     public:
         RocketFilePreviewArea(QWidget *parent, int thumbnailSize, RocketImageList *list);
         ~RocketFilePreviewArea();

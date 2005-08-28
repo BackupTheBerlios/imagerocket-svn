@@ -139,6 +139,7 @@ void RocketWindow::initGUI() {
     mView->addSeparator();
     tbar->addSeparator();
     a = aUseLargeThumbnails = new QAction(tr("Use &Large Thumbnails"), this);
+    a->setShortcut(QKeySequence("Ctrl+L"));
     connect(a, SIGNAL(toggled(bool)), SLOT(useLargeThumbnailsToggled(bool)));
     a->setCheckable(true);
     mView->addAction(a);
@@ -201,7 +202,7 @@ void RocketWindow::initGUI() {
     
     //This works around the problem with QMainWindow in which the dock widgets get shrunk if the
     //window is resized smaller than their height. I hope this will be fixed upstream. - WJC
-    setMinimumSize(400, 300);
+    setMinimumSize(500, 400);
     
     updateGui();
 }

@@ -90,19 +90,22 @@ void RocketImage::setThumbnail(StatusIcon iconType) {
     if ( !QPixmapCache::find(fileX + size, xIcon)
                 || !QPixmapCache::find(fileLoading, loadingIcon)
                 || !QPixmapCache::find(fileClickToShow, clickToShowIcon) ) {
-        QPixmap tmp;
         int thumbnailWidth = thumbnailSize, thumbnailHeight = int(.75 * thumbnailSize);
-        QFont f;
-        f.setPointSize(10 + thumbnailSize / 64);
         
         xIcon.load(fileX);
         QPixmap scaled(xIcon.scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
         QPixmapCache::insert(fileX + size, scaled);
         
+        QPixmap tmp;
+        QFont font;
+        font.setPointSize(7 + thumbnailSize / 32);
+        QColor fontColor(64, 64, 64); //not quite black
+        
         tmp = QPixmap(thumbnailWidth, thumbnailHeight);
         tmp.fill(QColor(0, 0, 0, 0));
         QPainter p(&tmp);
-        p.setFont(f);
+        p.setFont(font);
+        p.setPen(fontColor);
         p.drawText(0, 0, thumbnailWidth, thumbnailHeight,
                           Qt::AlignHCenter|Qt::AlignVCenter, tr("Loading..."));
         p.end();
@@ -112,8 +115,8 @@ void RocketImage::setThumbnail(StatusIcon iconType) {
         tmp = QPixmap(thumbnailWidth, thumbnailHeight);
         tmp.fill(QColor(0, 0, 0, 0));
         p.begin(&tmp);
-        p.setFont(f);
-        p.setPen(QColor(64, 64, 64)); //not quite black
+        p.setFont(font);
+        p.setPen(fontColor);
         p.drawText(0, 0, thumbnailWidth, thumbnailHeight,
                    Qt::AlignHCenter|Qt::AlignVCenter, tr("Click to\nShow"));
         p.end();
