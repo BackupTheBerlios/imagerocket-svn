@@ -18,6 +18,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketWindow.h"
 #include "RocketImage.h"
 #include "RocketAboutDialog.h"
+#include "RocketSaveDialog.h"
 #include "RocketFilePreviewWidget.h"
 
 #include "interfaces.h"
@@ -147,6 +148,12 @@ void RocketWindow::initGUI() {
             this);
     a->setShortcut(QKeySequence("Ctrl+O"));
     connect(a, SIGNAL(triggered()), SLOT(openFolderClicked()));
+    mFile->addAction(a);
+    mFile->addSeparator();
+    a = aOpenFolder = new QAction(tr("&Save Folder..."),
+                                  this);
+    a->setShortcut(QKeySequence("Ctrl+S"));
+    connect(a, SIGNAL(triggered()), SLOT(saveFolderClicked()));
     mFile->addAction(a);
     mFile->addSeparator();
     a = aFirst = new QAction(QIcon(":/pixmaps/first.png"),
@@ -378,6 +385,11 @@ void RocketWindow::openFolderClicked() {
     d.cdUp();
     lastDir = d.path();
     setDirectory(s);
+}
+
+void RocketWindow::saveFolderClicked() {
+    RocketSaveDialog dialog(this);
+    dialog.exec();
 }
 
 void RocketWindow::closeEvent(QCloseEvent *e) {

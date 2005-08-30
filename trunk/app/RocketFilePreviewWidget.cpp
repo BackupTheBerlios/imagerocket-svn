@@ -54,7 +54,7 @@ void RocketFilePreviewWidget::updatePreview() {
         } else {
             setMinimumSize(0, sizeHint().height());
         }
-        resize(sizeHint());
+        updateGeometry();
         emit updateSize();
         oldPrefSize = sizeHint();
     }
@@ -135,7 +135,7 @@ void RocketFilePreviewWidget::setOrientation(bool horizontal) {
     } else {
         setMinimumSize(0, sizeHint().height());
     }
-    resize(sizeHint());
+    updateGeometry();
     emit updateSize();
     oldPrefSize = sizeHint();
 }

@@ -3,6 +3,7 @@ TARGET = imagerocket
 DESTDIR = ..
 HEADERS =   RocketWindow.h \
             RocketAboutDialog.h \
+            RocketSaveDialog.h \
             RocketView.h \
             RocketImageSquareContainer.h \
             RocketFilePreviewArea.h \
@@ -10,12 +11,14 @@ HEADERS =   RocketWindow.h \
             RocketImageList.h \
             RocketImage.h \
             RocketToolBox.h \
+            TinyButton.h \
             ThreadedImageLoader.h \
             interfaces.h \
             consts.h
 SOURCES =   main.cpp \
             RocketWindow.cpp \
             RocketAboutDialog.cpp \
+            RocketSaveDialog.cpp \
             RocketView.cpp \
             RocketImageSquareContainer.cpp \
             RocketFilePreviewArea.cpp \
@@ -23,9 +26,10 @@ SOURCES =   main.cpp \
             RocketImageList.cpp \
             RocketToolBox.cpp \
             RocketImage.cpp \
+            TinyButton.cpp \
             ThreadedImageLoader.cpp
             
-FORMS =     aboutdialog.ui
+FORMS =     aboutdialog.ui savedialog.ui
 RESOURCES = pixmaps.qrc app.qrc
 INCLUDEPATH += ../lua
 MOC_DIR = tmp

@@ -44,7 +44,7 @@ protected:
     int index;
     QLabel *statusFile, *statusZoom, *statusSize;
     QMenu *mFile, *mEdit, *mView, *mHelp;
-    QAction *aOpenFolder, *aExit;
+    QAction *aOpenFolder, *aSaveFolder, *aExit;
     QAction *aFirst, *aBack, *aForward, *aLast;
     QAction *aUseLargeThumbnails;
     QAction *aZoomOut, *aZoom100, *aZoomIn, *aZoomFit;
@@ -69,6 +69,7 @@ protected slots:
     void initObject();
     
     void openFolderClicked();
+    void saveFolderClicked();
     void exitClicked();
     
     void firstClicked();
