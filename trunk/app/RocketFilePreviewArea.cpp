@@ -36,10 +36,9 @@ RocketFilePreviewArea::RocketFilePreviewArea(QWidget *parent, int thumbnailSize,
     connect(list, SIGNAL(listChanged()), SLOT(listChanged()));
     connect(&lazyResizer, SIGNAL(timeout()), SLOT(updateSize()));
     lazyResizer.setSingleShot(true);
-    QPalette palette;
-    palette.setColor(QPalette::Background, QApplication::palette().base().color());
-    palette.setBrush(QPalette::Base, QBrush());
-    viewport()->setPalette(palette);
+    QPalette pal;
+    pal.setColor(QPalette::Background, palette().base().color());
+    viewport()->setPalette(pal);
 }
 
 RocketFilePreviewArea::~RocketFilePreviewArea() {
@@ -49,7 +48,7 @@ RocketFilePreviewArea::~RocketFilePreviewArea() {
 }
 
 QSize RocketFilePreviewArea::sizeHint() const {
-    return QSize(30, thumbnailSize+40);
+    return QSize(30, thumbnailSize+50);
 }
 
 void RocketFilePreviewArea::resizeEvent(QResizeEvent *event) {

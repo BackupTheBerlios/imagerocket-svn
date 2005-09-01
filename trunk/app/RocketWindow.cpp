@@ -49,6 +49,7 @@ void RocketWindow::initGUI() {
     icon.addFile(":/pixmaps/rocket-16.xpm");
     setWindowIcon(icon);
     dFiles = NULL;
+    previewsHidden = false;
     
     /* Saving/restoring of window position disabled due to difficulty on X11 and
     // questionable usefulness. I think Windows may do this as well also, so I
@@ -195,12 +196,32 @@ void RocketWindow::initGUI() {
     dPalette = new QDockWidget(this);
     dPalette->setWindowTitle(tr("Tools"));
     dPalette->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
-    dPalette->setFeatures(QDockWidget::DockWidgetMovable|QDockWidget::DockWidgetClosable);
+    dPalette->setFeatures(QDockWidget::AllDockWidgetFeatures);
     toolbox = new RocketToolBox(dPalette);
     connect(toolbox, SIGNAL(itemClicked(QListWidgetItem *)), SLOT(toolClicked(QListWidgetItem *)));
     toolbox->setFrameStyle(QFrame::Box|QFrame::Plain);
     dPalette->setWidget(toolbox);
     addDockWidget(Qt::RightDockWidgetArea, dPalette);
+    
+    //add toolbars and dock widgets toggles to View menu
+    mView->addSeparator();
+    QList < QToolBar * > toolbars = qFindChildren< QToolBar * >(this);
+    if (toolbars.size()) {
+        foreach (QToolBar *tb, toolbars) {
+            if (tb->parentWidget() == this) {
+                mView->addAction(tb->toggleViewAction());
+            }
+        }
+    }
+    QList < QDockWidget * > dockwidgets = qFindChildren< QDockWidget * >(this);
+    if (dockwidgets.size()) {
+        foreach (QDockWidget *dock, dockwidgets) {
+            if (dock->parentWidget() == this) {
+                mView->addAction(dock->toggleViewAction());
+            }
+        }
+    }
+
     
     view = new RocketView(this, PIECE_SIZE);
     setCentralWidget(view);
@@ -352,6 +373,13 @@ void RocketWindow::setZoom(double zoom) {
 /*! This resets the display if there are no images open.
 */
 void RocketWindow::setIndex(int index) {
+    if (images.size() <= 1 && dFiles->isVisible()) {
+        dFiles->hide();
+        previewsHidden = true;
+    } else if (images.size() > 1 && previewsHidden) {
+        dFiles->show();
+        previewsHidden = false;
+    }
     if (images.size()) {
         if (this->index < images.size()) {
             //if old selection index is valid, inform old selection of its loss.
@@ -461,6 +489,9 @@ void RocketWindow::zoomFitToggled(bool value) {
 }
 
 void RocketWindow::useLargeThumbnailsToggled(bool value) {
+    //XXX Deleting everything is causes flicker and removes the preview toggle from
+    //the View menu. The latter must especially be fixed! The proper fix for the underlying
+    //problem will take some work, I expect. - WJC
     delete dFiles;
     dFiles = new QDockWidget(this);
     dFiles->setWindowTitle(tr("File Thumbnails"));
@@ -475,8 +506,8 @@ void RocketWindow::useLargeThumbnailsToggled(bool value) {
     }
     dFiles->setMinimumSize(64, 0);
     connect(filePreviewArea, SIGNAL(clicked(int)), this, SLOT(previewClicked(int)));
-    dFiles->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea|Qt::BottomDockWidgetArea);
-    dFiles->setFeatures(QDockWidget::DockWidgetClosable);
+    dFiles->setAllowedAreas(Qt::TopDockWidgetArea|Qt::BottomDockWidgetArea);
+    dFiles->setFeatures(QDockWidget::AllDockWidgetFeatures);
     dFiles->setWidget(filePreviewArea);
     addDockWidget(Qt::BottomDockWidgetArea, dFiles);
 }

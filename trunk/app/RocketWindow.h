@@ -42,6 +42,7 @@ protected:
     lua_State *L;
     QList < QObject * > plugins;
     int index;
+    bool previewsHidden;
     QLabel *statusFile, *statusZoom, *statusSize;
     QMenu *mFile, *mEdit, *mView, *mHelp;
     QAction *aOpenFolder, *aSaveFolder, *aExit;

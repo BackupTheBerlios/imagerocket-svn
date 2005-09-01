@@ -32,7 +32,7 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
     onTrash = onWidget = active = usingHorizontalLayout = false;
     QString file(":/pixmaps/trash.png");
     QString file2(":/pixmaps/trashLit.png");
-    font.setPixelSize(11);
+    font.setPointSize(10);
     if (!QPixmapCache::find(file, trashIcon)
          || !QPixmapCache::find(file2, trashLitIcon)) {
         trashIcon.load(file);
@@ -41,9 +41,6 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
         QPixmapCache::insert(file2, trashLitIcon);
     }
     setMouseTracking(true);
-    QPalette palette;
-    palette.setBrush(QPalette::Base, QBrush());
-    setPalette(palette);
     updatePreview();
 }
 
@@ -62,7 +59,7 @@ void RocketFilePreviewWidget::updatePreview() {
 }
 
 void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
-    QColor bg(QApplication::palette().base().color());
+    QColor bg(palette().background().color());
     QPainter p(this);
     p.setFont(font);
     QFontMetrics metrics(font);
@@ -79,7 +76,6 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         p.setPen(Qt::black);
         p.drawRect(left-1, top-1, pix.width()+1, pix.height()+1);
     }
-    p.setPen(Qt::black);
     p.drawPixmap(left, top, pix);
     
     int textPosition = centerY - pix.height()/2 + img->getThumbnail().height() + 5;
@@ -95,19 +91,16 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
                    QColor(bg.red(), bg.green(), bg.blue(), 192));
     }
     //trying to be smart about the user's palette here
-    if (bg.toHsv().value() < 64) {
-        p.setPen(Qt::white);
-    } else {
-        p.setPen(Qt::black);
-    }
+    p.setPen(palette().color(QPalette::Text));
     p.drawText(0, textPosition, width(), textHeight,
                Qt::AlignHCenter|Qt::AlignTop, img->getShortFileName());
     //DEBUG - shows fontmetrics return versus the actual appearance
-    //p.drawText(5, 5, fileNameRect.width()+5, fileNameRect.height()+5, Qt::AlignLeft|Qt::AlignTop, img->getShortFileName());
+    //p.drawText(5, 5, fileNameRect.width()+5, fileNameRect.height()+5,
+    //           Qt::AlignLeft|Qt::AlignTop, img->getShortFileName());
     //p.drawRect(5, 5, fileNameRect.width(), fileNameRect.height());
     
     if (active) {
-        QColor border(QApplication::palette().highlight().color());
+        QColor border(palette().highlight().color());
         QColor fill(border.red(), border.green(), border.blue(), 75);
         p.fillRect(1, 1, width()-2, height()-2, fill);
         p.setPen(border);
