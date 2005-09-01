@@ -24,19 +24,20 @@ Suite 330, Boston, MA 02111-1307 USA */
 class RocketFilePreviewWidget : public QWidget {
 Q_OBJECT
 protected:
-    QPixmap trashIcon, trashLitIcon, xIcon, loadingIcon;
+    QPixmap trashIcon, trashLitIcon, floppyIcon;
     QFont font;
     RocketImage *img;
     int thumbnailSize;
     bool onTrash, onWidget;
     bool active, usingHorizontalLayout;
     QSize oldPrefSize;
+    enum Direction {LeftToRight, RightToLeft};
     void paintEvent(QPaintEvent *event);
     void leaveEvent(QEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-    bool positionOnButton(QPoint p, int num);
-    QRect buttonRect(int num);
+    bool positionOnButton(QPoint p, int num, Direction d);
+    QRect buttonRect(int num, Direction d);
 public:
     RocketFilePreviewWidget(QWidget *parent, RocketImage *img, int thumbnailSize);
     QSize sizeHint();

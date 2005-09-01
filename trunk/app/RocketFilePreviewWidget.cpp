@@ -32,13 +32,17 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
     onTrash = onWidget = active = usingHorizontalLayout = false;
     QString file(":/pixmaps/trash.png");
     QString file2(":/pixmaps/trashLit.png");
+    QString file3(":/pixmaps/floppy.png");
     font.setPointSize(10);
     if (!QPixmapCache::find(file, trashIcon)
-         || !QPixmapCache::find(file2, trashLitIcon)) {
+         || !QPixmapCache::find(file2, trashLitIcon)
+         || !QPixmapCache::find(file3, floppyIcon)) {
         trashIcon.load(file);
         QPixmapCache::insert(file, trashIcon);
         trashLitIcon.load(file2);
         QPixmapCache::insert(file2, trashLitIcon);
+        floppyIcon.load(file3);
+        QPixmapCache::insert(file3, floppyIcon);
     }
     setMouseTracking(true);
     updatePreview();
@@ -99,6 +103,11 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     //           Qt::AlignLeft|Qt::AlignTop, img->getShortFileName());
     //p.drawRect(5, 5, fileNameRect.width(), fileNameRect.height());
     
+    if (img->canUndo()) {
+        QRect floppy(buttonRect(1, RightToLeft));
+        p.drawPixmap(floppy.x(), floppy.y(), floppyIcon);
+    }
+    
     if (active) {
         QColor border(palette().highlight().color());
         QColor fill(border.red(), border.green(), border.blue(), 75);
@@ -106,11 +115,13 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         p.setPen(border);
         p.drawRect(0, 0, width()-1, height()-1);
     }
-    QRect r(buttonRect(1));
+    
     if (onTrash) {
-        p.drawPixmap(r.x(), r.y(), trashLitIcon);
+        QRect trash(buttonRect(1, LeftToRight));
+        p.drawPixmap(trash.x(), trash.y(), trashLitIcon);
     } else if (onWidget) {
-        p.drawPixmap(r.x(), r.y(), trashIcon);
+        QRect trash(buttonRect(1, LeftToRight));
+        p.drawPixmap(trash.x(), trash.y(), trashIcon);
     }
 }
 
@@ -138,14 +149,14 @@ void RocketFilePreviewWidget::leaveEvent(QEvent *event) {
 }
 
 void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
-    onTrash = positionOnButton(event->pos(), 1);
+    onTrash = positionOnButton(event->pos(), 1, LeftToRight);
     onWidget = true;
     update();
 }
 
 void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
     bool leftClick = event->button() == 1;
-    if (positionOnButton(event->pos(), 1) && leftClick) {
+    if (positionOnButton(event->pos(), 1, LeftToRight) && leftClick) {
         int response = QMessageBox::question(this, img->getFileName(),
                 tr("Are you sure you want to delete %1?").arg(img->getFileName()),
                 QMessageBox::Yes, QMessageBox::No);
@@ -165,12 +176,18 @@ void RocketFilePreviewWidget::resetIcons() {
     }
 }
 
-bool RocketFilePreviewWidget::positionOnButton(QPoint p, int num) {
-    return buttonRect(num).contains(p);
+bool RocketFilePreviewWidget::positionOnButton(QPoint p, int num, Direction d) {
+    return buttonRect(num, d).contains(p);
 }
 
-QRect RocketFilePreviewWidget::buttonRect(int num) {
-    return QRect((trashIcon.width()+2)*(num-1)+2, 2, trashIcon.width(), trashIcon.height());
+QRect RocketFilePreviewWidget::buttonRect(int num, Direction d) {
+    if (d == LeftToRight) {
+        int x = (trashIcon.width()+2)*(num-1)+2;
+        return QRect(x, 2, trashIcon.width(), trashIcon.height());
+    } else {
+        int x = width()-(trashIcon.width()+2)*(num-1)-2-trashIcon.width();
+        return QRect(x, 2, trashIcon.width(), trashIcon.height());
+    }
 }
 
 QSize RocketFilePreviewWidget::sizeHint() {
