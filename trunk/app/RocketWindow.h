@@ -53,7 +53,6 @@ protected:
     QAction *aAbout;
     QDockWidget *dPalette, *dFiles;
     RocketToolBox *toolbox;
-    QStringList imageNameFilters;
     QString lastDir;
     
     RocketFilePreviewArea *filePreviewArea;
@@ -62,6 +61,7 @@ protected:
     virtual void setIndex(int index);
     
     void closeEvent(QCloseEvent *e);
+    bool eventFilter(QObject *watched, QEvent *e);
     void loadPlugins(QString dirPath);
     
 protected slots:

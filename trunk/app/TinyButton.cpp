@@ -65,7 +65,7 @@ QSize TinyButton::sizeHint() const {
         return QPushButton::sizeHint();
     }
     ensurePolished();
-    int w = 0;
+    int w = 0, h = 0;
     QStyleOptionButton opt = getButtonStyleOption();
     QString s(text());
     if (s.isEmpty()) {
@@ -76,7 +76,9 @@ QSize TinyButton::sizeHint() const {
     w += sz.width();
     w += style()->pixelMetric(QStyle::PM_DefaultFrameWidth, &opt, this);
     w += style()->pixelMetric(QStyle::PM_ButtonMargin, &opt, this);
-    int h = QPushButton::sizeHint().height();
+    h += sz.height();
+    h += style()->pixelMetric(QStyle::PM_DefaultFrameWidth, &opt, this);
+    h += style()->pixelMetric(QStyle::PM_ButtonMargin, &opt, this);
     if (widthForcedToHeight) {
         return QSize(qMax(h, w), h);
     } else {

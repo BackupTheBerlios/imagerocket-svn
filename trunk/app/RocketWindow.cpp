@@ -62,7 +62,7 @@ void RocketWindow::initGUI() {
     }
     */
     
-    //Window Size and Center
+    //Size and center the window
     //I need to check whether this is useful, since
     //window managers may manage it well enough. - WJC
     int scrn = 0;
@@ -99,33 +99,33 @@ void RocketWindow::initGUI() {
     QAction *a;
     a = aUndo = new QAction(QIcon(":/pixmaps/undo.png"),
             tr("&Undo"), this);
-    a->setShortcut(QKeySequence("Ctrl+Z"));
+    a->setShortcut(QKeySequence(tr("Ctrl+Z", "undo")));
     a->setStatusTip(tr("Undo the last operation"));
     connect(a, SIGNAL(triggered()), SLOT(undoClicked()));
     tbar->addAction(a);
     mEdit->addAction(a);
     a = aRedo = new QAction(QIcon(":/pixmaps/redo.png"),
             tr("&Redo"), this);
-    a->setShortcut(QKeySequence("Ctrl+Y"));
+    a->setShortcut(QKeySequence(tr("Ctrl+Y", "redo")));
     connect(aRedo, SIGNAL(triggered()), SLOT(redoClicked()));
     tbar->addAction(a);
     mEdit->addAction(a);
     tbar->addSeparator();
     a = aZoomIn = new QAction(QIcon(":/pixmaps/zoom-in.png"),
             tr("Zoom &In"), this);
-    a->setShortcut(QKeySequence("="));
+    a->setShortcut(QKeySequence(tr("=", "zoom in")));
     connect(a, SIGNAL(triggered()), SLOT(zoomInClicked()));
     tbar->addAction(a);
     mView->addAction(a);
     a = aZoom100 = new QAction(QIcon(":/pixmaps/zoom-100.png"),
             tr("&Zoom to 100%"), this);
-    a->setShortcut(QKeySequence("_"));
+    a->setShortcut(QKeySequence(tr("_", "zoom 100%")));
     connect(a, SIGNAL(triggered()), SLOT(zoom100Clicked()));
     tbar->addAction(a);
     mView->addAction(a);
     a = aZoomOut = new QAction(QIcon(":/pixmaps/zoom-out.png"),
             tr("Zoom &Out"), this);
-    a->setShortcut(QKeySequence("-"));
+    a->setShortcut(QKeySequence(tr("-", "zoom out")));
     connect(a, SIGNAL(triggered()), SLOT(zoomOutClicked()));
     tbar->addAction(a);
     mView->addAction(a);
@@ -133,7 +133,7 @@ void RocketWindow::initGUI() {
     tbar->addSeparator();
     a = aZoomFit = new QAction(QIcon(":/pixmaps/zoom-fit.png"),
                                tr("&Fit to Window"), this);
-    a->setShortcut(QKeySequence("+"));
+    a->setShortcut(QKeySequence(tr("+", "fit to window")));
     a->setCheckable(true);
     connect(a, SIGNAL(toggled(bool)), SLOT(zoomFitToggled(bool)));
     tbar->addAction(a);
@@ -141,43 +141,43 @@ void RocketWindow::initGUI() {
     mView->addSeparator();
     tbar->addSeparator();
     a = aUseLargeThumbnails = new QAction(tr("Use &Large Thumbnails"), this);
-    a->setShortcut(QKeySequence("Ctrl+L"));
+    a->setShortcut(QKeySequence(tr("Ctrl+L", "use large thumbnails")));
     connect(a, SIGNAL(toggled(bool)), SLOT(useLargeThumbnailsToggled(bool)));
     a->setCheckable(true);
     mView->addAction(a);
     a = aOpenFolder = new QAction(tr("&Open Folder..."),
             this);
-    a->setShortcut(QKeySequence("Ctrl+O"));
+    a->setShortcut(QKeySequence(tr("Ctrl+O", "open folder")));
     connect(a, SIGNAL(triggered()), SLOT(openFolderClicked()));
     mFile->addAction(a);
     mFile->addSeparator();
     a = aOpenFolder = new QAction(tr("&Save Folder..."),
                                   this);
-    a->setShortcut(QKeySequence("Ctrl+S"));
+    a->setShortcut(QKeySequence(tr("Ctrl+S", "save folder")));
     connect(a, SIGNAL(triggered()), SLOT(saveFolderClicked()));
     mFile->addAction(a);
     mFile->addSeparator();
     a = aFirst = new QAction(QIcon(":/pixmaps/first.png"),
             tr("To &First"), this);
-    a->setShortcut(QKeySequence("Home"));
+    a->setShortcut(QKeySequence(tr("Home", "to first")));
     connect(a, SIGNAL(triggered()), SLOT(firstClicked()));
     tbar->addAction(a);
     mFile->addAction(a);
     a = aBack = new QAction(QIcon(":/pixmaps/back.png"),
             tr("&Back"), this);
-    a->setShortcut(QKeySequence("Backspace"));
+    a->setShortcut(QKeySequence(tr("Backspace", "go back")));
     connect(a, SIGNAL(triggered()), SLOT(backClicked()));
     tbar->addAction(a);
     mFile->addAction(a);
     a = aForward = new QAction(QIcon(":/pixmaps/forward.png"),
             tr("&Forward"), this);
-    a->setShortcut(QKeySequence("Space"));
+    a->setShortcut(QKeySequence(tr("Space", "go forward")));
     connect(a, SIGNAL(triggered()), SLOT(forwardClicked()));
     tbar->addAction(a);
     mFile->addAction(a);
     a = aLast = new QAction(QIcon(":/pixmaps/last.png"),
             tr("To &Last"), this);
-    a->setShortcut(QKeySequence("End"));
+    a->setShortcut(QKeySequence(tr("End", "to last")));
     connect(a, SIGNAL(triggered()), SLOT(lastClicked()));
     tbar->addAction(a);
     mFile->addAction(a);
@@ -188,8 +188,6 @@ void RocketWindow::initGUI() {
     a = aAbout = new QAction(tr("&About"), this);
     connect(a, SIGNAL(triggered()), SLOT(aboutClicked()));
     mHelp->addAction(a);
-    
-    imageNameFilters << "*.png" << "*.jpg" << "*.gif" << "*.xpm" << "*.bmp";
     
     useLargeThumbnailsToggled(false);
     
@@ -227,10 +225,13 @@ void RocketWindow::initGUI() {
     setCentralWidget(view);
     view->setFocus(Qt::OtherFocusReason);
     connect(view, SIGNAL(zoomChanged(double)), this, SLOT(updateGui()));
+    view->viewport()->installEventFilter(this);
     
     //This works around the problem with QMainWindow in which the dock widgets get shrunk if the
     //window is resized smaller than their height. I hope this will be fixed upstream. - WJC
     setMinimumSize(500, 400);
+    
+    setAcceptDrops(true);
     
     updateGui();
 }
@@ -254,9 +255,14 @@ void RocketWindow::initObject() {
     
     QDir appDir(QCoreApplication::applicationDirPath());
     loadPlugins(appDir.filePath("plugins"));
-    QDir upDir(appDir.filePath(".."));
-    loadPlugins(upDir.filePath("plugins"));
-    loadPlugins("/usr/local/imagerocket");
+    loadPlugins(QDir::home().filePath("imagerocket/plugins"));
+    loadPlugins(QDir::home().filePath(".imagerocket/plugins"));
+    QSettings settings;
+    QString data(settings.value("app/dataLocation").toString());
+    if (!data.isEmpty()) {
+        loadPlugins(data.append("/plugins"));
+    }
+    loadPlugins("/usr/local/imagerocket/plugins");
     
     //QTimer::singleShot(random() % 100, this, SLOT(close())); //debugging crash test - use with prog_test.sh
 }
@@ -264,7 +270,10 @@ void RocketWindow::initObject() {
 //!This iterates the given directory and looks in its child directories for plugins.
 void RocketWindow::loadPlugins(QString dirPath) {
     //This could use some cleanup. The error handling code could be streamlined. - WJC
-    QDir dir(dirPath);
+    QDir dir(QDir::convertSeparators(dirPath));
+    if (!dir.exists()) {
+        return;
+    }
     QStringList dirList(dir.entryList(QDir::Dirs|QDir::Readable));
     foreach (QString file, dirList) {
         if (file == "." || file == "..") {
@@ -296,8 +305,9 @@ void RocketWindow::loadPlugins(QString dirPath) {
                 PluginInterface *i = qobject_cast
                         < PluginInterface * >(o);
                 if (!i) {
-                    QMessageBox::warning(this, tr("Plugin Loading Failed"),
-                            tr("Plugin %1 does not subclass PluginInterface and cannot be used.").arg(f));
+                    statusBar()->showMessage(
+                            tr("Plugin %1 is incompatible with this version.").arg(f),
+                            10000);
                     delete o;
                     delete lib;
                     delete plugin;
@@ -330,6 +340,9 @@ RocketWindow::~RocketWindow() {
 
 //! This loads the images in the given directory.
 void RocketWindow::setDirectory(QString dirName) {
+    if (!QFileInfo(dirName).isDir()) {
+        dirName = QFileInfo(dirName).dir().absolutePath();
+    }
     images.setLocation(dirName);
     setIndex(0);
 }
@@ -422,6 +435,29 @@ void RocketWindow::saveFolderClicked() {
 
 void RocketWindow::closeEvent(QCloseEvent *e) {
     deleteLater();
+}
+
+bool RocketWindow::eventFilter(QObject *watched, QEvent *e) {
+    if (e->type() == QEvent::DragEnter) {
+        QDragEnterEvent *de = static_cast < QDragEnterEvent * >(e);
+        const char *text;
+        int a=0;
+        while ((text = de->format(a++)) && text[0] != '\0') {
+            qDebug("%d - %s", a, text);
+        }
+        if (de->mimeData()->hasFormat("text/uri-list")) {
+            de->acceptProposedAction();
+        }
+        return true;
+    } else if (e->type() == QEvent::Drop) {
+        QDragEnterEvent *de = static_cast < QDragEnterEvent * >(e);
+        QString urls(de->mimeData()->text());
+        QStringList urlList = urls.split(QRegExp("\\s+"));
+        QString string(QUrl::fromEncoded(urlList[0].toAscii()).toLocalFile());
+        setDirectory(string);
+        return true;
+    }
+    return false;
 }
 
 void RocketWindow::exitClicked() {

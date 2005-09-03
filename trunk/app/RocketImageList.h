@@ -30,6 +30,8 @@ protected:
     QVector < RocketImage * > list;
     ThreadedImageLoader *generator;
     void continueThumbnailGeneration();
+protected slots:
+    void showMessage();
 public:
     RocketImageList();
     ~RocketImageList();

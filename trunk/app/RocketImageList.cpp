@@ -49,7 +49,8 @@ void RocketImageList::refreshImages() {
 void RocketImageList::setLocation(QString location) {
     RocketImageList::location = location;
     QStringList imageNameFilters;
-    imageNameFilters << "*.png" << "*.jpg" << "*.gif" << "*.xpm" << "*.bmp"; //TODO share this list with RocketView
+    //TODO share this list with RocketWindow
+    imageNameFilters << "*.png" << "*.jpg" << "*.gif" << "*.xpm" << "*.bmp";
     QDir dir(location);
     QStringList files = dir.entryList(
             imageNameFilters, QDir::Files|QDir::Readable, QDir::Name);
@@ -63,12 +64,16 @@ void RocketImageList::setLocation(QString location) {
         list.append(i);
     }
     emit listChanged();
+    emit indexChanged(0);
     continueThumbnailGeneration();
     if (!list.size()) {
-        QMessageBox::warning(NULL, tr("Open Folder..."),
-                             tr("No images were found in the folder."));
+        QTimer::singleShot(0, this, SLOT(showMessage()));
     }
-    emit indexChanged(0);
+}
+
+void RocketImageList::showMessage() {
+    QMessageBox::warning(NULL, tr("Open Folder..."),
+                         tr("No images were found in the folder."));
 }
 
 //! This loops through current images and checks if they need a thumbnail.
