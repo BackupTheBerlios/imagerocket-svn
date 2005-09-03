@@ -372,7 +372,8 @@ void RocketWindow::updateGui() {
     } else {
         QDir dir(images.getLocation());
         setWindowTitle(tr("%1 %2 - %3", "programName version currentLocation")
-                .arg(PROGRAM_NAME).arg(VERSION).arg(dir.canonicalPath()));
+            .arg(PROGRAM_NAME).arg(VERSION)
+            .arg(QDir::convertSeparators(dir.absolutePath())));
     }
 }
 
@@ -451,9 +452,27 @@ bool RocketWindow::eventFilter(QObject *watched, QEvent *e) {
         return true;
     } else if (e->type() == QEvent::Drop) {
         QDragEnterEvent *de = static_cast < QDragEnterEvent * >(e);
-        QString urls(de->mimeData()->text());
-        QStringList urlList = urls.split(QRegExp("\\s+"));
-        QString string(QUrl::fromEncoded(urlList[0].toAscii()).toLocalFile());
+        QString string;
+        if (de->mimeData()->hasUrls()) {
+            QList < QUrl > urlList(de->mimeData()->urls());
+            if (urlList.size() > 0) {
+                string = urlList[0].toLocalFile();
+                if (urlList.size() > 1) {
+                    statusBar()->showMessage(tr("Only one folder can be opened at a time."), 5000);
+                }
+            }
+        } else {
+            //I believe that Qt/X11 doesn't split url lists, so this is needed. I'll double-check
+            //though. - WJC
+            QString urls(de->mimeData()->text());
+            QStringList urlList = urls.split(QRegExp("\\s+"));
+            if (urlList.size() > 0) {
+                string = QUrl::fromEncoded(urlList[0].toAscii()).toLocalFile();
+                if (urlList.size() > 1) {
+                    statusBar()->showMessage(tr("Only one folder can be opened at a time."), 5000);
+                }
+            }
+        }
         setDirectory(string);
         return true;
     }

@@ -101,7 +101,8 @@ void RocketView::createBorders() {
         p.drawLine(a, 0, a+3, 0);
     }
     p.end();
-    horizontalBorder = pix;
+    horizontalBorder = pix.transformed(matrix);
+    matrix.scale(2, 1); //fixes a bug(?) in qt/windows in which rotate leaves a blank image.
     matrix.rotate(90);
     verticalBorder = horizontalBorder.transformed(matrix);
     
@@ -113,6 +114,7 @@ void RocketView::createBorders() {
     p.drawRect(0, 0, cornerCapSize, cornerCapSize);
     p.end();
     nwCorner = pix2;
+    //This doesn't work in qt/windows yet either.
     matrix.rotate(90);
     neCorner = nwCorner.transformed(matrix);
     matrix.rotate(90);

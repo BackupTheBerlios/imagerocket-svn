@@ -31,7 +31,7 @@ SOURCES =   main.cpp \
             
 FORMS =     aboutdialog.ui savedialog.ui
 RESOURCES = pixmaps.qrc app.qrc
-INCLUDEPATH += ../lua
+INCLUDEPATH += ../lua .
 MOC_DIR = tmp
 OBJECTS_DIR = tmp
 UI_DIR = tmp
