@@ -81,6 +81,7 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         p.drawRect(left-1, top-1, pix.width()+1, pix.height()+1);
     }
     p.drawPixmap(left, top, pix);
+    lastDrawnPosition = QPoint(left, top);
     
     int textPosition = centerY - pix.height()/2 + img->getThumbnail().height() + 5;
     int textHeight = height()-img->getThumbnail().height();
@@ -181,12 +182,19 @@ bool RocketFilePreviewWidget::positionOnButton(QPoint p, int num, Direction d) {
 }
 
 QRect RocketFilePreviewWidget::buttonRect(int num, Direction d) {
+    int margin = trashIcon.width() / 2;
     if (d == LeftToRight) {
-        int x = (trashIcon.width()+2)*(num-1)+2;
-        return QRect(x, 2, trashIcon.width(), trashIcon.height());
+        int x = std::min(lastDrawnPosition.x(), width()/3)-margin+(trashIcon.width()+2)*(num-1);
+        return QRect(std::max(margin, x),
+                     std::max(margin, lastDrawnPosition.y()-margin),
+                     trashIcon.width(), trashIcon.height());
     } else {
-        int x = width()-(trashIcon.width()+2)*(num-1)-2-trashIcon.width();
-        return QRect(x, 2, trashIcon.width(), trashIcon.height());
+        int iw = img->getThumbnail().width();
+        int x = std::min(lastDrawnPosition.x()+iw,
+                         int(width()*(2.0/3.0)))+margin-(trashIcon.width()+2)*(num-1);
+        return QRect(std::max(margin, x),
+                     std::max(margin, lastDrawnPosition.y()-margin),
+                     trashIcon.width(), trashIcon.height());
     }
 }
 

@@ -27,6 +27,7 @@ protected:
     QPixmap trashIcon, trashLitIcon, floppyIcon;
     QFont font;
     RocketImage *img;
+    QPoint lastDrawnPosition;
     int thumbnailSize;
     bool onTrash, onWidget;
     bool active, usingHorizontalLayout;

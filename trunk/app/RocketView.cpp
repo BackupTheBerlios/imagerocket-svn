@@ -83,13 +83,69 @@ RocketView::~RocketView() {
 void RocketView::createBorders() {
     //Full length borders on big/zoomed images crash on Windows,so we just tile the
     //border. For the border pattern, I must also use a hack, since the pattern drawing
-    //mechanism is inconsistent between OSes, at least on Qt 4.0.0. -- WJC
+    //mechanism is inconsistent between OSes, at least on Qt 4.0.0. - WJC
     const int cornerCapSize = 5;
     const int borderSize = 384;
     QColor orange(255, 191, 0);
     QPen pen(Qt::darkGray), pen2(Qt::yellow);
     QPen penCorner(orange);
     QPainter p;
+    
+    QPixmap pix(borderSize, 1);
+    p.begin(&pix);
+    p.setPen(pen);
+    p.drawLine(0, 0, borderSize, 0);
+    p.setPen(pen2);
+    for (int a=0;a<borderSize;a+=8) {
+        p.drawLine(a, 0, a+3, 0);
+    }
+    p.end();
+    horizontalBorder = pix;
+    
+    pix = QPixmap(1, borderSize);
+    p.begin(&pix);
+    p.setPen(pen);
+    p.drawLine(0, 0, 0, borderSize);
+    p.setPen(pen2);
+    for (int a=0;a<borderSize;a+=8) {
+        p.drawLine(0, a, 0, a+3);
+    }
+    p.end();
+    verticalBorder = pix;
+    
+    pix = QPixmap(cornerCapSize, cornerCapSize);
+    pix.fill(QColor(0, 0, 0, 0));
+    p.begin(&pix);
+    p.setPen(penCorner);
+    p.drawRect(0, 0, cornerCapSize, cornerCapSize);
+    p.end();
+    nwCorner = pix;
+    
+    pix = QPixmap(cornerCapSize, cornerCapSize);
+    pix.fill(QColor(0, 0, 0, 0));
+    p.begin(&pix);
+    p.setPen(penCorner);
+    p.drawRect(-1, 0, cornerCapSize, cornerCapSize);
+    p.end();
+    neCorner = pix;
+    
+    pix = QPixmap(cornerCapSize, cornerCapSize);
+    pix.fill(QColor(0, 0, 0, 0));
+    p.begin(&pix);
+    p.setPen(penCorner);
+    p.drawRect(0, -1, cornerCapSize, cornerCapSize);
+    p.end();
+    swCorner = pix;
+    
+    pix = QPixmap(cornerCapSize, cornerCapSize);
+    pix.fill(QColor(0, 0, 0, 0));
+    p.begin(&pix);
+    p.setPen(penCorner);
+    p.drawRect(-1, -1, cornerCapSize, cornerCapSize);
+    p.end();
+    seCorner = pix;
+    
+    /* This code fails on Qt/Windows 4.0.1. It could replace the code above when Qt is fixed. - WJC
     QMatrix matrix;
     
     QPixmap pix(borderSize, 1);
@@ -101,8 +157,7 @@ void RocketView::createBorders() {
         p.drawLine(a, 0, a+3, 0);
     }
     p.end();
-    horizontalBorder = pix.transformed(matrix);
-    matrix.scale(2, 1); //fixes a bug(?) in qt/windows in which rotate leaves a blank image.
+    horizontalBorder = pix;
     matrix.rotate(90);
     verticalBorder = horizontalBorder.transformed(matrix);
     
@@ -114,13 +169,13 @@ void RocketView::createBorders() {
     p.drawRect(0, 0, cornerCapSize, cornerCapSize);
     p.end();
     nwCorner = pix2;
-    //This doesn't work in qt/windows yet either.
     matrix.rotate(90);
     neCorner = nwCorner.transformed(matrix);
     matrix.rotate(90);
     seCorner = nwCorner.transformed(matrix);
     matrix.rotate(90);
     swCorner = nwCorner.transformed(matrix);
+    */
 }
 
 //! This loads the file and displays it. The widget displays error text if the load fails.
