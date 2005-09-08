@@ -1,5 +1,5 @@
 /* ImageRocket
-An image-editing program written for editing speed and ease of use.
+A widget which displays images in a scrollable container at any zoom level.
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
-#include "RocketView.h"
+#include "PixmapView.h"
 #include "RocketImageSquareContainer.h"
 #include <QtGui>
 #include <iostream>
@@ -26,7 +26,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #define SINGLE_STEP 25
 
 /*!
-  \class RocketView
+  \class PixmapView
   \short A scrolling and zooming image view widget
   
   This widget can display large images at any zoom; optionally fit the image to the widget; and
@@ -35,17 +35,16 @@ Suite 330, Boston, MA 02111-1307 USA */
   \sa RocketImageSquareContainer
  */
 
-RocketView::RocketView(QWidget *parent, int pieceSize)
-                      : QAbstractScrollArea(parent) {
+PixmapView::PixmapView(QWidget *parent, int pieceSize)
+            : QAbstractScrollArea(parent) {
     zoom = 1.0;
     inResizeEvent = false;
     blockDrawing = false;
     brokenImage = false;
     fitToWidget = false;
-    RocketView::pieceSize = pieceSize;
+    PixmapView::pieceSize = pieceSize;
     squares = NULL;
-    middleButtonScrollX = -1;
-    middleButtonScrollY = -1;
+    middleButtonScrollPoint = QPoint(-1, -1);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     horizontalScrollBar()->setSingleStep(SINGLE_STEP);
     verticalScrollBar()->setSingleStep(SINGLE_STEP);
@@ -54,10 +53,8 @@ RocketView::RocketView(QWidget *parent, int pieceSize)
     QPalette p;
     p.setBrush(QPalette::Base, QBrush());
     viewport()->setPalette(p);
-    //turn on double-buffering
-    //viewport()->setAttribute(Qt::WA_PaintOnScreen, true);
     
-    pix = new QPixmap();
+    pix = QPixmap();
     transparency = false;
     
     preloader = new QTimer(this);
@@ -75,12 +72,11 @@ RocketView::RocketView(QWidget *parent, int pieceSize)
 #endif
 }
 
-RocketView::~RocketView() {
+PixmapView::~PixmapView() {
     delete squares;
-    delete pix;
 }
 
-void RocketView::createBorders() {
+void PixmapView::createBorders() {
     //Full length borders on big/zoomed images crash on Windows,so we just tile the
     //border. For the border pattern, I must also use a hack, since the pattern drawing
     //mechanism is inconsistent between OSes, at least on Qt 4.0.0. - WJC
@@ -179,7 +175,7 @@ void RocketView::createBorders() {
 }
 
 //! This loads the file and displays it. The widget displays error text if the load fails.
-void RocketView::load(QString fileName) {
+void PixmapView::load(QString fileName) {
     load(QImage(fileName));
 }
 
@@ -191,7 +187,7 @@ void RocketView::load(QString fileName) {
   \sa load(QPixmap, bool)
   \sa resetToBlank()
 */
-void RocketView::load(QImage newImage) {
+void PixmapView::load(QImage newImage) {
     if (!newImage.isNull()) {
         QPixmap p(QPixmap::fromImage(newImage));
         load(p, newImage.hasAlphaChannel());
@@ -211,44 +207,41 @@ void RocketView::load(QImage newImage) {
   \sa load(QImage)
   \sa resetToBlank()
 */
-void RocketView::load(QPixmap newPixmap, bool hasTransparency) {
-    //qDebug("----- load -----");
-    bool changed = (newPixmap.size() != pix->size());
+void PixmapView::load(QPixmap newPixmap, bool hasTransparency) {
+    bool changed = (newPixmap.size() != pix.size());
     transparency = hasTransparency;
     delete squares;
     squares = NULL;
     preloader->stop();
     preloadPoints.clear();
-    delete pix;
     if (!newPixmap.isNull()) {
         brokenImage = false;
-        pix = new QPixmap(newPixmap);
-        squares = new RocketImageSquareContainer(pix, transparency, pieceSize);
+        pix = newPixmap;
+        squares = new RocketImageSquareContainer(&pix, transparency, pieceSize);
         if (fitToWidget) {
             updateZoomForSize();
         } else {
-            resizeContents(int(pix->width() * zoom), int(pix->height() * zoom));
+            resizeContents(int(pix.width() * zoom), int(pix.height() * zoom));
         }
     } else {
         brokenImage = true;
-        pix = new QPixmap();
+        pix = QPixmap();
         resizeContents(0, 0);
     }
     viewport()->update();
 }
 
 //! This sets the displayed image to a blank one, without error message.
-void RocketView::resetToBlank() {
+void PixmapView::resetToBlank() {
     brokenImage = false;
     delete squares;
     squares = NULL;
-    delete pix;
-    pix = new QPixmap();
+    pix = QPixmap();
     setZoom(1.0);
 }
 
 //! This sets the parameters of the scrollbars.
-void RocketView::resizeContents(int w, int h) {
+void PixmapView::resizeContents(int w, int h) {
     preloadPoints.clear();
     int iw=0, ih=0;
     if (squares) {
@@ -277,14 +270,14 @@ void RocketView::resizeContents(int w, int h) {
     blockDrawing = false;
 }
 
-void RocketView::resizeEvent(QResizeEvent *e) {
+void PixmapView::resizeEvent(QResizeEvent *e) {
     if (!inResizeEvent) {
         inResizeEvent = true;
         //qDebug("resizeEvent %d", fitToWidget);
         if (squares && fitToWidget) {
             updateZoomForSize();
         } else {
-            resizeContents(int(pix->width() * zoom), int(pix->height() * zoom));
+            resizeContents(int(pix.width() * zoom), int(pix.height() * zoom));
         }
         inResizeEvent = false;
     }
@@ -295,9 +288,9 @@ void RocketView::resizeEvent(QResizeEvent *e) {
   This is the basis for the fit-to-widget feature.
 \sa setFitToWidget(bool)
 */
-void RocketView::updateZoomForSize() {
+void PixmapView::updateZoomForSize() {
     //qDebug("updateZoomForSize");
-    QSize w(size()), i(pix->size()), padding(10, 10);
+    QSize w(size()), i(pix.size()), padding(10, 10);
     w -= padding;
     QSize tmp(i);
     tmp.scale(w, Qt::KeepAspectRatio);
@@ -306,48 +299,45 @@ void RocketView::updateZoomForSize() {
 }
 
 //! This controls whether the image is zoomed to always fit the widget.
-void RocketView::setFitToWidget(bool value) {
+void PixmapView::setFitToWidget(bool value) {
     fitToWidget = value;
-    if (fitToWidget && !pix->isNull()) {
+    if (fitToWidget && !pix.isNull()) {
         updateZoomForSize();
-        resizeContents(int(pix->width() * zoom), int(pix->height() * zoom));
+        resizeContents(int(pix.width() * zoom), int(pix.height() * zoom));
     }
     update();
 }
 
-void RocketView::mousePressEvent(QMouseEvent *e) {
+void PixmapView::mousePressEvent(QMouseEvent *e) {
     if (e->button() == Qt::MidButton) {
-        middleButtonScrollX = e->x();
-        middleButtonScrollY = e->y();
+        middleButtonScrollPoint = e->pos();
         setCursor(Qt::SizeAllCursor);
     }
 }
 
-void RocketView::mouseReleaseEvent(QMouseEvent *e) {
+void PixmapView::mouseReleaseEvent(QMouseEvent *e) {
     setCursor(Qt::ArrowCursor);
-    middleButtonScrollX = -1;
-    middleButtonScrollY = -1;
+    middleButtonScrollPoint = QPoint(-1, -1);
 }
 
-void RocketView::mouseMoveEvent(QMouseEvent *e) {
-    if (middleButtonScrollX > -1) {
+void PixmapView::mouseMoveEvent(QMouseEvent *e) {
+    if (middleButtonScrollPoint.x() > -1) {
         int newX = e->x();
         int newY = e->y();
-        int dx = middleButtonScrollX - newX;
-        int dy = middleButtonScrollY - newY;
+        int dx = middleButtonScrollPoint.x() - newX;
+        int dy = middleButtonScrollPoint.y() - newY;
         horizontalScrollBar()->setValue(horizontalScrollBar()->value() + dx);
         verticalScrollBar()->setValue(verticalScrollBar()->value() + dy);
-        middleButtonScrollX = newX;
-        middleButtonScrollY = newY;
+        middleButtonScrollPoint = QPoint(newX, newY);
     }
 }
 
-double RocketView::getZoom() {
+double PixmapView::getZoom() {
     return zoom;
 }
 
 //! This centers the view on the position.
-void RocketView::center(int x, int y) {
+void PixmapView::center(int x, int y) {
     blockDrawing = true;
     int centerX = x - horizontalScrollBar()->pageStep()/2;
     int centerY = y - verticalScrollBar()->pageStep()/2;
@@ -356,13 +346,13 @@ void RocketView::center(int x, int y) {
     blockDrawing = false;
 }
 
-void RocketView::center(QPoint point) {
+void PixmapView::center(QPoint point) {
     center(point.x(), point.y());
 }
 
 //! This finds the visible center position in natural image coords.
 /*! This position, times the current zoom, is the default zoom point for #setZoom. */
-QPoint RocketView::visibleCenter() {
+QPoint PixmapView::visibleCenter() {
     QScrollBar *scrH = horizontalScrollBar(), *scrV = verticalScrollBar();
     int visW = viewport()->width(), visH = viewport()->height();
     int pixW = squares->getScaledWidth();
@@ -374,12 +364,12 @@ QPoint RocketView::visibleCenter() {
         centerX = int(scrH->value() / zoom + scrH->pageStep() / zoom / 2);
     } else {
         //Non-scrolling to scrolling needs a different formula.
-        centerX = pix->width() / 2;
+        centerX = pix.width() / 2;
     }
     if (scrollingY) {
         centerY = int(scrV->value() / zoom + scrV->pageStep() / zoom / 2);
     } else {
-        centerY = pix->height() / 2;
+        centerY = pix.height() / 2;
     }
     return QPoint(centerX, centerY);
 }
@@ -389,7 +379,7 @@ QPoint RocketView::visibleCenter() {
   The center position can be specified, overriding the zoom into the visible center.
   Avoid unnecessary calls, since all is recalculated each time.
 */
-void RocketView::setZoom(double zoomFactor, int x, int y) {
+void PixmapView::setZoom(double zoomFactor, int x, int y) {
     //qDebug("setZoom %f", zoomFactor);
     assert(zoomFactor > 0.0);
     preloadPoints.clear();
@@ -402,7 +392,7 @@ void RocketView::setZoom(double zoomFactor, int x, int y) {
     QPoint centerPoint(visibleCenter());
     squares->setZoom(zoomFactor);
     //qDebug("Total Squares: %d", squares->getPieceCount());
-    resizeContents(int(pix->width() * zoomFactor), int(pix->height() * zoomFactor));
+    resizeContents(int(pix.width() * zoomFactor), int(pix.height() * zoomFactor));
     int cx = int((x == -1) ? centerPoint.x() * zoomFactor : x * zoomFactor);
     int cy = int((y == -1) ? centerPoint.y() * zoomFactor : y * zoomFactor);
     center(cx, cy);
@@ -411,12 +401,12 @@ void RocketView::setZoom(double zoomFactor, int x, int y) {
     emit zoomChanged(zoom);
 }
 
-void RocketView::setZoom(double zoomFactor, QPoint zoomCenter) {
+void PixmapView::setZoom(double zoomFactor, QPoint zoomCenter) {
     setZoom(zoomFactor, zoomCenter.x(), zoomCenter.y());
 }
 
-//! This resets the zoom and position. If fit-to-widget is on, the call is a no-op.
-void RocketView::resetZoomAndPosition() {
+//! This resets the zoom and position. If fit-to-widget is on, the call does nothing.
+void PixmapView::resetZoomAndPosition() {
     //qDebug("resetZoomAndPosition %d", fitToWidget);
     //With fitToWidget, zoom should already be determined, and there should be no scrollbars.
     if (!fitToWidget) {
@@ -428,11 +418,11 @@ void RocketView::resetZoomAndPosition() {
     }
 }
 
-void RocketView::scrollingTestTimeout() {
+void PixmapView::scrollingTestTimeout() {
     //broken
 #ifdef DRAWING_SPEED_TEST
     for (int a=0;a<10;++a) {
-        if ( (contentsY() >= pix->height() - visibleHeight())
+        if ( (contentsY() >= pix.height() - visibleHeight())
              && scrollingDown) {
             scrollingDown = false;
         } else if ( (contentsY() == 0) && !scrollingDown) {
@@ -445,7 +435,7 @@ void RocketView::scrollingTestTimeout() {
 }
 
 //! This caches the tiles just outside the border after a few hundred msecs for speed.
-void RocketView::preloaderTimeout() {
+void PixmapView::preloaderTimeout() {
     preloader->stop();
     if (squares && preloadSize == squares->getGridSize()) {
         qDebug("Timer Fired");
@@ -456,7 +446,7 @@ void RocketView::preloaderTimeout() {
     preloadPoints.clear();
 }
 
-void RocketView::paintEvent(QPaintEvent *e) {
+void PixmapView::paintEvent(QPaintEvent *e) {
     if (blockDrawing) {
         return;
     }
@@ -509,7 +499,7 @@ void RocketView::paintEvent(QPaintEvent *e) {
     p.setClipRect(e->rect());
     bool zoomOne = (zoom > .9999 && zoom < 1.0001);
     if (zoomOne && !transparency) {
-        p.drawPixmap(clipX, clipY, *pix, clipX - pixX, clipY - pixY, clipW, clipH);
+        p.drawPixmap(clipX, clipY, pix, clipX - pixX, clipY - pixY, clipW, clipH);
     } else {
         int ps = squares->getPieceSize();
         QRect contents(conX, conY, visW, visH);
@@ -545,7 +535,7 @@ void RocketView::paintEvent(QPaintEvent *e) {
 }
 
 /* This is junk code that I might decide on using after all. - WJC
-QPixmap *RocketView::makeTransparentTile(
+QPixmap *PixmapView::makeTransparentTile(
        unsigned int size, int squares,
        const QColor &first, const QColor &second) {
     QPixmap *pix = new QPixmap(size*squares, size*squares);

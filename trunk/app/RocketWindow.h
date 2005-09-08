@@ -23,7 +23,7 @@ extern "C" {
 #include "lualib.h"
 #include "lauxlib.h"
 }
-#include "RocketView.h"
+#include "PixmapView.h"
 #include "RocketFilePreviewArea.h"
 #include "RocketImageList.h"
 #include "RocketToolBox.h"
@@ -37,7 +37,7 @@ class RocketWindow : public QMainWindow {
 Q_OBJECT
 protected:
     
-    RocketView *view;
+    PixmapView *view;
     RocketImageList images;
     lua_State *L;
     QList < QObject * > plugins;

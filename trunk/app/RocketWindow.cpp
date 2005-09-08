@@ -221,7 +221,7 @@ void RocketWindow::initGUI() {
     }
 
     
-    view = new RocketView(this, PIECE_SIZE);
+    view = new PixmapView(this, PIECE_SIZE);
     setCentralWidget(view);
     view->setFocus(Qt::OtherFocusReason);
     connect(view, SIGNAL(zoomChanged(double)), this, SLOT(updateGui()));
@@ -377,7 +377,7 @@ void RocketWindow::updateGui() {
     }
 }
 
-//! This sets the zoom in the #RocketView and the GUI.
+//! This sets the zoom in the #PixmapView and the GUI.
 void RocketWindow::setZoom(double zoom) {
     view->setZoom(zoom);
     updateGui();

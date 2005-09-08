@@ -18,21 +18,21 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketImageSquareContainer.h"
 #include <QtGui>
 
-#ifndef ROCKET_VIEW_H
-#define ROCKET_VIEW_H
+#ifndef PIXMAP_VIEW_H
+#define PIXMAP_VIEW_H
 
-class RocketView : public QAbstractScrollArea {
+class PixmapView : public QAbstractScrollArea {
 Q_OBJECT
 protected:
     
-    QPixmap *pix;
+    QPixmap pix;
     QPixmap horizontalBorder, verticalBorder, nwCorner, neCorner, swCorner, seCorner;
     bool transparency, fitToWidget, blockDrawing, brokenImage;
     RocketImageSquareContainer *squares;
     double zoom;
     int pieceSize;
     bool inResizeEvent;
-    int middleButtonScrollX, middleButtonScrollY;
+    QPoint middleButtonScrollPoint;
     
     QTimer *preloader;
     QVector < QPoint > preloadPoints;
@@ -61,18 +61,18 @@ protected slots:
     
 public:
     
-    RocketView(QWidget *parent, int pieceSize);
-    virtual ~RocketView();
+    PixmapView(QWidget *parent, int pieceSize);
+    virtual ~PixmapView();
     
     void load(QString fileName);
     void load(QImage newImage);
     void load(QPixmap newPixmap, bool hasTransparency);
     void resetToBlank();
-    QPixmap *getPixmap() {
+    QPixmap &getPixmap() {
         return pix;
     }
     
-    QSize imageSize() {return pix->size();}
+    QSize imageSize() {return pix.size();}
     
     double getZoom();
     void setZoom(double zoomFactor, int x=-1, int y=-1);
@@ -89,7 +89,7 @@ public:
     QPoint visibleCenter();
     
     bool isNullImage() {
-        return pix->isNull();
+        return pix.isNull();
     }
 
 signals:

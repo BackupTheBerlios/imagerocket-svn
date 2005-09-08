@@ -1,10 +1,10 @@
 TEMPLATE = app
 TARGET = imagerocket
 DESTDIR = ..
-HEADERS =   RocketWindow.h \
+HEADERS =   PixmapView.h \
+            RocketWindow.h \
             RocketAboutDialog.h \
             RocketSaveDialog.h \
-            RocketView.h \
             RocketImageSquareContainer.h \
             RocketFilePreviewArea.h \
             RocketFilePreviewWidget.h \
@@ -16,10 +16,10 @@ HEADERS =   RocketWindow.h \
             interfaces.h \
             consts.h
 SOURCES =   main.cpp \
+            PixmapView.cpp \
             RocketWindow.cpp \
             RocketAboutDialog.cpp \
             RocketSaveDialog.cpp \
-            RocketView.cpp \
             RocketImageSquareContainer.cpp \
             RocketFilePreviewArea.cpp \
             RocketFilePreviewWidget.cpp \
