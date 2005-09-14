@@ -1,21 +1,18 @@
-/* ImageRocket
-An image-editing program written for editing speed and ease of use.
+/* PixmapDividedZoomer
+A class which takes a pixmap and provides pieces of the images zoomed to any size.
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
-You can redistribute and/or modify this software under the terms of the GNU
-General Public License as published by the Free Software Foundation;
-either version 2 of the License, or (at your option) any later version.
+All rights reserved.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, provided that the above copyright notice(s) and this permission notice appear in all copies of the Software and that both the above copyright notice(s) and this permission notice appear in supporting documentation.
 
-You should have received a copy of the GNU General Public License along with this
-program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
-Suite 330, Boston, MA 02111-1307 USA */
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-#include "RocketImageSquareContainer.h"
+Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization of the copyright holder.
+*/
+
+#include "PixmapDividedZoomer.h"
 #include <QPainter>
 #include <QSettings>
 #include <QTime>
@@ -23,7 +20,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include <assert.h>
 
 /*!
-  \class RocketImageSquareContainer
+  \class PixmapDividedZoomer
   \brief A class which takes a pixmap and provides pieces of the images zoomed to any size
   
   The zoom should be set using setZoom(double). The pieces can then be created and deleted
@@ -43,13 +40,13 @@ public:
     ~RocketPixmap() {inMemory--;}
 };
 
-RocketImageSquareContainer::RocketImageSquareContainer(QPixmap *source,
+PixmapDividedZoomer::PixmapDividedZoomer(QPixmap *source,
             bool hasTransparency, int pieceSize) {
     assert(!inMemory); //DEBUG
     assert(source);
-    RocketImageSquareContainer::source = source;
-    RocketImageSquareContainer::hasTransparency = hasTransparency;
-    RocketImageSquareContainer::pieceSize = pieceSize;
+    PixmapDividedZoomer::source = source;
+    PixmapDividedZoomer::hasTransparency = hasTransparency;
+    PixmapDividedZoomer::pieceSize = pieceSize;
     scaledW = 0;
     scaledH = 0;
     if (source->hasAlphaChannel()) {
@@ -78,7 +75,7 @@ RocketImageSquareContainer::RocketImageSquareContainer(QPixmap *source,
     setZoom(1.0);
 }
 
-RocketImageSquareContainer::~RocketImageSquareContainer() {
+PixmapDividedZoomer::~PixmapDividedZoomer() {
     if (transparent) {
         delete transparent;
     }
@@ -89,7 +86,7 @@ RocketImageSquareContainer::~RocketImageSquareContainer() {
 }
 
 //! This returns the size of the indexed piece.
-QSize RocketImageSquareContainer::getSize(int x, int y) {
+QSize PixmapDividedZoomer::getSize(int x, int y) {
     int zw = int(source->width() * zoom), zh = int(source->height() * zoom);
     int zoomW = std::min(zw - x * pieceSize, pieceSize);
     int zoomH = std::min(zh - y * pieceSize, pieceSize);
@@ -100,7 +97,7 @@ QSize RocketImageSquareContainer::getSize(int x, int y) {
 /*!
   If newState matches the current state, the call is ignored.
 */
-void RocketImageSquareContainer::setCached(int x, int y, bool newState) {
+void PixmapDividedZoomer::setCached(int x, int y, bool newState) {
     //dump piece to disk: pieces[index]->save(QString("file%1.png").arg(index)), "PNG");
     assert(inMemory < 64); //DEBUG/XXX - limits size of window - remove before shipping!
     assert(x >= 0 && y >= 0);
@@ -143,7 +140,7 @@ void RocketImageSquareContainer::setCached(int x, int y, bool newState) {
 }
 
 //! This deletes all current pieces and sets the zoom.
-void RocketImageSquareContainer::setZoom(double z) {
+void PixmapDividedZoomer::setZoom(double z) {
     zoom = z;
     for (int a=0;a<pieces.size();++a) {
         delete pieces[a];

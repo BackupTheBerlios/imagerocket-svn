@@ -2,10 +2,10 @@ TEMPLATE = app
 TARGET = imagerocket
 DESTDIR = ..
 HEADERS =   PixmapView.h \
+            PixmapDividedZoomer.h \
             RocketWindow.h \
             RocketAboutDialog.h \
             RocketSaveDialog.h \
-            RocketImageSquareContainer.h \
             RocketFilePreviewArea.h \
             RocketFilePreviewWidget.h \
             RocketImageList.h \
@@ -17,10 +17,10 @@ HEADERS =   PixmapView.h \
             consts.h
 SOURCES =   main.cpp \
             PixmapView.cpp \
+            PixmapDividedZoomer.cpp \
             RocketWindow.cpp \
             RocketAboutDialog.cpp \
             RocketSaveDialog.cpp \
-            RocketImageSquareContainer.cpp \
             RocketFilePreviewArea.cpp \
             RocketFilePreviewWidget.cpp \
             RocketImageList.cpp \
@@ -28,7 +28,7 @@ SOURCES =   main.cpp \
             RocketImage.cpp \
             TinyButton.cpp \
             ThreadedImageLoader.cpp
-            
+
 FORMS =     aboutdialog.ui savedialog.ui
 RESOURCES = pixmaps.qrc app.qrc
 INCLUDEPATH += ../lua .
