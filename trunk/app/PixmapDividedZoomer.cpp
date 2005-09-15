@@ -33,63 +33,36 @@ Except as contained in this notice, the name of a copyright holder shall not be 
 int inMemory = 0;
 
 //DEBUG class to check pixmap usage
-class RocketPixmap : public QPixmap {
+class CountingPixmap : public QPixmap {
 public:
-    RocketPixmap(int w, int h) : QPixmap(w, h) {++inMemory;}
-    RocketPixmap(QPixmap pix) : QPixmap(pix) {++inMemory;}
-    ~RocketPixmap() {inMemory--;}
+    CountingPixmap(int w, int h) : QPixmap(w, h) {++inMemory;}
+    CountingPixmap(QPixmap pix) : QPixmap(pix) {++inMemory;}
+    ~CountingPixmap() {inMemory--;}
 };
 
-PixmapDividedZoomer::PixmapDividedZoomer(QPixmap *source,
-            bool hasTransparency, int pieceSize) {
-    assert(!inMemory); //DEBUG
-    assert(source);
+PixmapDividedZoomer::PixmapDividedZoomer() {
+    zoom = 1.0;
+}
+
+void PixmapDividedZoomer::setPixmap(QPixmap &source, QPixmap &transparent, bool hasTransparency) {
     PixmapDividedZoomer::source = source;
+    PixmapDividedZoomer::transparent = transparent;
     PixmapDividedZoomer::hasTransparency = hasTransparency;
-    PixmapDividedZoomer::pieceSize = pieceSize;
     scaledW = 0;
     scaledH = 0;
-    if (source->hasAlphaChannel()) {
-        transparent = new QPixmap(pieceSize, pieceSize);
-        //TODO This should be removed and the settings should be passed with arguments,
-        //so RocketView and this class can be stand-alone classes. - WJC
-        QSettings settings;
-        QColor first = settings.value("canvas/bgcolor1",
-                                      QColor(150, 150, 150)).value<QColor>();
-        QColor second = settings.value("canvas/bgcolor2",
-                                      QColor(200, 200, 200)).value<QColor>();
-        QPainter p(transparent);
-        int squares = settings.value("canvas/squareCount", 16).toInt();
-        int size = pieceSize/squares;
-        p.fillRect(0, 0, pieceSize, pieceSize, first);
-        for (int x=0;x<squares;++x) {
-            for (int y=0;y<squares;++y) {
-                if ( (x+y) % 2 ) {
-                    p.fillRect(x*size, y*size, size, size, second);
-                }
-            }
-        }
-    } else {
-        transparent = NULL;
-    }
-    setZoom(1.0);
+    resetArray();
 }
 
 PixmapDividedZoomer::~PixmapDividedZoomer() {
-    if (transparent) {
-        delete transparent;
-    }
-    for (int a=0;a<pieces.size();++a) {
-        delete pieces[a];
-        pieces[a] = NULL;
-    }
+    freePieces();
 }
 
 //! This returns the size of the indexed piece.
 QSize PixmapDividedZoomer::getSize(int x, int y) {
-    int zw = int(source->width() * zoom), zh = int(source->height() * zoom);
-    int zoomW = std::min(zw - x * pieceSize, pieceSize);
-    int zoomH = std::min(zh - y * pieceSize, pieceSize);
+    assert(!isNull());
+    int zw = int(source.width() * zoom), zh = int(source.height() * zoom);
+    int zoomW = std::min(zw - x * transparent.width(), transparent.width());
+    int zoomH = std::min(zh - y * transparent.height(), transparent.height());
     return QSize(zoomW, zoomH);
 }
 
@@ -98,7 +71,7 @@ QSize PixmapDividedZoomer::getSize(int x, int y) {
   If newState matches the current state, the call is ignored.
 */
 void PixmapDividedZoomer::setCached(int x, int y, bool newState) {
-    //dump piece to disk: pieces[index]->save(QString("file%1.png").arg(index)), "PNG");
+    assert(!isNull());
     assert(inMemory < 64); //DEBUG/XXX - limits size of window - remove before shipping!
     assert(x >= 0 && y >= 0);
     assert(x < getGridWidth() && y < getGridHeight());
@@ -110,25 +83,25 @@ void PixmapDividedZoomer::setCached(int x, int y, bool newState) {
             QColor transColor(0, 0, 0, 0);
             temp.fill(transColor);
             QPainter pTemp(&temp);
-            pTemp.drawPixmap(0, 0, *source,
-                             int(x * pieceSize / zoom), int(y * pieceSize / zoom),
+            pTemp.drawPixmap(0, 0, source,
+                             int(x * transparent.width() / zoom), int(y * transparent.height() / zoom),
                              int(scaled.width() / zoom), int(scaled.height() / zoom));
-            pieces[index] = new RocketPixmap(scaled.width(), scaled.height());
+            pieces[index] = new CountingPixmap(scaled.width(), scaled.height());
             pTemp.end();
             QPainter pPiece(pieces[index]);
-            pPiece.drawPixmap(0, 0, *transparent);
+            pPiece.drawPixmap(0, 0, transparent);
             pPiece.drawPixmap(0, 0, temp.scaled(scaled.width(), scaled.height()));
         } else {
             QPainter pTemp(&temp);
-            pTemp.drawPixmap(0, 0, *source,
-                             int(x * pieceSize / zoom), int(y * pieceSize / zoom),
+            pTemp.drawPixmap(0, 0, source,
+                             int(x * transparent.width() / zoom), int(y * transparent.height() / zoom),
                              int(scaled.width() / zoom), int(scaled.height() / zoom));
-            pieces[index] = new RocketPixmap(temp.scaled(scaled.width(), scaled.height()));
+            pieces[index] = new CountingPixmap(temp.scaled(scaled.width(), scaled.height()));
         }
+        //dump piece to disk: pieces[index]->save(QString("file%1.png").arg(index)), "PNG");  //DEBUG
+        
         //QPainter pPiece(pieces[index]); //DEBUG draws black corner on each square
-        //pPiece.drawPoint(0, 0);
-        //pPiece.drawPoint(1, 0);
-        //pPiece.drawPoint(0, 1);
+        //pPiece.drawPoint(0, 0); pPiece.drawPoint(1, 0); pPiece.drawPoint(0, 1);
         //qDebug("%d", index);
         //pPiece.drawText(20, 20, QString(QString("%1-")
         //        .append(QTime::currentTime().toString("h:mm:ss")))
@@ -139,13 +112,21 @@ void PixmapDividedZoomer::setCached(int x, int y, bool newState) {
     }
 }
 
+void PixmapDividedZoomer::reset() {
+    source = QPixmap();
+    freePieces();
+}
+
 //! This deletes all current pieces and sets the zoom.
 void PixmapDividedZoomer::setZoom(double z) {
+    assert(!isNull());
     zoom = z;
-    for (int a=0;a<pieces.size();++a) {
-        delete pieces[a];
-        pieces[a] = NULL;
-    }
+    resetArray();
+    emit zoomChanged();
+}
+
+void PixmapDividedZoomer::resetArray() {
+    freePieces();
     pieces.clear();
     pieceCount = (getGridWidth()-1) * getGridHeight()
             + (getGridHeight()-1) + 1;
@@ -161,5 +142,11 @@ void PixmapDividedZoomer::setZoom(double z) {
     for (int y=0;y<getGridHeight();++y) {
         scaledH += getSize(0, y).height();
     }
-    emit zoomChanged();
+}
+
+void PixmapDividedZoomer::freePieces() {
+    for (int a=0;a<pieces.size();++a) {
+        delete pieces[a];
+        pieces[a] = NULL;
+    }
 }

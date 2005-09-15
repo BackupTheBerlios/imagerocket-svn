@@ -40,16 +40,15 @@ PixmapView::PixmapView(QWidget *parent, int pieceSize)
     brokenImage = false;
     fitToWidget = false;
     PixmapView::pieceSize = pieceSize;
-    squares = NULL;
     middleButtonScrollPoint = QPoint(-1, -1);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     horizontalScrollBar()->setSingleStep(SINGLE_STEP);
     verticalScrollBar()->setSingleStep(SINGLE_STEP);
     
     //no background color on viewport
-    QPalette p;
-    p.setBrush(QPalette::Base, QBrush());
-    viewport()->setPalette(p);
+    QPalette palette;
+    palette.setBrush(QPalette::Base, QBrush());
+    viewport()->setPalette(palette);
     
     pix = QPixmap();
     transparency = false;
@@ -57,6 +56,8 @@ PixmapView::PixmapView(QWidget *parent, int pieceSize)
     preloader = new QTimer(this);
     connect(preloader, SIGNAL(timeout()),
             this, SLOT(preloaderTimeout()));
+    
+    setTransparencyPattern(MidToneChecks);
     
     createBorders();
     
@@ -70,11 +71,10 @@ PixmapView::PixmapView(QWidget *parent, int pieceSize)
 }
 
 PixmapView::~PixmapView() {
-    delete squares;
 }
 
 void PixmapView::createBorders() {
-    //Full length borders on big/zoomed images crash on Windows,so we just tile the
+    //Full length borders on big/zoomed images crash on Windows, so we just tile the
     //border. For the border pattern, I must also use a hack, since the pattern drawing
     //mechanism is inconsistent between OSes, at least on Qt 4.0.0. - WJC
     const int cornerCapSize = 5;
@@ -138,7 +138,8 @@ void PixmapView::createBorders() {
     p.end();
     seCorner = pix;
     
-    /* This code fails on Qt/Windows 4.0.1. It could replace the code above when Qt is fixed. - WJC
+    /* This code fails on Qt/Windows 4.0.1. It should replace the code above when Qt is fixed.
+    This is issue 85128 on TrollTech's Task Tracker. - WJC
     QMatrix matrix;
     
     QPixmap pix(borderSize, 1);
@@ -207,14 +208,12 @@ void PixmapView::load(QImage newImage) {
 void PixmapView::load(QPixmap newPixmap, bool hasTransparency) {
     bool changed = (newPixmap.size() != pix.size());
     transparency = hasTransparency;
-    delete squares;
-    squares = NULL;
     preloader->stop();
     preloadPoints.clear();
     if (!newPixmap.isNull()) {
         brokenImage = false;
         pix = newPixmap;
-        squares = new PixmapDividedZoomer(&pix, transparency, pieceSize);
+        squares.setPixmap(pix, transparentTile, hasTransparency);
         if (fitToWidget) {
             updateZoomForSize();
         } else {
@@ -223,17 +222,71 @@ void PixmapView::load(QPixmap newPixmap, bool hasTransparency) {
     } else {
         brokenImage = true;
         pix = QPixmap();
+        squares.reset();
         resizeContents(0, 0);
     }
     viewport()->update();
 }
 
+void PixmapView::setTransparencyPattern(TransparencyPattern pattern) {
+    transparencyPattern = pattern;
+    switch (pattern) {
+    case DarkChecks:
+        setCheckPattern(QColor(0, 0, 0), QColor(51, 51, 51));
+        break;
+    case MidToneChecks:
+        setCheckPattern(QColor(102, 102, 102), QColor(153, 153, 153));
+        break;
+    case LightChecks:
+        setCheckPattern(QColor(204, 204, 204), QColor(255, 255, 255));
+        break;
+    case Black:
+        transparentTile = QPixmap(pieceSize, pieceSize);
+        transparentTile.fill(Qt::black);
+        break;
+    case Gray:
+        transparentTile = QPixmap(pieceSize, pieceSize);
+        transparentTile.fill(Qt::gray);
+        break;
+    case White:
+        transparentTile = QPixmap(pieceSize, pieceSize);
+        transparentTile.fill(Qt::white);
+        break;
+    default:
+        assert(0);
+        break;
+    }
+    if (!pix.isNull()) {
+        //a not-so-great way to recreate all affected tiles - WJC
+        load(pix, transparency);
+    }
+}
+
+void PixmapView::setCheckPattern(QColor one, QColor two) {
+    transparentTile = QPixmap(pieceSize, pieceSize);
+    QSettings settings;
+    QPainter paint(&transparentTile);
+    int squares = settings.value("canvas/squareCount", 16).toInt();
+    int size = pieceSize/squares;
+    paint.fillRect(0, 0, pieceSize, pieceSize, one);
+    for (int x=0;x<squares;++x) {
+        for (int y=0;y<squares;++y) {
+            if ( (x+y) % 2 ) {
+                paint.fillRect(x*size, y*size, size, size, two);
+            }
+        }
+    }
+}
+
+PixmapView::TransparencyPattern PixmapView::getTransparencyPattern() {
+    return transparencyPattern;
+}
+
 //! This sets the displayed image to a blank one, without error message.
 void PixmapView::resetToBlank() {
     brokenImage = false;
-    delete squares;
-    squares = NULL;
     pix = QPixmap();
+    squares.reset();
     setZoom(1.0);
 }
 
@@ -241,9 +294,9 @@ void PixmapView::resetToBlank() {
 void PixmapView::resizeContents(int w, int h) {
     preloadPoints.clear();
     int iw=0, ih=0;
-    if (squares) {
-        iw = squares->getScaledWidth();
-        ih = squares->getScaledHeight();
+    if (!pix.isNull()) {
+        iw = squares.getScaledWidth();
+        ih = squares.getScaledHeight();
     }
     
     int vw = viewport()->width(), vh = viewport()->height();
@@ -271,7 +324,7 @@ void PixmapView::resizeEvent(QResizeEvent *e) {
     if (!inResizeEvent) {
         inResizeEvent = true;
         //qDebug("resizeEvent %d", fitToWidget);
-        if (squares && fitToWidget) {
+        if (!pix.isNull() && fitToWidget) {
             updateZoomForSize();
         } else {
             resizeContents(int(pix.width() * zoom), int(pix.height() * zoom));
@@ -352,8 +405,8 @@ void PixmapView::center(QPoint point) {
 QPoint PixmapView::visibleCenter() {
     QScrollBar *scrH = horizontalScrollBar(), *scrV = verticalScrollBar();
     int visW = viewport()->width(), visH = viewport()->height();
-    int pixW = squares->getScaledWidth();
-    int pixH = squares->getScaledHeight();
+    int pixW = squares.getScaledWidth();
+    int pixH = squares.getScaledHeight();
     bool scrollingX = (visW <= pixW);
     bool scrollingY = (visH <= pixH);
     int centerX = 0, centerY = 0;
@@ -380,15 +433,15 @@ void PixmapView::setZoom(double zoomFactor, int x, int y) {
     //qDebug("setZoom %f", zoomFactor);
     assert(zoomFactor > 0.0);
     preloadPoints.clear();
-    if (!squares) {
+    if (pix.isNull()) {
         zoom = 1.0;
         resizeContents(0, 0);
         emit zoomChanged(zoom);
         return;
     }
     QPoint centerPoint(visibleCenter());
-    squares->setZoom(zoomFactor);
-    //qDebug("Total Squares: %d", squares->getPieceCount());
+    squares.setZoom(zoomFactor);
+    //qDebug("Total Squares: %d", squares.getPieceCount());
     resizeContents(int(pix.width() * zoomFactor), int(pix.height() * zoomFactor));
     int cx = int((x == -1) ? centerPoint.x() * zoomFactor : x * zoomFactor);
     int cy = int((y == -1) ? centerPoint.y() * zoomFactor : y * zoomFactor);
@@ -434,10 +487,10 @@ void PixmapView::scrollingTestTimeout() {
 //! This caches the tiles just outside the border after a few hundred msecs for speed.
 void PixmapView::preloaderTimeout() {
     preloader->stop();
-    if (squares && preloadSize == squares->getGridSize()) {
+    if (!pix.isNull() && preloadSize == squares.getGridSize()) {
         qDebug("Timer Fired");
         foreach (QPoint point, preloadPoints) {
-            squares->setCached(point.x(), point.y(), true);
+            squares.setCached(point.x(), point.y(), true);
         }
     }
     preloadPoints.clear();
@@ -451,7 +504,7 @@ void PixmapView::paintEvent(QPaintEvent *e) {
     int clipX = e->rect().x(), clipY = e->rect().y();
     int clipW = e->rect().width(), clipH = e->rect().height();
     int visW = viewport()->width(), visH = viewport()->height();
-    if (!squares) {
+    if (pix.isNull()) {
         p.fillRect(clipX, clipY, clipW, clipH, Qt::gray);
         if (brokenImage) {
             QFont f;
@@ -462,8 +515,8 @@ void PixmapView::paintEvent(QPaintEvent *e) {
         return;
     }
     int conX = horizontalScrollBar()->value(), conY = verticalScrollBar()->value();
-    int scaledW = squares->getScaledWidth();
-    int scaledH = squares->getScaledHeight();
+    int scaledW = squares.getScaledWidth();
+    int scaledH = squares.getScaledHeight();
     bool scrollingX = (visW <= scaledW);
     bool scrollingY = (visH <= scaledH);
     int centerX = visW / 2 - scaledW / 2;
@@ -498,34 +551,34 @@ void PixmapView::paintEvent(QPaintEvent *e) {
     if (zoomOne && !transparency) {
         p.drawPixmap(clipX, clipY, pix, clipX - pixX, clipY - pixY, clipW, clipH);
     } else {
-        int ps = squares->getPieceSize();
+        QSize tile = squares.getTileSize();
         QRect contents(conX, conY, visW, visH);
-        QRect preload(contents.x() - ps / 2, contents.y() - ps / 2,
-                contents.width() + ps, contents.height() + ps);
+        QRect preload(contents.x() - tile.width() / 2, contents.y() - tile.height() / 2,
+                contents.width() + tile.width(), contents.height() + tile.height());
         QVector < QPoint > points;
         preloadPoints.clear();
-        preloadSize = squares->getGridSize();
+        preloadSize = squares.getGridSize();
         //create squares
-        for (int x=0;x<squares->getGridWidth();++x) {
-            for (int y=0;y<squares->getGridHeight();++y) {
-                QSize size(squares->getSize(x, y));
-                QRect sr(x * ps, y * ps, size.width(), size.height());
+        for (int x=0;x<squares.getGridWidth();++x) {
+            for (int y=0;y<squares.getGridHeight();++y) {
+                QSize size(squares.getSize(x, y));
+                QRect sr(x * tile.width(), y * tile.height(), size.width(), size.height());
                 if (contents.intersects(sr)) {
                     //qDebug("Loading %d,%d", x, y);
-                    squares->setCached(x, y, true);
+                    squares.setCached(x, y, true);
                     points.append(QPoint(x, y));
                 } else if (preload.intersects(sr)) {
                     preloadPoints.append(QPoint(x, y));
                 } else {
                     //qDebug("Unloading %d,%d", x, y);
-                    squares->setCached(x, y, false);
+                    squares.setCached(x, y, false);
                 }
             }
         }
         //draw squares
         foreach (QPoint point, points) {
-            QPixmap *i = squares->getPiece(point.x(), point.y());
-            p.drawPixmap(pixX + point.x() * ps, pixY + point.y() * ps, *i);
+            QPixmap *i = squares.getPiece(point.x(), point.y());
+            p.drawPixmap(pixX + point.x() * tile.width(), pixY + point.y() * tile.height(), *i);
         }
         preloader->start(PRELOAD_MSEC);
     }

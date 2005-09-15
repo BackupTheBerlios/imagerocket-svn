@@ -19,53 +19,68 @@ Except as contained in this notice, the name of a copyright holder shall not be 
 #include <QVector>
 #include <QPixmap>
 #include <QImage>
+#include <assert.h>
 
 class PixmapDividedZoomer : public QObject {
 Q_OBJECT
 protected:
     
     QVector < QPixmap * > pieces;
-    QPixmap *source;
-    QPixmap *transparent;
-    int pieceSize, pieceCount, scaledH, scaledW;
+    QPixmap source, transparent;
+    int pieceCount, scaledH, scaledW;
     bool hasTransparency;
     double zoom;
     int getIndex(int x, int y) {return (x * getGridHeight()) + y;}
+    void resetArray();
     
 public:
     
-    PixmapDividedZoomer(QPixmap *source, bool hasTransparency, int pieceSize);
+    PixmapDividedZoomer();
     ~PixmapDividedZoomer();
+    void setPixmap(QPixmap &source, QPixmap &transparent, bool hasTransparency);
+    bool isNull() {return source.isNull();}
     void setCached(int x, int y, bool newState);
     int getPieceCount() {return pieceCount;}
     QSize getSize(int x, int y);
     QPixmap *getPiece(int x, int y) {
+        assert(!isNull());
         return pieces[getIndex(x, y)];
     }
     int getGridWidth() {
-        int w = int(source->width() * zoom);
-        return (w / pieceSize) + ((w % pieceSize) ? 1 : 0);
+        assert(!isNull());
+        int w = int(source.width() * zoom);
+        int pieceW = transparent.width();
+        return (w / pieceW) + ((w % pieceW) ? 1 : 0);
     }
     int getGridHeight() {
-        int h = int(source->height() * zoom);
-        return (h / pieceSize) + ((h % pieceSize) ? 1 : 0);
+        assert(!isNull());
+        int h = int(source.height() * zoom);
+        int pieceH = transparent.height();
+        return (h / pieceH) + ((h % pieceH) ? 1 : 0);
     }
     QSize getGridSize() {
+        assert(!isNull());
         return QSize(getGridHeight(), getGridWidth());
     }
     int getScaledWidth() {
+        assert(!isNull());
         return scaledW;
     }
     int getScaledHeight() {
+        assert(!isNull());
         return scaledH;
     }
-    int getPieceSize() {
-        return pieceSize;
+    QSize getTileSize() {
+        assert(!isNull());
+        return transparent.size();
     }
     double getZoom() {
+        assert(!isNull());
         return zoom;
     }
+    void reset();
     void setZoom(double zoom);
+    void freePieces();
     
 signals:
     

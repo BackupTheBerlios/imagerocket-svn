@@ -20,16 +20,21 @@ Except as contained in this notice, the name of a copyright holder shall not be 
 
 class PixmapView : public QAbstractScrollArea {
 Q_OBJECT
+public:
+    
+    enum TransparencyPattern {DarkChecks, MidToneChecks, LightChecks, Black, Gray, White};
+    
 protected:
     
-    QPixmap pix;
+    QPixmap pix, transparentTile;
     QPixmap horizontalBorder, verticalBorder, nwCorner, neCorner, swCorner, seCorner;
     bool transparency, fitToWidget, blockDrawing, brokenImage;
-    PixmapDividedZoomer *squares;
+    PixmapDividedZoomer squares;
     double zoom;
     int pieceSize;
     bool inResizeEvent;
     QPoint middleButtonScrollPoint;
+    TransparencyPattern transparencyPattern;
     
     QTimer *preloader;
     QVector < QPoint > preloadPoints;
@@ -46,6 +51,8 @@ protected:
     void paintEvent(QPaintEvent *e);
     
     void createBorders();
+    
+    void setCheckPattern(QColor one, QColor two);
     
     //Automated scrolling stuff
     bool scrollingDown;
@@ -75,6 +82,9 @@ public:
     void setZoom(double zoomFactor, int x=-1, int y=-1);
     void setZoom(double zoomFactor, QPoint zoomCenter);
     void resetZoomAndPosition();
+    
+    void setTransparencyPattern(TransparencyPattern pattern);
+    TransparencyPattern getTransparencyPattern();
     
     void setFitToWidget(bool);
     bool willFitToWidget() {
