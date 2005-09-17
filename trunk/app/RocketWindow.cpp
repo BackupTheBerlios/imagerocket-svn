@@ -23,8 +23,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 #include "interfaces.h"
 #include "consts.h"
-#include <assert.h>
-#include <iostream>
+#include <cassert>
 
 #define PIECE_SIZE 192
 

@@ -3,29 +3,35 @@ A class which takes a pixmap and provides pieces of the images zoomed to any siz
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
-All rights reserved.
+Note that this class may not be used on programs not under the GPL. Email me if you
+wish to discuss the use of this class in closed-source programs.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, provided that the above copyright notice(s) and this permission notice appear in all copies of the Software and that both the above copyright notice(s) and this permission notice appear in supporting documentation.
+You can redistribute and/or modify this software under the terms of the GNU
+General Public License as published by the Free Software Foundation;
+either version 2 of the License, or (at your option) any later version.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization of the copyright holder.
-*/
+You should have received a copy of the GNU General Public License along with this
+program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
+Suite 330, Boston, MA 02111-1307 USA */
 
 #include "PixmapDividedZoomer.h"
 #include <QPainter>
 #include <QSettings>
 #include <QTime>
-#include <limits>
-#include <assert.h>
+#include <algorithm>
 
 /*!
   \class PixmapDividedZoomer
   \brief A class which takes a pixmap and provides pieces of the images zoomed to any size
   
-  The zoom should be set using setZoom(double). The pieces can then be created and deleted
-  using the setCached(x, y, bool) function. If the image has transparency, the squares will
-  be created with a transparency background that ignores the zoom factor.
+  Set the source pixmap and transparent tile with #setPixmap. The zoom should be set using
+  #setZoom. The pieces can then be created and deleted using the #setCached function. If
+  the image has transparency, the squares will be created with a transparency background
+  that ignores the zoom factor.
   
   Positions are grid-based.
 */
@@ -44,6 +50,13 @@ PixmapDividedZoomer::PixmapDividedZoomer() {
     zoom = 1.0;
 }
 
+//! This sets the image, transparent tile, and whether the image has transparency.
+/*!
+  The transparent tile, aside from its main role, also supplies the maximum size of the pieces.\n
+  If you're unsure about the proper value, hasTransparency can always be set to true, but that
+  will slow the generation of pieces slightly, since the transparent tile will be drawn onto pieces
+  before the image itself.
+*/
 void PixmapDividedZoomer::setPixmap(QPixmap &source, QPixmap &transparent, bool hasTransparency) {
     PixmapDividedZoomer::source = source;
     PixmapDividedZoomer::transparent = transparent;
@@ -58,7 +71,10 @@ PixmapDividedZoomer::~PixmapDividedZoomer() {
 }
 
 //! This returns the size of the indexed piece.
-QSize PixmapDividedZoomer::getSize(int x, int y) {
+/*!
+    This will be no larger the result of getMaximumPieceSize.
+*/
+QSize PixmapDividedZoomer::getPieceSize(int x, int y) const {
     assert(!isNull());
     int zw = int(source.width() * zoom), zh = int(source.height() * zoom);
     int zoomW = std::min(zw - x * transparent.width(), transparent.width());
@@ -77,15 +93,15 @@ void PixmapDividedZoomer::setCached(int x, int y, bool newState) {
     assert(x < getGridWidth() && y < getGridHeight());
     int index = getIndex(x, y);
     if (newState && !pieces[index]) {
-        QSize scaled(getSize(x, y));
+        QSize scaled(getPieceSize(x, y));
         QPixmap temp(int(scaled.width() / zoom), int(scaled.height() / zoom));
         if (hasTransparency) {
             QColor transColor(0, 0, 0, 0);
             temp.fill(transColor);
             QPainter pTemp(&temp);
             pTemp.drawPixmap(0, 0, source,
-                             int(x * transparent.width() / zoom), int(y * transparent.height() / zoom),
-                             int(scaled.width() / zoom), int(scaled.height() / zoom));
+                    int(x * transparent.width() / zoom), int(y * transparent.height() / zoom),
+                    int(scaled.width() / zoom), int(scaled.height() / zoom));
             pieces[index] = new CountingPixmap(scaled.width(), scaled.height());
             pTemp.end();
             QPainter pPiece(pieces[index]);
@@ -94,8 +110,8 @@ void PixmapDividedZoomer::setCached(int x, int y, bool newState) {
         } else {
             QPainter pTemp(&temp);
             pTemp.drawPixmap(0, 0, source,
-                             int(x * transparent.width() / zoom), int(y * transparent.height() / zoom),
-                             int(scaled.width() / zoom), int(scaled.height() / zoom));
+                    int(x * transparent.width() / zoom), int(y * transparent.height() / zoom),
+                    int(scaled.width() / zoom), int(scaled.height() / zoom));
             pieces[index] = new CountingPixmap(temp.scaled(scaled.width(), scaled.height()));
         }
         //dump piece to disk: pieces[index]->save(QString("file%1.png").arg(index)), "PNG");  //DEBUG
@@ -112,6 +128,7 @@ void PixmapDividedZoomer::setCached(int x, int y, bool newState) {
     }
 }
 
+//This makes the instance isNull and frees the pieces but does not change the zoom.
 void PixmapDividedZoomer::reset() {
     source = QPixmap();
     freePieces();
@@ -125,6 +142,7 @@ void PixmapDividedZoomer::setZoom(double z) {
     emit zoomChanged();
 }
 
+//! This frees pieces with #freePieces and recreates the array based on the current settings. #setZoom calls this.
 void PixmapDividedZoomer::resetArray() {
     freePieces();
     pieces.clear();
@@ -136,14 +154,15 @@ void PixmapDividedZoomer::resetArray() {
     }
     scaledW = 0;
     for (int x=0;x<getGridWidth();++x) {
-        scaledW += getSize(x, 0).width();
+        scaledW += getPieceSize(x, 0).width();
     }
     scaledH = 0;
     for (int y=0;y<getGridHeight();++y) {
-        scaledH += getSize(0, y).height();
+        scaledH += getPieceSize(0, y).height();
     }
 }
 
+//! This frees all pieces allocated by #setCached.
 void PixmapDividedZoomer::freePieces() {
     for (int a=0;a<pieces.size();++a) {
         delete pieces[a];

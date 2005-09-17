@@ -3,14 +3,20 @@ A widget which displays images in a scrollable container at any zoom level.
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
-All rights reserved.
+Note that this class may not be used on programs not under the GPL. Email me if you
+wish to discuss the use of this class in closed-source programs.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, provided that the above copyright notice(s) and this permission notice appear in all copies of the Software and that both the above copyright notice(s) and this permission notice appear in supporting documentation.
+You can redistribute and/or modify this software under the terms of the GNU
+General Public License as published by the Free Software Foundation;
+either version 2 of the License, or (at your option) any later version.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization of the copyright holder.
-*/
+You should have received a copy of the GNU General Public License along with this
+program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
+Suite 330, Boston, MA 02111-1307 USA */
 
 #ifndef PIXMAP_VIEW_H
 #define PIXMAP_VIEW_H
@@ -22,12 +28,20 @@ class PixmapView : public QAbstractScrollArea {
 Q_OBJECT
 public:
     
+    //! These are the choices for the pattern which shows behind transparent images.
+    /*!
+        These patterns are identical to those provided by Gimp, so I assume they've been
+        thought out. - WJC
+        - *Checks - checkerboard patterns with color schemes based on their prefix
+        - Black, Gray, White: solid colors
+    */
     enum TransparencyPattern {DarkChecks, MidToneChecks, LightChecks, Black, Gray, White};
     
 protected:
     
     QPixmap pix, transparentTile;
-    QPixmap horizontalBorder, verticalBorder, nwCorner, neCorner, swCorner, seCorner;
+    QPixmap horizontalBorder, verticalBorder;
+    QPixmap nwBorderCorner, neBorderCorner, swBorderCorner, seBorderCorner;
     bool transparency, fitToWidget, blockDrawing, brokenImage;
     PixmapDividedZoomer squares;
     double zoom;
@@ -35,6 +49,7 @@ protected:
     bool inResizeEvent;
     QPoint middleButtonScrollPoint;
     TransparencyPattern transparencyPattern;
+    int patternSquareCount;
     
     QTimer *preloader;
     QVector < QPoint > preloadPoints;
@@ -54,13 +69,8 @@ protected:
     
     void setCheckPattern(QColor one, QColor two);
     
-    //Automated scrolling stuff
-    bool scrollingDown;
-    QTimer *scrollingTest;
-    
 protected slots:
     
-    void scrollingTestTimeout();
     void preloaderTimeout();
     
 public:
@@ -72,32 +82,33 @@ public:
     void load(QImage newImage);
     void load(QPixmap newPixmap, bool hasTransparency);
     void resetToBlank();
-    QPixmap &getPixmap() {
-        return pix;
-    }
+    const QPixmap &getPixmap() const {return pix;}
     
-    QSize imageSize() {return pix.size();}
+    QSize imageSize() const {return pix.size();}
     
-    double getZoom();
+    double getZoom() const {return zoom;}
     void setZoom(double zoomFactor, int x=-1, int y=-1);
-    void setZoom(double zoomFactor, QPoint zoomCenter);
+    //! Convenience function for setZoom(double, int, int)
+    void setZoom(double zoomFactor, QPoint zoomCenter) {
+        setZoom(zoomFactor, zoomCenter.x(), zoomCenter.y());
+    }
     void resetZoomAndPosition();
     
-    void setTransparencyPattern(TransparencyPattern pattern);
-    TransparencyPattern getTransparencyPattern();
+    void setTransparencyPattern(TransparencyPattern pattern, int patternSquareCount = -1);
+    TransparencyPattern getTransparencyPattern() const {return transparencyPattern;}
+    int getPatternSquareCount() const {return patternSquareCount;}
     
     void setFitToWidget(bool);
-    bool willFitToWidget() {
-        return fitToWidget;
-    }
+    bool isFitToWidget() const {return fitToWidget;}
     
     void center(int x, int y);
-    void center(QPoint point);
-    QPoint visibleCenter();
-    
-    bool isNullImage() {
-        return pix.isNull();
+    //! Convenience function for center(int, int)
+    void center(QPoint point) {
+        center(point.x(), point.y());
     }
+    QPoint visibleCenter() const;
+    
+    bool isNullImage() const {return pix.isNull();}
 
 signals:
     

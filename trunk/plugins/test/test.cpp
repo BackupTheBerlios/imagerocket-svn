@@ -1,6 +1,6 @@
 #include "test.h"
-#include <assert.h>
-#include <iostream>
+#include <cassert>
+#include <algorithm>
 
 void Test::init(QString &fileName, lua_State *L) {
     Test::fileName = fileName;
