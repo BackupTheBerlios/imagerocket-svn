@@ -430,7 +430,34 @@ void RocketWindow::openFolderClicked() {
 
 void RocketWindow::saveFolderClicked() {
     RocketSaveDialog dialog(this);
-    dialog.exec();
+    if (dialog.exec() == QDialog::Accepted) {
+        RocketSaveDialog::SaveType type = dialog.getSaveType();
+        if (type == RocketSaveDialog::ReplaceFiles) {
+            foreach (RocketImage *i, *images.getVector()) {
+                QFileInfo f(i->getShortFileName());
+                if (i->canUndo()) {
+                    i->getPixmap().save(i->getFileName(), f.suffix().toAscii());
+                    i->setSaved();
+                }
+            }
+            filePreviewArea->update();
+        } else if (type == RocketSaveDialog::NewLocation) {
+            QString location(dialog.getSaveLocation());
+            QDir location2(location);
+            foreach (RocketImage *i, *images.getVector()) {
+                QFileInfo f(i->getShortFileName());
+                if (i->canUndo()) {
+                    i->getPixmap().save(
+                            location2.filePath(i->getShortFileName()),
+                            f.suffix().toAscii());
+                    i->setSaved();
+                }
+            }
+            filePreviewArea->update();
+        } else {
+            assert(0);
+        }
+    }
 }
 
 void RocketWindow::closeEvent(QCloseEvent *e) {

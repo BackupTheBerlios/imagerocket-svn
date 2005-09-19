@@ -27,7 +27,7 @@ protected:
     QPixmap thumbnail;
     QPixmap xIcon, clickToShowIcon, loadingIcon;
     QString fileName, shortName;
-    int statusIcon;
+    int statusIcon, savedIndex;
     bool transparency;
     void setSelected(bool value);
     friend void RocketImageList::setIndex(int index);
@@ -52,6 +52,8 @@ public:
     QString getFileName() {return fileName;}
     QString getShortFileName() {return shortName;}
     int getStatusIconIndex() {return statusIcon;}
+    void setSaved();
+    bool isSaved() {return savedIndex == index;}
 signals:
     void thumbnailChanged(QPixmap pix);
 };

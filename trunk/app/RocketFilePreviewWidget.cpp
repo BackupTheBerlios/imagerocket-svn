@@ -104,7 +104,7 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     //           Qt::AlignLeft|Qt::AlignTop, img->getShortFileName());
     //p.drawRect(5, 5, fileNameRect.width(), fileNameRect.height());
     
-    if (img->canUndo()) {
+    if (!img->isSaved()) {
         QRect floppy(buttonRect(1, RightToLeft));
         p.drawPixmap(floppy.x(), floppy.y(), floppyIcon);
     }

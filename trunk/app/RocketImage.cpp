@@ -26,6 +26,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 RocketImage::RocketImage(QString fileName) {
     changes.append(QPixmap());
     index = 0;
+    savedIndex = 0;
     RocketImage::fileName = fileName;
     QFileInfo f(fileName);
     shortName = f.fileName();
@@ -43,16 +44,37 @@ void RocketImage::addChange(QPixmap pix) {
     if (index+1<changes.size()-1) {
         changes.remove(index+1, changes.size()-index-1);
     }
+    if (index == savedIndex) {
+        //in-memory pixmaps will never again match the file on disk, to the program's knowledge,
+        //since the saved pixmap is lost.
+        savedIndex = -1;
+    }
 }
 
 void RocketImage::undo() {
     assert(canUndo());
     index--;
+    if (!thumbnail.isNull()) {
+        //this is sloppy and should probably be replaced - WJC
+        emit thumbnailChanged(thumbnail);
+    }
 }
 
 void RocketImage::redo() {
     assert(canRedo());
     ++index;
+    if (!thumbnail.isNull()) {
+        //this is sloppy and should probably be replaced - WJC
+        emit thumbnailChanged(thumbnail);
+    }
+}
+
+void RocketImage::setSaved() {
+    savedIndex = index;
+    if (!thumbnail.isNull()) {
+        //this is sloppy and should probably be replaced - WJC
+        emit thumbnailChanged(thumbnail);
+    }
 }
 
 void RocketImage::setActive(bool value) {

@@ -25,11 +25,16 @@ class RocketSaveDialog : public QDialog, private Ui::RocketSaveDialog {
 Q_OBJECT
 public:
     
+    enum SaveType {ReplaceFiles, NewLocation};
+    
     RocketSaveDialog(QWidget *parent);
+    SaveType getSaveType() {return replaceFilesRadio->isChecked() ? ReplaceFiles : NewLocation;}
+    QString getSaveLocation() {return directoryEdit->text();}
     
 protected slots:
     
     void selectDirButtonClicked();
+    
 };
 
 #endif
