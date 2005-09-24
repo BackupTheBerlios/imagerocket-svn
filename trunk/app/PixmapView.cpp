@@ -3,8 +3,8 @@ A widget which displays images in a scrollable container at any zoom level.
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
-Note that this class may not be used on programs not under the GPL. Email me if you
-wish to discuss the use of this class in closed-source programs.
+Note that this class may not be used by programs not under the GPL without permission.
+Email me if you wish to discuss the use of this class in non-GPL programs.
 
 You can redistribute and/or modify this software under the terms of the GNU
 General Public License as published by the Free Software Foundation;
@@ -170,7 +170,7 @@ void PixmapView::createBorders() {
 }
 
 //! This loads the file and displays it. The widget displays error text if the load fails.
-void PixmapView::load(QString fileName) {
+void PixmapView::load(const QString &fileName) {
     load(QImage(fileName));
 }
 
@@ -182,7 +182,7 @@ void PixmapView::load(QString fileName) {
   \sa load(QPixmap, bool)
   \sa resetToBlank()
 */
-void PixmapView::load(QImage newImage) {
+void PixmapView::load(const QImage &newImage) {
     if (!newImage.isNull()) {
         QPixmap p(QPixmap::fromImage(newImage));
         load(p, newImage.hasAlphaChannel());
@@ -202,7 +202,7 @@ void PixmapView::load(QImage newImage) {
   \sa load(QImage)
   \sa resetToBlank()
 */
-void PixmapView::load(QPixmap newPixmap, bool hasTransparency) {
+void PixmapView::load(const QPixmap &newPixmap, bool hasTransparency) {
     bool changed = (newPixmap.size() != pix.size());
     transparency = hasTransparency;
     preloader->stop();

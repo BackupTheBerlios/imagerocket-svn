@@ -1,6 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-<file>license.txt</file>
+<file>license.htm</file>
 <file>main.lua</file>
 </qresource>
 </RCC>

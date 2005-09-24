@@ -3,8 +3,8 @@ A widget which displays images in a scrollable container at any zoom level.
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
-Note that this class may not be used on programs not under the GPL. Email me if you
-wish to discuss the use of this class in closed-source programs.
+Note that this class may not be used by programs not under the GPL without permission.
+Email me if you wish to discuss the use of this class in non-GPL programs.
 
 You can redistribute and/or modify this software under the terms of the GNU
 General Public License as published by the Free Software Foundation;
@@ -78,9 +78,9 @@ public:
     PixmapView(QWidget *parent, int pieceSize);
     virtual ~PixmapView();
     
-    void load(QString fileName);
-    void load(QImage newImage);
-    void load(QPixmap newPixmap, bool hasTransparency);
+    void load(const QString &fileName);
+    void load(const QImage &newImage);
+    void load(const QPixmap &newPixmap, bool hasTransparency);
     void resetToBlank();
     const QPixmap &getPixmap() const {return pix;}
     

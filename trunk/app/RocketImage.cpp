@@ -23,11 +23,11 @@ Suite 330, Boston, MA 02111-1307 USA */
    \short The image class which manages undo/redo, thumbnails, and image loading on a per-image basis.
 */
 
-RocketImage::RocketImage(QString fileName) {
+RocketImage::RocketImage(const QString &fileName) {
     changes.append(QPixmap());
     index = 0;
     savedIndex = 0;
-    RocketImage::fileName = fileName;
+    this->fileName = fileName;
     QFileInfo f(fileName);
     shortName = f.fileName();
     transparency = false; //variable is only accurate if image is loaded
@@ -38,7 +38,7 @@ RocketImage::RocketImage(QString fileName) {
 RocketImage::~RocketImage() {
 }
 
-void RocketImage::addChange(QPixmap pix) {
+void RocketImage::addChange(const QPixmap &pix) {
     changes.insert(index+1, pix);
     index = index+1;
     if (index+1<changes.size()-1) {
@@ -53,7 +53,7 @@ void RocketImage::addChange(QPixmap pix) {
 
 void RocketImage::undo() {
     assert(canUndo());
-    index--;
+    --index;
     if (!thumbnail.isNull()) {
         //this is sloppy and should probably be replaced - WJC
         emit thumbnailChanged(thumbnail);
@@ -95,7 +95,7 @@ void RocketImage::setActive(bool value) {
     }
 }
 
-void RocketImage::setThumbnail(QPixmap thumb) {
+void RocketImage::setThumbnail(const QPixmap &thumb) {
     thumbnail = thumb;
     statusIcon = 0;
     emit thumbnailChanged(thumb);

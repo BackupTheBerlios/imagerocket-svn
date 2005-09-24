@@ -31,17 +31,18 @@ RocketAboutDialog::RocketAboutDialog(QWidget *parent)
             "<h4>"
             "&copy; 2005 Wesley Crossman<br>"
             "Lua scripting engine &copy; 1994-2004 Tecgraf, PUC-Rio<br>"
-            "Qt toolkit &copy; 1994-2005 Trolltech AS"
+            "Qt toolkit &copy; 1994-2005 Trolltech AS<br>"
+            "Icons are from Red Hat's Bluecurve and The Gimp's default icon theme"
             "</h4></br>"));
     //Credits
     tmp.append(tr("<h3>Thanks To</h3><br><ul>"
             "<li></li>"
             "</ul>"));
     //License
-    QFile f(":/license.txt");
+    QFile f(":/license.htm");
     f.open(QFile::ReadOnly);
     QTextStream in(&f);
-    QString license(in.readAll().replace("\n", "<br>"));
+    QString license(in.readAll());
     tmp.append(tr("<h3>License</h3><br><tt><small>"
             "<i>This program is distributed under the GPL, version 2 or later.</i>"
             "<br>%1</small></tt>").arg(license));

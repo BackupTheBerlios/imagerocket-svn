@@ -3,8 +3,8 @@ A class which takes a pixmap and provides pieces of the images zoomed to any siz
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
-Note that this class may not be used on programs not under the GPL. Email me if you
-wish to discuss the use of this class in closed-source programs.
+Note that this class may not be used by programs not under the GPL without permission.
+Email me if you wish to discuss the use of this class in non-GPL programs.
 
 You can redistribute and/or modify this software under the terms of the GNU
 General Public License as published by the Free Software Foundation;
@@ -43,7 +43,7 @@ class CountingPixmap : public QPixmap {
 public:
     CountingPixmap(int w, int h) : QPixmap(w, h) {++inMemory;}
     CountingPixmap(QPixmap pix) : QPixmap(pix) {++inMemory;}
-    ~CountingPixmap() {inMemory--;}
+    ~CountingPixmap() {--inMemory;}
 };
 
 PixmapDividedZoomer::PixmapDividedZoomer() {
@@ -57,10 +57,11 @@ PixmapDividedZoomer::PixmapDividedZoomer() {
   will slow the generation of pieces slightly, since the transparent tile will be drawn onto pieces
   before the image itself.
 */
-void PixmapDividedZoomer::setPixmap(QPixmap &source, QPixmap &transparent, bool hasTransparency) {
-    PixmapDividedZoomer::source = source;
-    PixmapDividedZoomer::transparent = transparent;
-    PixmapDividedZoomer::hasTransparency = hasTransparency;
+void PixmapDividedZoomer::setPixmap(const QPixmap &source,
+            const QPixmap &transparent, bool hasTransparency) {
+    this->source = source;
+    this->transparent = transparent;
+    this->hasTransparency = hasTransparency;
     scaledW = 0;
     scaledH = 0;
     resetArray();
@@ -87,33 +88,34 @@ QSize PixmapDividedZoomer::getPieceSize(int x, int y) const {
   If newState matches the current state, the call is ignored.
 */
 void PixmapDividedZoomer::setCached(int x, int y, bool newState) {
+    //QTime t; t.start(); //DEBUG timing
     assert(!isNull());
     assert(inMemory < 64); //DEBUG/XXX - limits size of window - remove before shipping!
     assert(x >= 0 && y >= 0);
     assert(x < getGridWidth() && y < getGridHeight());
     int index = getIndex(x, y);
     if (newState && !pieces[index]) {
+        QTime timing(QTime::currentTime());
         QSize scaled(getPieceSize(x, y));
-        QPixmap temp(int(scaled.width() / zoom), int(scaled.height() / zoom));
         if (hasTransparency) {
-            QColor transColor(0, 0, 0, 0);
-            temp.fill(transColor);
-            QPainter pTemp(&temp);
-            pTemp.drawPixmap(0, 0, source,
+            QPixmap temp(source.copy(
                     int(x * transparent.width() / zoom), int(y * transparent.height() / zoom),
-                    int(scaled.width() / zoom), int(scaled.height() / zoom));
+                    int(scaled.width() / zoom), int(scaled.height() / zoom)));
+            assert(!temp.isNull());
             pieces[index] = new CountingPixmap(scaled.width(), scaled.height());
-            pTemp.end();
             QPainter pPiece(pieces[index]);
             pPiece.drawPixmap(0, 0, transparent);
             pPiece.drawPixmap(0, 0, temp.scaled(scaled.width(), scaled.height()));
         } else {
-            QPainter pTemp(&temp);
-            pTemp.drawPixmap(0, 0, source,
+            QPixmap temp(source.copy(
                     int(x * transparent.width() / zoom), int(y * transparent.height() / zoom),
-                    int(scaled.width() / zoom), int(scaled.height() / zoom));
+                    std::max(int(scaled.width() / zoom), 1), std::max(int(scaled.height() / zoom), 1)));
+            assert(!temp.isNull());
             pieces[index] = new CountingPixmap(temp.scaled(scaled.width(), scaled.height()));
         }
+        /*if (x < 5 && y == 0) { //DEBUG timing
+            qDebug("Time to Generate %d, %d = %d ms", x, y, t.elapsed());
+        }*/
         //dump piece to disk: pieces[index]->save(QString("file%1.png").arg(index)), "PNG");  //DEBUG
         
         //QPainter pPiece(pieces[index]); //DEBUG draws black corner on each square
@@ -137,6 +139,7 @@ void PixmapDividedZoomer::reset() {
 //! This deletes all current pieces and sets the zoom.
 void PixmapDividedZoomer::setZoom(double z) {
     assert(!isNull());
+    assert(z > 0.0);
     zoom = z;
     resetArray();
     emit zoomChanged();

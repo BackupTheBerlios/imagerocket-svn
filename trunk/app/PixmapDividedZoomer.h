@@ -3,8 +3,8 @@ A class which takes a pixmap and provides pieces of the images zoomed to any siz
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
-Note that this class may not be used on programs not under the GPL. Email me if you
-wish to discuss the use of this class in closed-source programs.
+Note that this class may not be used by programs not under the GPL without permission.
+Email me if you wish to discuss the use of this class in non-GPL programs.
 
 You can redistribute and/or modify this software under the terms of the GNU
 General Public License as published by the Free Software Foundation;
@@ -44,7 +44,7 @@ public:
     PixmapDividedZoomer();
     ~PixmapDividedZoomer();
     
-    void setPixmap(QPixmap &source, QPixmap &transparent, bool hasTransparency);
+    void setPixmap(const QPixmap &source, const QPixmap &transparent, bool hasTransparency);
     bool isNull() const {return source.isNull();}
     
     void setZoom(double zoom);
@@ -70,12 +70,12 @@ public:
         return transparent.size();
     }
     
-    const QPixmap *getPiece(int x, int y) {
+    const QPixmap *getPiece(int x, int y) const {
         assert(!isNull());
         return pieces[getIndex(x, y)];
     }
     //! Convenience function for getPiece(int, int)
-    const QPixmap *getPiece(QPoint p) {return getPiece(p.x(), p.y());}
+    const QPixmap *getPiece(QPoint p) const {return getPiece(p.x(), p.y());}
     
     int getGridWidth() const {
         assert(!isNull());

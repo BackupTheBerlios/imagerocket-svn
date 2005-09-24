@@ -35,10 +35,10 @@ protected:
     int index;
 public:
     enum StatusIcon {TooLarge = 1, Broken, Loading};
-    RocketImage(QString fileName);
+    RocketImage(const QString &fileName);
     ~RocketImage();
     QPixmap getPixmap() {return changes[index];}
-    void addChange(QPixmap pix);
+    void addChange(const QPixmap &pix);
     void undo();
     void redo();
     int getIndex() {return index;}
@@ -47,7 +47,7 @@ public:
     void setActive(bool value);
     bool hasTransparency() {return transparency;}
     QPixmap getThumbnail() {return thumbnail;}
-    void setThumbnail(QPixmap thumb);
+    void setThumbnail(const QPixmap &thumb);
     void setThumbnail(StatusIcon iconType);
     QString getFileName() {return fileName;}
     QString getShortFileName() {return shortName;}
