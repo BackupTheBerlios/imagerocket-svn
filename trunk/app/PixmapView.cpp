@@ -36,7 +36,6 @@ Suite 330, Boston, MA 02111-1307 USA */
   The widget uses PixmapDividedZoomer to provide pieces of the zoomed image.
   \sa PixmapDividedZoomer
  */
-
 PixmapView::PixmapView(QWidget *parent, int pieceSize)
             : QAbstractScrollArea(parent) {
     zoom = 1.0;
@@ -263,7 +262,7 @@ void PixmapView::setTransparencyPattern(TransparencyPattern pattern, int pattern
         break;
     }
     if (!pix.isNull()) {
-        //a not-so-great way to recreate all affected tiles - WJC
+        //XXX check that this doesn't change position or cause any other side-effects - WJC
         load(pix, transparency);
     }
 }
@@ -271,7 +270,6 @@ void PixmapView::setTransparencyPattern(TransparencyPattern pattern, int pattern
 //! This is a helper function for #setTransparencyPattern.
 void PixmapView::setCheckPattern(QColor one, QColor two) {
     transparentTile = QPixmap(pieceSize, pieceSize);
-    QSettings settings;
     QPainter paint(&transparentTile);
     int size = pieceSize/patternSquareCount;
     paint.fillRect(0, 0, pieceSize, pieceSize, one);

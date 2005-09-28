@@ -1,5 +1,5 @@
 /* PixmapDividedZoomer
-A class which takes a pixmap and provides pieces of the images zoomed to any size.
+A class which takes a pixmap and provides pieces of the images zoomed to any size
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
@@ -20,7 +20,6 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 #include "PixmapDividedZoomer.h"
 #include <QPainter>
-#include <QSettings>
 #include <QTime>
 #include <algorithm>
 

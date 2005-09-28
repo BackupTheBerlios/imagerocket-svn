@@ -1,5 +1,5 @@
 /* PixmapDividedZoomer
-A class which takes a pixmap and provides pieces of the images zoomed to any size.
+A class which takes a pixmap and provides pieces of the images zoomed to any size
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 

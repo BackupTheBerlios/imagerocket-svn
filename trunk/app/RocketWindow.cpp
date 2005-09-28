@@ -435,7 +435,7 @@ void RocketWindow::saveFolderClicked() {
         if (type == RocketSaveDialog::ReplaceFiles) {
             foreach (RocketImage *i, *images.getVector()) {
                 QFileInfo f(i->getShortFileName());
-                if (i->canUndo()) {
+                if (!i->isSaved()) {
                     i->getPixmap().save(i->getFileName(), f.suffix().toAscii());
                     i->setSaved();
                 }
@@ -446,7 +446,7 @@ void RocketWindow::saveFolderClicked() {
             QDir location2(location);
             foreach (RocketImage *i, *images.getVector()) {
                 QFileInfo f(i->getShortFileName());
-                if (i->canUndo()) {
+                if (!i->isSaved()) {
                     i->getPixmap().save(
                             location2.filePath(i->getShortFileName()),
                             f.suffix().toAscii());
@@ -465,21 +465,25 @@ void RocketWindow::closeEvent(QCloseEvent *e) {
 }
 
 bool RocketWindow::eventFilter(QObject *watched, QEvent *e) {
+    //The handlers for DragEnter/Drop are messy, but seem to work with the following:
+    //Nautilus/Linux, Konqueror/Linux, Firefox/Linux, and Explorer/Windows
+    //This should still be tested on the Mac as well.
     if (e->type() == QEvent::DragEnter) {
-        QDragEnterEvent *de = static_cast < QDragEnterEvent * >(e);
+        QDragEnterEvent *de = static_cast< QDragEnterEvent * >(e);
         const char *text;
         int a=0;
         while ((text = de->format(a++)) && text[0] != '\0') {
             qDebug("%d - %s", a, text);
         }
-        if (de->mimeData()->hasFormat("text/uri-list")) {
+        if (de->mimeData()->hasFormat("text/uri-list")
+                    || de->mimeData()->hasFormat("text/x-moz-url")) {
             de->acceptProposedAction();
         }
         return true;
     } else if (e->type() == QEvent::Drop) {
-        QDragEnterEvent *de = static_cast < QDragEnterEvent * >(e);
+        QDragEnterEvent *de = static_cast< QDragEnterEvent * >(e);
         QString string;
-        if (de->mimeData()->hasUrls()) {
+        if (de->mimeData()->urls().size()) {
             QList < QUrl > urlList(de->mimeData()->urls());
             if (urlList.size() > 0) {
                 string = urlList[0].toLocalFile();
@@ -488,10 +492,11 @@ bool RocketWindow::eventFilter(QObject *watched, QEvent *e) {
                 }
             }
         } else {
-            //I believe that Qt/X11 doesn't split url lists, so this is needed. I'll double-check
-            //though. - WJC
+            //This is a hack needed for Qt/X11. I'm not sure what causes the above
+            //code to fail under that setup. - WJC
             QString urls(de->mimeData()->text());
-            QStringList urlList = urls.split(QRegExp("\\s+"));
+            urls.replace(" ", "%20");
+            QStringList urlList = urls.split(QRegExp("[\\r\\n]+"));
             if (urlList.size() > 0) {
                 string = QUrl::fromEncoded(urlList[0].toAscii()).toLocalFile();
                 if (urlList.size() > 1) {
@@ -499,6 +504,7 @@ bool RocketWindow::eventFilter(QObject *watched, QEvent *e) {
                 }
             }
         }
+        qDebug(("\"" + string + "\" %d").toAscii(), de->mimeData()->urls().size());
         setDirectory(string);
         return true;
     }

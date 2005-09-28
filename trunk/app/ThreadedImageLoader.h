@@ -1,7 +1,10 @@
-/* ImageRocket
-An image-editing program written for editing speed and ease of use.
+/* ThreadedImageLoader
+A simple class to load images in worker threads
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
+
+Note that this class may not be used by programs not under the GPL without permission.
+Email me if you wish to discuss the use of this class in non-GPL programs.
 
 You can redistribute and/or modify this software under the terms of the GNU
 General Public License as published by the Free Software Foundation;
@@ -18,7 +21,10 @@ Suite 330, Boston, MA 02111-1307 USA */
 #ifndef THREADED_IMAGE_LOADER
 #define THREADED_IMAGE_LOADER
 
-#include <QtGui>
+#include <QThread>
+#include <QImage>
+#include <QWaitCondition>
+#include <QMutex>
 
 class ThreadedImageLoader : public QThread {
 Q_OBJECT
@@ -31,7 +37,7 @@ protected:
 public:
     ThreadedImageLoader();
     ~ThreadedImageLoader();
-    void loadImage(QString fileName);
+    void loadImage(const QString &fileName);
 signals:
     void imageLoaded(QString, QImage);
 };

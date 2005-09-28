@@ -1,5 +1,5 @@
 /* PixmapView
-A widget which displays images in a scrollable container at any zoom level.
+A widget which displays images in a scrollable container at any zoom level
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
@@ -22,7 +22,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #define PIXMAP_VIEW_H
 
 #include "PixmapDividedZoomer.h"
-#include <QtGui>
+#include <QAbstractScrollArea>
 
 class PixmapView : public QAbstractScrollArea {
 Q_OBJECT
