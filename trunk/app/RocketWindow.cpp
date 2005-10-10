@@ -64,19 +64,20 @@ void RocketWindow::initGUI() {
     //Size and center the window
     //I need to check whether this is useful, since
     //window managers may manage it well enough. - WJC
-    int scrn = 0;
+    int screen = 0;
     QWidget *w = topLevelWidget();
-    if(w) {
-        scrn = QApplication::desktop()->screenNumber(w);
-    } else if (QApplication::desktop()->isVirtualDesktop()) {
-        scrn = QApplication::desktop()->screenNumber(QCursor::pos());
+    QDesktopWidget *desktop = QApplication::desktop();
+    if (w) {
+        screen = desktop->screenNumber(w);
+    } else if (desktop->isVirtualDesktop()) {
+        screen = desktop->screenNumber(QCursor::pos());
     } else {
-        scrn = QApplication::desktop()->screenNumber(this);
+        screen = desktop->screenNumber(this);
     }
-    QRect desk(QApplication::desktop()->availableGeometry(scrn));
-    resize(int(desk.width() * (2.0/3.0)), int(desk.height() * (2.0/3.0)));
-    move(desk.width()/2 - frameGeometry().width()/2,
-         desk.height()/2 - frameGeometry().height()/2);
+    QRect rect(desktop->availableGeometry(screen));
+    resize(int(rect.width() * (2.0/3.0)), int(rect.height() * (2.0/3.0)));
+    move(rect.width()/2 - frameGeometry().width()/2,
+         rect.height()/2 - frameGeometry().height()/2);
     
     QStatusBar *status = new QStatusBar(this);
     statusFile = new QLabel(status);
@@ -220,8 +221,14 @@ void RocketWindow::initGUI() {
     }
 
     
-    view = new PixmapView(this, PIECE_SIZE);
-    setCentralWidget(view);
+    viewportContainer = new QWidget(this);
+    viewportContainerLayout = new QVBoxLayout(viewportContainer);
+    viewportContainer->setLayout(viewportContainerLayout);
+    viewportContainerLayout->setMargin(0);
+    viewportContainerLayout->setSpacing(0);
+    view = new PixmapView(viewportContainer, PIECE_SIZE);
+    viewportContainerLayout->addWidget(view);
+    setCentralWidget(viewportContainer);
     view->setFocus(Qt::OtherFocusReason);
     connect(view, SIGNAL(zoomChanged(double)), this, SLOT(updateGui()));
     view->viewport()->installEventFilter(this);
@@ -235,7 +242,7 @@ void RocketWindow::initGUI() {
     updateGui();
 }
 
-//!This does the delayed setup for the class.
+//! This does the delayed setup for the class.
 void RocketWindow::initObject() {
     if (images.size()) {
         setIndex(0);
@@ -266,7 +273,7 @@ void RocketWindow::initObject() {
     //QTimer::singleShot(random() % 100, this, SLOT(close())); //debugging crash test - use with prog_test.sh
 }
 
-//!This iterates the given directory and looks in its child directories for plugins.
+//! This iterates the given directory and looks in its child directories for plugins.
 void RocketWindow::loadPlugins(QString dirPath) {
     //This could use some cleanup. The error handling code could be streamlined. - WJC
     QDir dir(QDir::convertSeparators(dirPath));
@@ -312,7 +319,7 @@ void RocketWindow::loadPlugins(QString dirPath) {
                     delete plugin;
                     continue;
                 }
-                i->init(f, L);
+                i->init(f, L, this);
                 plugins.append(o);
                 ToolInterface *i2 = qobject_cast< ToolInterface * >(o);
                 if (i2) {
@@ -464,6 +471,24 @@ void RocketWindow::closeEvent(QCloseEvent *e) {
     deleteLater();
 }
 
+bool RocketWindow::event(QEvent *e) {
+    if (e->type() == 1000) {
+        UpdatePreviewToolEvent *event = static_cast < UpdatePreviewToolEvent * >(e);
+        view->load(*event->pixmap, true);
+        delete event->pixmap;
+        return true;
+    } else if (e->type() == 1001) {
+        AddChangeToolEvent *event = static_cast < AddChangeToolEvent * >(e);
+        RocketImage *image = images.getAsRocketImage(index);
+        image->addChange(*event->pixmap);
+        setIndex(index);
+        //delete event->pixmap;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool RocketWindow::eventFilter(QObject *watched, QEvent *e) {
     //The handlers for DragEnter/Drop are messy, but seem to work with the following:
     //Nautilus/Linux, Konqueror/Linux, Firefox/Linux, and Explorer/Windows
@@ -603,14 +628,20 @@ void RocketWindow::toolClicked(QListWidgetItem *item) {
     if (item) {
         int pluginIndex = item->data(Qt::UserRole).toInt();
         RocketImage *image = images.getAsRocketImage(index);
-        QPixmap tmp(image->getPixmap());
         QObject *plugin = plugins[pluginIndex];
         ToolInterface *tool = qobject_cast < ToolInterface * >(plugin);
         assert(tool);
-        QImage *img = tool->activate(&tmp);
+        QWidget *w = tool->getSettingsToolBar(new QPixmap(image->getPixmap()));
+        if (w) {
+            w->hide();
+            w->setParent(viewportContainer);
+            viewportContainerLayout->addWidget(w);
+            w->show();
+        }
+        /*QImage *img = tool->activate(&tmp);
         assert(img);
         image->addChange(QPixmap::fromImage(*img));
-        setIndex(index);
+        setIndex(index);*/
     }
 }
 

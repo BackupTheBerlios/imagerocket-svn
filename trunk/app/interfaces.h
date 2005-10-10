@@ -8,9 +8,25 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+class UpdatePreviewToolEvent : public QEvent {
+public:
+    QPixmap *pixmap;
+    UpdatePreviewToolEvent() : QEvent(QEvent::User) {
+        pixmap = NULL;
+    }
+};
+
+class AddChangeToolEvent : public QEvent {
+    public:
+        QPixmap *pixmap;
+        AddChangeToolEvent() : QEvent(static_cast < QEvent::Type > (QEvent::User+1)) {
+            pixmap = NULL;
+        }
+};
+
 class PluginInterface {
 public:
-    virtual void init(QString &fileName, lua_State *L) = 0;
+    virtual void init(QString &fileName, lua_State *L, QObject *parent) = 0;
     virtual ~PluginInterface() {}
 };
 
@@ -22,6 +38,7 @@ public:
     virtual QListWidgetItem *createListEntry(QListWidget *parent) = 0;
     virtual QImage *activate(QPixmap *pix = NULL) = 0;
     virtual QImage *activate(QImage *img = NULL) = 0;
+    virtual QWidget *getSettingsToolBar(QPixmap *pix) = 0;
     virtual int length() = 0;
     virtual void reset() = 0;
     virtual ~ToolInterface() {}

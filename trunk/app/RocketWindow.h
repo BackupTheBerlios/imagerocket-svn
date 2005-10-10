@@ -38,6 +38,8 @@ Q_OBJECT
 protected:
     
     PixmapView *view;
+    QWidget *viewportContainer;
+    QLayout *viewportContainerLayout;
     RocketImageList images;
     lua_State *L;
     QList < QObject * > plugins;
@@ -62,6 +64,7 @@ protected:
     
     void closeEvent(QCloseEvent *e);
     bool eventFilter(QObject *watched, QEvent *e);
+    bool event(QEvent *e);
     void loadPlugins(QString dirPath);
     
 protected slots:

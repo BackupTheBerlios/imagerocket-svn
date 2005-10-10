@@ -2,8 +2,9 @@
 #include <cassert>
 #include <algorithm>
 
-void Test::init(QString &fileName, lua_State *L) {
-    Test::fileName = fileName;
+void Test::init(QString &fileName, lua_State *L, QObject *parent) {
+    this->fileName = fileName;
+    this->parent = parent;
     
     QFile script(":/test.lua");
     script.open(QFile::ReadOnly);
@@ -48,6 +49,39 @@ QImage *Test::activate(QImage *img) {
     return NULL;
 }
 
+QWidget *Test::getSettingsToolBar(QPixmap *pix) {
+    if (settingsToolBar) {
+        assert(0); //The settings toolbar already exists. It should be deleted first.
+    }
+    this->pix = pix;
+    QFrame *f = new QFrame();
+    settingsToolBar = f;
+    f->setFrameStyle(QFrame::Panel|QFrame::Raised);
+    QBoxLayout *layout = new QHBoxLayout(f);
+    f->setLayout(layout);
+    layout->setMargin(3);
+    layout->setSpacing(5);
+    layout->addWidget(new QLabel("Brightness", f));
+    QSlider *s = new QSlider(Qt::Horizontal, f);
+    s->setMinimumSize(150, 1);
+    layout->addWidget(s);
+    layout->addWidget(new QLabel("Contrast", f));
+    QSlider *s2 = new QSlider(Qt::Horizontal, f);
+    s2->setMinimumSize(150, 1);
+    layout->addWidget(s2);
+    layout->addStretch(0);
+    layout->addWidget(new QCheckBox("Preview", f));
+    QPushButton *ok = new QPushButton("&OK", f);
+    connect(new QShortcut(QKeySequence("Return"), ok), SIGNAL(activated()), ok, SIGNAL(clicked()));
+    connect(ok, SIGNAL(clicked()), SLOT(okClicked()));
+    layout->addWidget(ok);
+    QPushButton *cancel = new QPushButton("&Cancel", f);
+    connect(new QShortcut(QKeySequence("Esc"), cancel), SIGNAL(activated()), cancel, SIGNAL(clicked()));
+    connect(cancel, SIGNAL(clicked()), SLOT(cancelClicked()));
+    layout->addWidget(cancel);
+    return settingsToolBar;
+}
+
 int Test::length() {
     return 1;
 }
@@ -64,6 +98,18 @@ QListWidgetItem *Test::createListEntry(QListWidget *parent) {
     item->setIcon(icon);
     item->setFlags(Qt::ItemIsEnabled);
     return item;
+}
+
+void Test::okClicked() {
+    AddChangeToolEvent *event = new AddChangeToolEvent;
+    QImage *img = activate(pix);
+    event->pixmap = new QPixmap(QPixmap::fromImage(*img));
+    QCoreApplication::sendEvent(parent, event);
+    settingsToolBar->deleteLater();
+}
+
+void Test::cancelClicked() {
+    settingsToolBar->deleteLater();
 }
 
 Q_EXPORT_PLUGIN(Test)
