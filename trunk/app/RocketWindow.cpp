@@ -339,6 +339,7 @@ RocketWindow::~RocketWindow() {
     settings.setValue("window/height", frameGeometry().height());
     settings.setValue("window/maximized", isMaximized());
     */
+    delete toolSettingsToolBar;
     foreach (QObject *i, plugins) {
         delete i;
     }
@@ -393,6 +394,10 @@ void RocketWindow::setZoom(double zoom) {
 /*! This resets the display if there are no images open.
 */
 void RocketWindow::setIndex(int index) {
+    if (this->index != index) {
+        //sloppy, temporary way of closing the tool settings toolbar.
+        delete toolSettingsToolBar;
+    }
     if (images.size() <= 1 && dFiles->isVisible()) {
         dFiles->hide();
         previewsHidden = true;
@@ -631,12 +636,13 @@ void RocketWindow::toolClicked(QListWidgetItem *item) {
         QObject *plugin = plugins[pluginIndex];
         ToolInterface *tool = qobject_cast < ToolInterface * >(plugin);
         assert(tool);
-        QWidget *w = tool->getSettingsToolBar(new QPixmap(image->getPixmap()));
-        if (w) {
-            w->hide();
-            w->setParent(viewportContainer);
-            viewportContainerLayout->addWidget(w);
-            w->show();
+        delete toolSettingsToolBar;
+        toolSettingsToolBar = tool->getSettingsToolBar(new QPixmap(image->getPixmap()));
+        if (toolSettingsToolBar) {
+            toolSettingsToolBar->hide();
+            toolSettingsToolBar->setParent(viewportContainer);
+            viewportContainerLayout->addWidget(toolSettingsToolBar);
+            toolSettingsToolBar->show();
         }
         /*QImage *img = tool->activate(&tmp);
         assert(img);

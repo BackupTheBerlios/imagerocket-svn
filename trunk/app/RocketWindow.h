@@ -38,6 +38,7 @@ Q_OBJECT
 protected:
     
     PixmapView *view;
+    QPointer < QWidget > toolSettingsToolBar;
     QWidget *viewportContainer;
     QLayout *viewportContainerLayout;
     RocketImageList images;
