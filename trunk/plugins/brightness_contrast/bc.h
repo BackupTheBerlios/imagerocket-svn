@@ -1,13 +1,16 @@
-#ifndef TEST_H
-#define TEST_H
+#ifndef BC_H
+#define BC_H
 
 #include "interfaces.h"
+#include "ui_bcwidget.h"
 
-class Test : public QObject, public PluginInterface, public ToolInterface {
+class BrightnessContrastWidget;
+
+class BrightnessContrast : public QObject, public PluginInterface, public ToolInterface {
 Q_OBJECT
 Q_INTERFACES(PluginInterface ToolInterface)
 protected:
-    QPointer < QWidget > settingsToolBar;
+    QPointer < BrightnessContrastWidget > settingsToolBar;
     QString fileName;
     QPixmap *pix;
     QObject *parent;
@@ -25,4 +28,13 @@ protected slots:
     void cancelClicked();
 };
 
+class BrightnessContrastWidget : public QWidget, public Ui::BrightnessContrastWidget {
+    friend class BrightnessContrast;
+    public:
+        BrightnessContrastWidget(QWidget *parent) : QWidget(parent) {
+            setupUi(this);
+        }
+};
+
 #endif
+
