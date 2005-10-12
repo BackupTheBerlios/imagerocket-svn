@@ -62,6 +62,7 @@ protected:
     
     virtual void setZoom(double zoom);
     virtual void setIndex(int index);
+    virtual void updateShownPixmap();
     
     void closeEvent(QCloseEvent *e);
     bool eventFilter(QObject *watched, QEvent *e);

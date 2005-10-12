@@ -2,6 +2,6 @@
 #define CONSTS_H
 
 #define PROGRAM_NAME "ImageRocket"
-#define VERSION "0.1"
+#define VERSION "0.2"
 
 #endif

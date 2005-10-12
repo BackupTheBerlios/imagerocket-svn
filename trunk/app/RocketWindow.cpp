@@ -219,7 +219,6 @@ void RocketWindow::initGUI() {
             }
         }
     }
-
     
     viewportContainer = new QWidget(this);
     viewportContainerLayout = new QVBoxLayout(viewportContainer);
@@ -405,19 +404,26 @@ void RocketWindow::setIndex(int index) {
         dFiles->show();
         previewsHidden = false;
     }
+    this->index = index;
+    updateShownPixmap();
+    if (images.size()) {
+        view->resetZoomAndPosition();
+    }
+    updateGui();
+}
+
+void RocketWindow::updateShownPixmap() {
     if (images.size()) {
         if (this->index < images.size()) {
             //if old selection index is valid, inform old selection of its loss.
             images.getAsRocketImage(this->index)->setActive(false);
         }
-        this->index = index;
         filePreviewArea->setActive(index);
         RocketImage *img = images.getAsRocketImage(index);
         img->setActive(true);
         QFileInfo f(images.getAsString(index));
         statusFile->setText(f.fileName());
         view->load(img->getPixmap(), img->hasTransparency());
-        view->resetZoomAndPosition();
     } else {
         statusFile->setText("");
         view->resetToBlank();
@@ -486,7 +492,12 @@ bool RocketWindow::event(QEvent *e) {
         AddChangeToolEvent *event = static_cast < AddChangeToolEvent * >(e);
         RocketImage *image = images.getAsRocketImage(index);
         image->addChange(*event->pixmap);
-        setIndex(index);
+        QSize oldSize(view->getPixmap().size());
+        updateShownPixmap();
+        QSize newSize(view->getPixmap().size());
+        if (oldSize != newSize) {
+            view->resetZoomAndPosition();
+        }
         //delete event->pixmap;
         return true;
     } else {
@@ -564,13 +575,23 @@ void RocketWindow::lastClicked() {
 void RocketWindow::undoClicked() {
     RocketImage *image = images.getAsRocketImage(index);
     image->undo();
-    setIndex(index);
+    QSize oldSize(view->getPixmap().size());
+    updateShownPixmap();
+    QSize newSize(view->getPixmap().size());
+    if (oldSize != newSize) {
+        view->resetZoomAndPosition();
+    }
 }
 
 void RocketWindow::redoClicked() {
     RocketImage *image = images.getAsRocketImage(index);
     image->redo();
-    setIndex(index);
+    QSize oldSize(view->getPixmap().size());
+    updateShownPixmap();
+    QSize newSize(view->getPixmap().size());
+    if (oldSize != newSize) {
+        view->resetZoomAndPosition();
+    }
 }
 
 void RocketWindow::zoomInClicked() {

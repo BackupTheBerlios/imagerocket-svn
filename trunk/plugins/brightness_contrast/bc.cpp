@@ -6,13 +6,13 @@ void BrightnessContrast::init(QString &fileName, lua_State *L, QObject *parent) 
     this->fileName = fileName;
     this->parent = parent;
     
-    QFile script(":/test.lua");
+    QFile script(":/bc.lua");
     script.open(QFile::ReadOnly);
     QTextStream in(&script);
     QString scriptStr(in.readAll());
     if (luaL_loadbuffer(L, scriptStr.toAscii(), scriptStr.length(), "<lua>")
         || lua_pcall(L, 0, 0, 0)) {
-        lua_pushfstring(L, "Error loading test.lua -- %s",
+        lua_pushfstring(L, "Error loading bc.lua -- %s",
                         lua_tostring(L, -1));
         lua_error(L);
     }
@@ -77,9 +77,9 @@ void BrightnessContrast::reset() {
 QListWidgetItem *BrightnessContrast::createListEntry(QListWidget *parent) {
     //take the abs path of library and get the icon in the same directory
     QDir thisDir(QFileInfo(fileName).absoluteDir());
-    QString name(thisDir.filePath("test.png"));
+    QString name(thisDir.filePath("bc.png"));
     QIcon icon(name);
-    QListWidgetItem *item = new QListWidgetItem(tr("Brighten"), parent);
+    QListWidgetItem *item = new QListWidgetItem(tr("Bright/Contrast"), parent);
     item->setIcon(icon);
     item->setFlags(Qt::ItemIsEnabled);
     return item;
