@@ -14,6 +14,7 @@ protected:
     QString fileName;
     QPixmap *pix;
     QObject *parent;
+    QTimer updateTimer;
     void run();
 public:
     virtual void init(QString &fileName, lua_State *L, QObject *parent);
@@ -26,6 +27,9 @@ public:
 protected slots:
     void okClicked();
     void cancelClicked();
+    void previewToggled(bool);
+    void sliderValueChanged(int);
+    void emitUpdatedPreview();
 };
 
 class BrightnessContrastWidget : public QWidget, public Ui::BrightnessContrastWidget {

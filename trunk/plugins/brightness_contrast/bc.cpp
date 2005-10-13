@@ -64,6 +64,10 @@ QWidget *BrightnessContrast::getSettingsToolBar(QPixmap *pix) {
             SIGNAL(activated()), settingsToolBar->btnCancel, SIGNAL(clicked()));
     connect(settingsToolBar->btnOk, SIGNAL(clicked()), SLOT(okClicked()));
     connect(settingsToolBar->btnCancel, SIGNAL(clicked()), SLOT(cancelClicked()));
+    connect(settingsToolBar->chkPreview, SIGNAL(toggled(bool)), SLOT(previewToggled(bool)));
+    connect(settingsToolBar->sldBrightness, SIGNAL(valueChanged(int)), SLOT(sliderValueChanged(int)));
+    connect(settingsToolBar->sldContrast, SIGNAL(valueChanged(int)), SLOT(sliderValueChanged(int)));
+    connect(&updateTimer, SIGNAL(timeout()), SLOT(emitUpdatedPreview()));
     return settingsToolBar;
 }
 
@@ -90,11 +94,38 @@ void BrightnessContrast::okClicked() {
     QImage *img = activate(pix);
     event->pixmap = new QPixmap(QPixmap::fromImage(*img));
     QCoreApplication::sendEvent(parent, event);
+    previewToggled(false);
     settingsToolBar->deleteLater();
 }
 
 void BrightnessContrast::cancelClicked() {
+    previewToggled(false);
     settingsToolBar->deleteLater();
+}
+
+void BrightnessContrast::previewToggled(bool checked) {
+    if (checked) {
+        emitUpdatedPreview();
+    } else {
+        UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
+        QCoreApplication::sendEvent(parent, event);
+        updateTimer.stop();
+    }
+}
+
+void BrightnessContrast::emitUpdatedPreview() {
+    if (settingsToolBar->chkPreview->isChecked()) {
+        UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
+        QImage *img = activate(pix);
+        event->pixmap = new QPixmap(QPixmap::fromImage(*img));
+        QCoreApplication::sendEvent(parent, event);
+    }
+}
+
+void BrightnessContrast::sliderValueChanged(int value) {
+    if (settingsToolBar) {
+        updateTimer.start(1000);
+    }
 }
 
 Q_EXPORT_PLUGIN(BrightnessContrast)
