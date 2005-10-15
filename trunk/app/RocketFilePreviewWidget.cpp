@@ -29,20 +29,28 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
     this->thumbnailSize = thumbnailSize;
     this->img = img;
     connect(img, SIGNAL(thumbnailChanged(QPixmap)), this, SLOT(updatePreview()));
-    onTrash = onWidget = active = usingHorizontalLayout = false;
+    onTrash = onQuestion = onWidget = active = usingHorizontalLayout = false;
     QString file(":/pixmaps/trash.png");
     QString file2(":/pixmaps/trashLit.png");
-    QString file3(":/pixmaps/floppy.png");
+    QString file3(":/pixmaps/question.png");
+    QString file4(":/pixmaps/questionLit.png");
+    QString file5(":/pixmaps/floppy.png");
     font.setPointSize(10);
     if (!QPixmapCache::find(file, trashIcon)
          || !QPixmapCache::find(file2, trashLitIcon)
-         || !QPixmapCache::find(file3, floppyIcon)) {
+         || !QPixmapCache::find(file3, questionIcon)
+         || !QPixmapCache::find(file4, questionLitIcon)
+         || !QPixmapCache::find(file5, floppyIcon)) {
         trashIcon.load(file);
         QPixmapCache::insert(file, trashIcon);
         trashLitIcon.load(file2);
         QPixmapCache::insert(file2, trashLitIcon);
-        floppyIcon.load(file3);
-        QPixmapCache::insert(file3, floppyIcon);
+        questionIcon.load(file3);
+        QPixmapCache::insert(file3, questionIcon);
+        questionLitIcon.load(file4);
+        QPixmapCache::insert(file4, questionLitIcon);
+        floppyIcon.load(file5);
+        QPixmapCache::insert(file5, floppyIcon);
     }
     setMouseTracking(true);
     updatePreview();
@@ -120,9 +128,18 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     if (onTrash) {
         QRect trash(buttonRect(1, LeftToRight));
         p.drawPixmap(trash.x(), trash.y(), trashLitIcon);
+        QRect question(buttonRect(2, LeftToRight));
+        p.drawPixmap(question.x(), question.y(), questionIcon);
+    } else if (onQuestion) {
+        QRect trash(buttonRect(1, LeftToRight));
+        p.drawPixmap(trash.x(), trash.y(), trashIcon);
+        QRect question(buttonRect(2, LeftToRight));
+        p.drawPixmap(question.x(), question.y(), questionLitIcon);
     } else if (onWidget) {
         QRect trash(buttonRect(1, LeftToRight));
         p.drawPixmap(trash.x(), trash.y(), trashIcon);
+        QRect question(buttonRect(2, LeftToRight));
+        p.drawPixmap(question.x(), question.y(), questionIcon);
     }
 }
 
@@ -151,7 +168,25 @@ void RocketFilePreviewWidget::leaveEvent(QEvent *event) {
 
 void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
     onTrash = positionOnButton(event->pos(), 1, LeftToRight);
+    if (onTrash) {
+        setToolTip(tr("Delete"));
+    }
+    onQuestion = positionOnButton(event->pos(), 2, LeftToRight);
+    if (onQuestion) {
+        setToolTip(tr("Info"));
+    }
+    bool onChanged = positionOnButton(event->pos(), 1, RightToLeft);
+    if (onChanged && !img->isSaved()) {
+        setToolTip(tr("Changes Made"));
+    }
+    if (!onQuestion && !onTrash && !onChanged && !toolTip().isEmpty()) {
+        setToolTip(QString());
+        //hack which seems to destroy widget's tooltips
+        QToolTip::showText(QPoint(), QString(), this);
+    }
     onWidget = true;
+    //possible optimization: this updates on each mousemove. we could update on
+    //each state change instead. - WJC
     update();
 }
 
@@ -165,14 +200,16 @@ void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
             return;
         }
         emit deleteMe(this);
+    } else if (positionOnButton(event->pos(), 2, LeftToRight) && leftClick) {
+        emit questionClicked(this);
     } else if (leftClick) {
         emit clicked(this);
     }
 }
 
 void RocketFilePreviewWidget::resetIcons() {
-    if (onWidget || onTrash) {
-        onWidget = onTrash = false;
+    if (onWidget || onTrash || onQuestion) {
+        onWidget = onTrash = onQuestion = false;
         update();
     }
 }
@@ -183,18 +220,17 @@ bool RocketFilePreviewWidget::positionOnButton(QPoint p, int num, Direction d) {
 
 QRect RocketFilePreviewWidget::buttonRect(int num, Direction d) {
     int margin = trashIcon.width() / 2;
+    int y = std::max(margin, lastDrawnPosition.y()-margin);
     if (d == LeftToRight) {
-        int x = std::min(lastDrawnPosition.x(), width()/3)-margin+(trashIcon.width()+2)*(num-1);
-        return QRect(std::max(margin, x),
-                     std::max(margin, lastDrawnPosition.y()-margin),
-                     trashIcon.width(), trashIcon.height());
+        int x = std::max(margin, std::min(lastDrawnPosition.x(), width()/3)-margin)
+                + (trashIcon.width()+2)*(num-1);
+        return QRect(x, y, trashIcon.width(), trashIcon.height());
     } else {
         int iw = img->getThumbnail().width();
-        int x = std::min(lastDrawnPosition.x()+iw,
-                         int(width()*(2.0/3.0)))+margin-(trashIcon.width()+2)*(num-1);
-        return QRect(std::max(margin, x),
-                     std::max(margin, lastDrawnPosition.y()-margin),
-                     trashIcon.width(), trashIcon.height());
+        int x = std::max(margin, std::min(lastDrawnPosition.x()+iw,
+                        int(width()*(2.0/3.0)))+margin)
+                - (trashIcon.width()+2)*(num-1);
+        return QRect(x, y, trashIcon.width(), trashIcon.height());
     }
 }
 

@@ -36,6 +36,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 RocketWindow::RocketWindow(lua_State *L) : QMainWindow() {
     this->L = L;
+    index = -1;
     initGUI();
     //This improves the perceived speed of the program by delaying some work until
     //after the display of the window.
@@ -503,7 +504,7 @@ bool RocketWindow::event(QEvent *e) {
         RocketImage *image = images.getAsRocketImage(index);
         image->addChange(*event->pixmap);
         updateShownPixmap();
-        //delete event->pixmap;
+        delete event->pixmap;
         return true;
     } else {
         return false;
@@ -638,11 +639,17 @@ void RocketWindow::useLargeThumbnailsToggled(bool value) {
         setIndex(index);
     }
     dFiles->setMinimumSize(64, 0);
-    connect(filePreviewArea, SIGNAL(clicked(int)), this, SLOT(previewClicked(int)));
+    connect(filePreviewArea, SIGNAL(clicked(int)), SLOT(previewClicked(int)));
+    connect(filePreviewArea, SIGNAL(questionClicked(RocketImage *)),
+            SLOT(questionClicked(RocketImage *)));
     dFiles->setAllowedAreas(Qt::TopDockWidgetArea|Qt::BottomDockWidgetArea);
     dFiles->setFeatures(QDockWidget::AllDockWidgetFeatures);
     dFiles->setWidget(filePreviewArea);
     addDockWidget(Qt::BottomDockWidgetArea, dFiles);
+}
+
+void RocketWindow::questionClicked(RocketImage *img) {
+    statusBar()->showMessage(img->getFileName(), 5000);
 }
 
 void RocketWindow::toolClicked(QListWidgetItem *item) {

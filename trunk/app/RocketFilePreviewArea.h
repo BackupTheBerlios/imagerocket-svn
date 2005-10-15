@@ -35,6 +35,7 @@ Q_OBJECT
     protected slots:
         void clickedEvent(QWidget *w);
         void listChanged();
+        void questionClicked(RocketFilePreviewWidget *w);
         void updateSize();
         void centerOnPosition();
     public:
@@ -48,6 +49,7 @@ Q_OBJECT
         QSize RocketFilePreviewArea::sizeHint() const;
     signals:
         void clicked(int index);
+        void questionClicked(RocketImage *img);
 };
 
 #endif

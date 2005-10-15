@@ -5,6 +5,7 @@
 void BrightnessContrast::init(QString &fileName, lua_State *L, QObject *parent) {
     this->fileName = fileName;
     this->parent = parent;
+    updateTimer.setSingleShot(true);
     
     QFile script(":/bc.lua");
     script.open(QFile::ReadOnly);
@@ -54,6 +55,7 @@ QWidget *BrightnessContrast::getSettingsToolBar(QPixmap *pix) {
     if (settingsToolBar) {
         assert(0); //The settings toolbar already exists. It should be deleted first.
     }
+    assert(pix);
     this->pix = pix;
     settingsToolBar = new BrightnessContrastWidget(NULL);
     connect(new QShortcut(QKeySequence("Return"), settingsToolBar->btnOk), SIGNAL(activated()),
@@ -93,20 +95,23 @@ void BrightnessContrast::okClicked() {
     AddChangeToolEvent *event = new AddChangeToolEvent;
     QImage *img = activate(pix);
     event->pixmap = new QPixmap(QPixmap::fromImage(*img));
+    delete img;
     QCoreApplication::sendEvent(parent, event);
     previewToggled(false);
-    settingsToolBar->deleteLater();
+    delete pix;
+    delete settingsToolBar;
 }
 
 void BrightnessContrast::cancelClicked() {
     previewToggled(false);
-    settingsToolBar->deleteLater();
+    delete pix;
+    delete settingsToolBar;
 }
 
 void BrightnessContrast::previewToggled(bool checked) {
-    if (checked) {
+    if (pix && checked) {
         emitUpdatedPreview();
-    } else {
+    } else if (pix) {
         UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
         QCoreApplication::sendEvent(parent, event);
         updateTimer.stop();
@@ -114,16 +119,17 @@ void BrightnessContrast::previewToggled(bool checked) {
 }
 
 void BrightnessContrast::emitUpdatedPreview() {
-    if (settingsToolBar->chkPreview->isChecked()) {
+    if (pix && settingsToolBar->chkPreview->isChecked()) {
         UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
         QImage *img = activate(pix);
         event->pixmap = new QPixmap(QPixmap::fromImage(*img));
+        delete img;
         QCoreApplication::sendEvent(parent, event);
     }
 }
 
 void BrightnessContrast::sliderValueChanged(int value) {
-    if (settingsToolBar) {
+    if (pix) {
         updateTimer.start(1000);
     }
 }

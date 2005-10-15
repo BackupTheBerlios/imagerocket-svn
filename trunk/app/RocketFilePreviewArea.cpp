@@ -111,6 +111,10 @@ void RocketFilePreviewArea::clickedEvent(QWidget *w) {
     }
 }
 
+void RocketFilePreviewArea::questionClicked(RocketFilePreviewWidget *w) {
+    emit questionClicked(w->getImage());
+}
+
 void RocketFilePreviewArea::listChanged() {
     foreach (RocketFilePreviewWidget *w, previews) {
         delete w;
@@ -126,6 +130,8 @@ void RocketFilePreviewArea::listChanged() {
         //connect(preview, SIGNAL(deleteMe(QWidget *)), this, SLOT(deleteEntry(QWidget *)));
         connect(preview, SIGNAL(clicked(QWidget *)), SLOT(clickedEvent(QWidget *)));
         connect(preview, SIGNAL(updateSize()), SLOT(updateSize()));
+        connect(preview, SIGNAL(questionClicked(RocketFilePreviewWidget *)),
+                SLOT(questionClicked(RocketFilePreviewWidget *)));
     }
     centerOnPosition();
     updateSize();

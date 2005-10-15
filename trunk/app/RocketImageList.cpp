@@ -107,6 +107,7 @@ QPixmap RocketImageList::getThumbnail(int index) {
 }
 
 RocketImage *RocketImageList::getAsRocketImage(int index) {
+    assert(index < list.size());
     return list.value(index);
 }
 

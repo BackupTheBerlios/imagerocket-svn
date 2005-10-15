@@ -8,14 +8,14 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://inkscape.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="16.000000px"
-   height="16.000000px"
+   width="12.000000px"
+   height="12.000000px"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="0.42"
+   inkscape:version="0.42.2"
    sodipodi:docbase="/home/family/source/ImageRocket/app/pixmaps"
    sodipodi:docname="preview_icon.svg"
-   inkscape:export-filename="/home/family/source/ImageRocket/app/pixmaps/trashLit.png"
+   inkscape:export-filename="/home/family/source/ImageRocket/app/pixmaps/trash.png"
    inkscape:export-xdpi="90.000000"
    inkscape:export-ydpi="90.000000">
   <defs
@@ -29,13 +29,13 @@
      inkscape:pageshadow="2"
      inkscape:zoom="16.000000"
      inkscape:cx="12.325295"
-     inkscape:cy="7.4971591"
+     inkscape:cy="3.5837728"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     inkscape:window-width="712"
-     inkscape:window-height="512"
-     inkscape:window-x="213"
-     inkscape:window-y="372" />
+     inkscape:window-width="753"
+     inkscape:window-height="513"
+     inkscape:window-x="464"
+     inkscape:window-y="34" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -52,12 +52,12 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#86a952;fill-opacity:1.0000000;stroke:#203600;stroke-width:0.90615416;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4.0000000;stroke-dasharray:none;stroke-dashoffset:0.0000000;stroke-opacity:1.0000000"
-       id="rect1310"
-       width="13.925642"
-       height="13.577501"
-       x="1.0371790"
-       y="1.2112494"
+       style="fill:#86a952;fill-opacity:1.0000000;stroke:#203600;stroke-width:0.66371900;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4.0000000;stroke-dasharray:none;stroke-dashoffset:0.0000000;stroke-opacity:1.0000000"
+       id="rect1429"
+       width="10.199935"
+       height="9.9449368"
+       x="0.90003252"
+       y="1.0275316"
        rx="1.0828052"
        ry="1.0828052" />
   </g>

@@ -24,12 +24,12 @@ Suite 330, Boston, MA 02111-1307 USA */
 class RocketFilePreviewWidget : public QWidget {
 Q_OBJECT
 protected:
-    QPixmap trashIcon, trashLitIcon, floppyIcon;
+    QPixmap trashIcon, trashLitIcon, questionIcon, questionLitIcon, floppyIcon;
     QFont font;
     RocketImage *img;
     QPoint lastDrawnPosition;
     int thumbnailSize;
-    bool onTrash, onWidget;
+    bool onTrash, onQuestion, onWidget;
     bool active, usingHorizontalLayout;
     QSize oldPrefSize;
     enum Direction {LeftToRight, RightToLeft};
@@ -43,6 +43,9 @@ public:
     RocketFilePreviewWidget(QWidget *parent, RocketImage *img, int thumbnailSize);
     QSize sizeHint();
     void resetIcons();
+    RocketImage *getImage() {
+        return img;
+    }
     void setActive(bool value);
     bool getActive() {
         return active;
@@ -55,6 +58,7 @@ public slots:
     void updatePreview();
 signals:
     void deleteMe(QWidget *);
+    void questionClicked(RocketFilePreviewWidget *);
     void clicked(QWidget *);
     void updateSize();
 };

@@ -97,6 +97,8 @@ protected slots:
     
     void toolClicked(QListWidgetItem *item);
     
+    void questionClicked(RocketImage *img);
+    
     void updateGui();
     
 public:
