@@ -20,6 +20,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketAboutDialog.h"
 #include "RocketSaveDialog.h"
 #include "RocketFilePreviewWidget.h"
+#include "ProgramStarter.h"
 
 #include "interfaces.h"
 #include "consts.h"
@@ -152,7 +153,7 @@ void RocketWindow::initGUI() {
     connect(a, SIGNAL(triggered()), SLOT(openFolderClicked()));
     mFile->addAction(a);
     mFile->addSeparator();
-    a = aOpenFolder = new QAction(tr("&Save Folder..."),
+    a = aSaveFolder = new QAction(tr("&Save Folder..."),
                                   this);
     a->setShortcut(QKeySequence(tr("Ctrl+S", "save folder")));
     connect(a, SIGNAL(triggered()), SLOT(saveFolderClicked()));
@@ -186,6 +187,10 @@ void RocketWindow::initGUI() {
     a = aExit = new QAction(tr("E&xit"), this);
     connect(a, SIGNAL(triggered()), SLOT(exitClicked()));
     mFile->addAction(a);
+    a = aCheckForUpdates = new QAction(tr("Check for &Updates"), this);
+    connect(a, SIGNAL(triggered()), SLOT(checkForUpdatesClicked()));
+    mHelp->addAction(a);
+    mHelp->addSeparator();
     a = aAbout = new QAction(tr("&About"), this);
     connect(a, SIGNAL(triggered()), SLOT(aboutClicked()));
     mHelp->addAction(a);
@@ -366,8 +371,9 @@ void RocketWindow::updateGui() {
     aZoomOut->setEnabled(notNull && view->getZoom() / 2 > 0.01);
     aZoomFit->setEnabled(notNull);
     RocketImage *img = images.getAsRocketImage(index);
-    aUndo->setEnabled(img ? img->canUndo() : FALSE);
-    aRedo->setEnabled(img ? img->canRedo() : FALSE);
+    aUndo->setEnabled(img ? img->canUndo() : false);
+    aRedo->setEnabled(img ? img->canRedo() : false);
+    aSaveFolder->setEnabled(images.size());
     toolbox->setEnabled(notNull);
     statusZoom->setText(tr("%L1%", "zoom percentage (%L1 is the number)")
             .arg(view->getZoom()*100.0, 0, 'f', 1));
@@ -677,4 +683,29 @@ void RocketWindow::toolClicked(QListWidgetItem *item) {
 void RocketWindow::aboutClicked() {
     RocketAboutDialog about(this);
     about.exec();
+}
+
+void RocketWindow::checkForUpdatesClicked() {
+    delete updateChecker;
+    updateChecker = new RocketUpdateChecker(this);
+    connect(updateChecker, SIGNAL(done(bool)), SLOT(updateCheckerDone(bool)));
+    statusBar()->showMessage(tr("Checking for Updates..."), 3000);
+}
+
+void RocketWindow::updateCheckerDone(bool error) {
+    if (!error) {
+        if (updateChecker->isUpgradable()) {
+            RocketUpdateDialog *d = updateChecker->createDialog(this);
+            d->exec();
+            if (d->getSelected() == 1) {
+                ProgramStarter::instance()->openWebBrowser(tr("http://www.crossmans.net"));
+            }
+        } else {
+            QMessageBox::information(this, tr("Check for Updates"),
+                    tr("No updates are currently available."));
+        }
+    } else {
+        QMessageBox::information(this, tr("Check for Updates"),
+                tr("Check failed. Check your connection and try again later."));
+    }
 }

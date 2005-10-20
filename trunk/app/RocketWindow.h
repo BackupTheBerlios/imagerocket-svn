@@ -27,6 +27,7 @@ extern "C" {
 #include "RocketFilePreviewArea.h"
 #include "RocketImageList.h"
 #include "RocketToolBox.h"
+#include "RocketUpdateChecker.h"
 class PluginInterface;
 #include <QtCore>
 #include <QtGui>
@@ -44,6 +45,7 @@ protected:
     RocketImageList images;
     lua_State *L;
     QList < QObject * > plugins;
+    QPointer < RocketUpdateChecker > updateChecker;
     int index;
     bool previewsHidden;
     QLabel *statusFile, *statusZoom, *statusSize;
@@ -53,7 +55,7 @@ protected:
     QAction *aUseLargeThumbnails;
     QAction *aZoomOut, *aZoom100, *aZoomIn, *aZoomFit;
     QAction *aUndo, *aRedo;
-    QAction *aAbout;
+    QAction *aCheckForUpdates, *aAbout;
     QDockWidget *dPalette, *dFiles;
     RocketToolBox *toolbox;
     QString lastDir;
@@ -94,12 +96,14 @@ protected slots:
     void zoomFitToggled(bool);
     
     void aboutClicked();
+    void checkForUpdatesClicked();
     
     void toolClicked(QListWidgetItem *item);
     
     void questionClicked(RocketImage *img);
     
     void updateGui();
+    void updateCheckerDone(bool error);
     
 public:
     

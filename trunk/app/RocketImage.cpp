@@ -115,8 +115,9 @@ void RocketImage::setThumbnail(StatusIcon iconType) {
         int thumbnailWidth = thumbnailSize, thumbnailHeight = int(.75 * thumbnailSize);
         
         xIcon.load(fileX);
-        QPixmap scaled(xIcon.scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-        QPixmapCache::insert(fileX + size, scaled);
+        xIcon = xIcon.scaled(thumbnailSize, thumbnailSize,
+                Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        QPixmapCache::insert(fileX + size, xIcon);
         
         QPixmap tmp;
         QFont font;
