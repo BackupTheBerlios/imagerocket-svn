@@ -25,7 +25,7 @@ class RocketImage : public QObject {
 Q_OBJECT
 protected:
     QPixmap thumbnail;
-    QPixmap xIcon, clickToShowIcon, loadingIcon;
+    QPixmap xIcon, clickToShowIcon, loadingIcon, backgroundTile;
     QString fileName, shortName;
     int statusIcon, savedIndex;
     bool transparency;
@@ -49,6 +49,7 @@ public:
     QPixmap getThumbnail() {return thumbnail;}
     void setThumbnail(const QPixmap &thumb);
     void setThumbnail(StatusIcon iconType);
+    void setThumbnailWithBackground(const QPixmap &thumb);
     QString getFileName() {return fileName;}
     QString getShortFileName() {return shortName;}
     int getStatusIconIndex() {return statusIcon;}

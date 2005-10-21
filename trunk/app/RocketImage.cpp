@@ -31,6 +31,11 @@ RocketImage::RocketImage(const QString &fileName) {
     QFileInfo f(fileName);
     shortName = f.fileName();
     transparency = false; //variable is only accurate if image is loaded
+    QString fileTile(":/pixmaps/smallTransparentTile.png");
+    if (!QPixmapCache::find(fileTile, backgroundTile)) {
+        backgroundTile = QPixmap(fileTile);
+        QPixmapCache::insert(fileTile, backgroundTile);
+    }
     
     setThumbnail(Loading);
 }
@@ -86,7 +91,7 @@ void RocketImage::setActive(bool value) {
         if (!img.isNull()) {
             changes[0] = QPixmap::fromImage(img);
             QPixmap thumb(getPixmap().scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio));
-            setThumbnail(thumb);
+            setThumbnailWithBackground(thumb);
         } else {
             setThumbnail(Broken);
         }
@@ -99,6 +104,16 @@ void RocketImage::setThumbnail(const QPixmap &thumb) {
     thumbnail = thumb;
     statusIcon = 0;
     emit thumbnailChanged(thumb);
+}
+
+//! This does the same as setThumbnail(const QPixmap &) but adds a checkered background.
+void RocketImage::setThumbnailWithBackground(const QPixmap &thumb) {
+    QPixmap tmp(thumb.size());
+    QPainter p(&tmp);
+    p.drawTiledPixmap(0, 0, thumb.width(), thumb.height(), backgroundTile);
+    p.drawPixmap(0, 0, thumb);
+    p.end();
+    setThumbnail(tmp);
 }
 
 void RocketImage::setThumbnail(StatusIcon iconType) {
@@ -130,7 +145,7 @@ void RocketImage::setThumbnail(StatusIcon iconType) {
         p.setFont(font);
         p.setPen(fontColor);
         p.drawText(0, 0, thumbnailWidth, thumbnailHeight,
-                          Qt::AlignHCenter|Qt::AlignVCenter, tr("Loading..."));
+                Qt::AlignHCenter|Qt::AlignVCenter, tr("Loading..."));
         p.end();
         loadingIcon = tmp;
         QPixmapCache::insert(fileLoading, loadingIcon);
@@ -141,7 +156,7 @@ void RocketImage::setThumbnail(StatusIcon iconType) {
         p.setFont(font);
         p.setPen(fontColor);
         p.drawText(0, 0, thumbnailWidth, thumbnailHeight,
-                   Qt::AlignHCenter|Qt::AlignVCenter, tr("Click to\nShow"));
+                Qt::AlignHCenter|Qt::AlignVCenter, tr("Click to\nShow"));
         p.end();
         clickToShowIcon = tmp;
         QPixmapCache::insert(fileClickToShow, clickToShowIcon);

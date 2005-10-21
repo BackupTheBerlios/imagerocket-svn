@@ -128,7 +128,7 @@ void RocketImageList::updateThumbnail(const QString fileName, const QImage thumb
             if (i->getStatusIconIndex() == RocketImage::Loading) {
                 QPixmap tmp(QPixmap::fromImage(
                         thumbnail.scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio)));
-                i->setThumbnail(tmp);
+                i->setThumbnailWithBackground(tmp);
             }
         } else if (nameMatch) {
             i->setThumbnail(RocketImage::Broken);
