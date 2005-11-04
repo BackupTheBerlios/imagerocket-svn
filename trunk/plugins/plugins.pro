@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
-SUBDIRS = brightness_contrast
+SUBDIRS = brightness_contrast crop
 

@@ -19,7 +19,6 @@ program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
 #include "PixmapView.h"
-#include "PixmapDividedZoomer.h"
 #include <QtGui>
 #include <cassert>
 #include <algorithm>
@@ -48,6 +47,7 @@ PixmapView::PixmapView(QWidget *parent, int pieceSize)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     horizontalScrollBar()->setSingleStep(SINGLE_STEP);
     verticalScrollBar()->setSingleStep(SINGLE_STEP);
+    setMouseTracking(true);
     
     //no background color on viewport
     QPalette palette;
@@ -369,11 +369,23 @@ void PixmapView::mousePressEvent(QMouseEvent *e) {
         middleButtonScrollPoint = e->pos();
         setCursor(Qt::SizeAllCursor);
     }
+    if (tool) {
+        tool->mousePressEvent(e);
+    }
+}
+
+void PixmapView::mouseDoubleClickEvent(QMouseEvent *e) {
+    if (tool) {
+        tool->mouseDoubleClickEvent(e);
+    }
 }
 
 void PixmapView::mouseReleaseEvent(QMouseEvent *e) {
     setCursor(Qt::ArrowCursor);
     middleButtonScrollPoint = QPoint(-1, -1);
+    if (tool) {
+        tool->mouseReleaseEvent(e);
+    }
 }
 
 void PixmapView::mouseMoveEvent(QMouseEvent *e) {
@@ -385,6 +397,9 @@ void PixmapView::mouseMoveEvent(QMouseEvent *e) {
         horizontalScrollBar()->setValue(horizontalScrollBar()->value() + dx);
         verticalScrollBar()->setValue(verticalScrollBar()->value() + dy);
         middleButtonScrollPoint = QPoint(newX, newY);
+    }
+    if (tool) {
+        tool->mouseMoveEvent(e);
     }
 }
 
@@ -398,9 +413,9 @@ void PixmapView::center(int x, int y) {
     blockDrawing = false;
 }
 
-//! This finds the visible center position in natural image coords.
+//! This finds the visible center position.
 /*! This position, times the current zoom, is the default zoom point for #setZoom. */
-QPoint PixmapView::visibleCenter() const {
+PhysicalPoint PixmapView::getVisibleCenter() const {
     QScrollBar *scrH = horizontalScrollBar(), *scrV = verticalScrollBar();
     int visW = viewport()->width(), visH = viewport()->height();
     int pixW = squares.getScaledWidth();
@@ -409,17 +424,40 @@ QPoint PixmapView::visibleCenter() const {
     bool scrollingY = (visH <= pixH);
     int centerX = 0, centerY = 0;
     if (scrollingX) {
-        centerX = int(scrH->value() / zoom + scrH->pageStep() / zoom / 2);
+        centerX = int(scrH->value() + scrH->pageStep() / 2);
     } else {
         //Non-scrolling to scrolling needs a different formula.
-        centerX = pix.width() / 2;
+        centerX = pix.width() * zoom / 2;
     }
     if (scrollingY) {
-        centerY = int(scrV->value() / zoom + scrV->pageStep() / zoom / 2);
+        centerY = int(scrV->value() + scrV->pageStep() / 2);
     } else {
-        centerY = pix.height() / 2;
+        centerY = pix.height() * zoom / 2;
     }
-    return QPoint(centerX, centerY);
+    return PhysicalPoint(centerX, centerY);
+}
+
+QPair < bool, bool > PixmapView::isScrolling() const {
+    int visW = viewport()->width(), visH = viewport()->height();
+    int scaledW = squares.getScaledWidth(), scaledH = squares.getScaledHeight();
+    return QPair < bool, bool > (visW <= scaledW, visH <= scaledH);
+}
+
+QSize PixmapView::getMargin() const {
+    int visW = viewport()->width(), visH = viewport()->height();
+    int scaledW = squares.getScaledWidth(), scaledH = squares.getScaledHeight();
+    bool scrollingX = (visW <= scaledW), scrollingY = (visH <= scaledH);
+    int centerX = visW / 2 - scaledW / 2, centerY = visH / 2 - scaledH / 2;
+    return QSize(scrollingX ? 0 : centerX, scrollingY ? 0 : centerY);
+}
+
+void PixmapView::setTool(PixmapViewTool *tool) {
+    delete this->tool;
+    this->tool = tool;
+    if (tool) {
+        connect(tool, SIGNAL(destroyed()), SLOT(update()));
+    }
+    viewport()->update();
 }
 
 //! This sets the zoom factor and updates the widget.
@@ -435,7 +473,7 @@ void PixmapView::setZoom(double zoomFactor, int x, int y) {
         zoom = 1.0;
         resizeContents(0, 0);
     } else {
-        QPoint centerPoint(visibleCenter());
+        ImagePoint centerPoint(toImagePoint(getVisibleCenter()));
         squares.setZoom(zoomFactor);
         //qDebug("Total Squares: %d", squares.getPieceCount());
         resizeContents(int(pix.width() * zoomFactor), int(pix.height() * zoomFactor));
@@ -480,11 +518,10 @@ void PixmapView::paintEvent(QPaintEvent *e) {
         return;
     }
     QPainter p(viewport());
-    int clipX = e->rect().x(), clipY = e->rect().y();
-    int clipW = e->rect().width(), clipH = e->rect().height();
+    QRect clip(e->rect());
     int visW = viewport()->width(), visH = viewport()->height();
     if (pix.isNull()) {
-        p.fillRect(clipX, clipY, clipW, clipH, palette().mid());
+        p.fillRect(e->rect(), palette().mid());
         if (brokenImage) {
             QFont f;
             f.setPointSize(16);
@@ -493,34 +530,34 @@ void PixmapView::paintEvent(QPaintEvent *e) {
         }
         return;
     }
-    int conX = horizontalScrollBar()->value(), conY = verticalScrollBar()->value();
-    int scaledW = squares.getScaledWidth();
-    int scaledH = squares.getScaledHeight();
-    bool scrollingX = (visW <= scaledW);
-    bool scrollingY = (visH <= scaledH);
-    int centerX = visW / 2 - scaledW / 2;
-    int centerY = visH / 2 - scaledH / 2;
-    int pixX = scrollingX ? -conX : centerX;
-    int pixY = scrollingY ? -conY : centerY;
+    ScreenPoint position(toScreenPoint(PhysicalPoint(0, 0)));
+    
+    QSize scaled = squares.getScaledSize();
     QRegion visible(0, 0, visW, visH);
-    QRegion image(pixX, pixY, scaledW, scaledH);
-    QRect imageWithBorderRect(pixX-1, pixY-1, scaledW+2, scaledH+2);
-    QRegion imageWithBorder(imageWithBorderRect);
+    QRegion image(position.x(), position.y(), scaled.width(), scaled.height());
+    QRegion imageWithBorder(position.x()-1, position.y()-1, scaled.width()+2, scaled.height()+2);
     
     //Borders and BorderCorners
-    if (!scrollingY) {
-        p.drawTiledPixmap(pixX-1, pixY-1, scaledW+2, 1, horizontalBorder);
-        p.drawTiledPixmap(pixX-1, pixY+scaledH, scaledW+2, 1, horizontalBorder);
+    QPair < bool, bool > scrolling(isScrolling());
+    if (!scrolling.first) {
+        p.drawTiledPixmap(position.x()-1, position.y()-1,
+                1, scaled.height()+2, verticalBorder);
+        p.drawTiledPixmap(position.x()+scaled.width(), position.y()-1,
+                1, scaled.height()+2, verticalBorder);
     }
-    if (!scrollingX) {
-        p.drawTiledPixmap(pixX-1, pixY-1, 1, scaledH+2, verticalBorder);
-        p.drawTiledPixmap(pixX+scaledW, pixY-1, 1, scaledH+2, verticalBorder);
+    if (!scrolling.second) {
+        p.drawTiledPixmap(position.x()-1, position.y()-1,
+                scaled.width()+2, 1, horizontalBorder);
+        p.drawTiledPixmap(position.x()-1, position.y()+scaled.height(),
+                scaled.width()+2, 1, horizontalBorder);
     }
     int cornerSize = nwBorderCorner.width();
-    p.drawPixmap(pixX-1, pixY-1, nwBorderCorner);
-    p.drawPixmap(pixX+scaledW-cornerSize+1, pixY-1, neBorderCorner);
-    p.drawPixmap(pixX-1, pixY+scaledH-cornerSize+1, swBorderCorner);
-    p.drawPixmap(pixX+scaledW-cornerSize+1, pixY+scaledH-cornerSize+1, seBorderCorner);
+    int right = position.x()+scaled.width()-cornerSize+1;
+    int bottom = position.y()+scaled.height()-cornerSize+1;
+    p.drawPixmap(position.x()-1, position.y()-1, nwBorderCorner);
+    p.drawPixmap(right, position.y()-1, neBorderCorner);
+    p.drawPixmap(position.x()-1, bottom, swBorderCorner);
+    p.drawPixmap(right, bottom, seBorderCorner);
     
     p.setClipRegion(visible.subtract(imageWithBorder));
     p.fillRect(0, 0, visW, visH, palette().mid());
@@ -528,10 +565,11 @@ void PixmapView::paintEvent(QPaintEvent *e) {
     p.setClipRect(e->rect());
     bool zoomOne = (zoom > .9999 && zoom < 1.0001);
     if (zoomOne && !transparency) {
-        p.drawPixmap(clipX, clipY, pix, clipX - pixX, clipY - pixY, clipW, clipH);
+        p.drawPixmap(clip.x(), clip.y(), pix, clip.x() - position.x(), clip.y() - position.y(),
+                clip.width(), clip.height());
     } else {
         QSize tile = squares.getMaximumPieceSize();
-        QRect contents(conX, conY, visW, visH);
+        QRect contents(horizontalScrollBar()->value(), verticalScrollBar()->value(), visW, visH);
         QRect preload(contents.x() - tile.width() / 2, contents.y() - tile.height() / 2,
                 contents.width() + tile.width(), contents.height() + tile.height());
         QVector < QPoint > points;
@@ -557,9 +595,14 @@ void PixmapView::paintEvent(QPaintEvent *e) {
         //draw squares
         foreach (QPoint point, points) {
             const QPixmap *i = squares.getPiece(point.x(), point.y());
-            p.drawPixmap(pixX + point.x() * tile.width(), pixY + point.y() * tile.height(), *i);
+            p.drawPixmap(position.x() + point.x() * tile.width(),
+                    position.y() + point.y() * tile.height(), *i);
         }
         preloader->start(PRELOAD_MSEC);
+    }
+    
+    if (tool) {
+        tool->paintEvent(p, e);
     }
 }
 

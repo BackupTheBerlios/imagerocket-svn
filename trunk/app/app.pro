@@ -1,9 +1,7 @@
 TEMPLATE = app
 TARGET = imagerocket
 DESTDIR = ..
-HEADERS =   PixmapView.h \
-            PixmapDividedZoomer.h \
-            RocketWindow.h \
+HEADERS =   RocketWindow.h \
             RocketAboutDialog.h \
             RocketUpdateChecker.h \
             RocketSaveDialog.h \
@@ -18,8 +16,6 @@ HEADERS =   PixmapView.h \
             interfaces.h \
             consts.h
 SOURCES =   main.cpp \
-            PixmapView.cpp \
-            PixmapDividedZoomer.cpp \
             RocketWindow.cpp \
             RocketAboutDialog.cpp \
             RocketUpdateChecker.cpp \
@@ -35,7 +31,7 @@ SOURCES =   main.cpp \
 
 FORMS =     aboutdialog.ui savedialog.ui updatedialog.ui
 RESOURCES = pixmaps.qrc app.qrc
-INCLUDEPATH += ../lua .
+INCLUDEPATH += ../lua ../pixmapview .
 MOC_DIR = tmp
 OBJECTS_DIR = tmp
 UI_DIR = tmp
@@ -43,6 +39,6 @@ RCC_DIR = tmp
 CONFIG += warn_on
 CONFIG -= debug_and_release
 QT += network
-win32:LIBS += ../lua.dll
-unix:LIBS += ../liblua.so
+win32:LIBS += ../lua.dll pixmapview.dll
+unix:LIBS += ../liblua.so ../libpixmapview.so
 

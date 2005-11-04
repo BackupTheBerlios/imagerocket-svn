@@ -16,6 +16,7 @@ program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
 #include "RocketToolBox.h"
+#include <algorithm>
 
 RocketToolBox::RocketToolBox(QWidget *parent) : QListWidget(parent) {
     setFocusPolicy(Qt::NoFocus);
@@ -24,7 +25,7 @@ RocketToolBox::RocketToolBox(QWidget *parent) : QListWidget(parent) {
 void RocketToolBox::updateMinimumSize() {
     int fitWidth = 0;
     for (int a=0;a<count();++a) {
-        fitWidth += std::max(visualItemRect(item(a)).width(), fitWidth);
+        fitWidth = std::max(visualItemRect(item(a)).width(), fitWidth);
     }
     setMinimumWidth(fitWidth + 10);
 }

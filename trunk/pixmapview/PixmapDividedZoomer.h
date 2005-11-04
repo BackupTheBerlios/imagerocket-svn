@@ -103,6 +103,10 @@ public:
         return scaledH;
     }
     
+    QSize getScaledSize() const {
+        return QSize(getScaledWidth(), getScaledHeight());
+    }
+    
 signals:
     
     void zoomChanged();

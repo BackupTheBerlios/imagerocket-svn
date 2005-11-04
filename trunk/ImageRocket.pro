@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
-SUBDIRS = lua app plugins
+SUBDIRS = lua pixmapview app plugins
 

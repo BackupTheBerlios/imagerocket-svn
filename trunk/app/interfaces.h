@@ -1,6 +1,7 @@
 #ifndef PLUGIN_INTERFACE_H
 #define PLUGIN_INTERFACE_H
 
+class PixmapViewTool;
 #include <QtGui>
 extern "C" {
 #include "lua.h"
@@ -39,6 +40,7 @@ public:
     virtual QImage *activate(QPixmap *pix = NULL) = 0;
     virtual QImage *activate(QImage *img = NULL) = 0;
     virtual QWidget *getSettingsToolBar(QPixmap *pix) = 0;
+    virtual PixmapViewTool *getViewTool() = 0;
     virtual int length() = 0;
     virtual void reset() = 0;
     virtual ~ToolInterface() {}

@@ -377,7 +377,7 @@ void RocketWindow::updateGui() {
     toolbox->setEnabled(notNull);
     statusZoom->setText(tr("%L1%", "zoom percentage (%L1 is the number)")
             .arg(view->getZoom()*100.0, 0, 'f', 1));
-    QSize size = view->imageSize();
+    QSize size = view->getImageSize();
     QString s = tr("%L1 x %L2", "image dimensions").arg(size.width()).arg(size.height());
     statusSize->setText(s);
     if (images.getLocation().isEmpty()) {
@@ -673,6 +673,11 @@ void RocketWindow::toolClicked(QListWidgetItem *item) {
             viewportContainerLayout->addWidget(toolSettingsToolBar);
             toolSettingsToolBar->show();
         }
+        PixmapViewTool *t = tool->getViewTool();
+        if (t) {
+            t->setParent(view);
+        }
+        view->setTool(t);
         /*QImage *img = tool->activate(&tmp);
         assert(img);
         image->addChange(QPixmap::fromImage(*img));

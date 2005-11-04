@@ -80,6 +80,10 @@ int BrightnessContrast::length() {
 void BrightnessContrast::reset() {
 }
 
+PixmapViewTool *BrightnessContrast::getViewTool() {
+    return NULL;
+}
+
 QListWidgetItem *BrightnessContrast::createListEntry(QListWidget *parent) {
     //take the abs path of library and get the icon in the same directory
     QDir thisDir(QFileInfo(fileName).absoluteDir());
