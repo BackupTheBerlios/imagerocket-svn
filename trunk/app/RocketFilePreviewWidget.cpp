@@ -18,6 +18,8 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketFilePreviewWidget.h"
 #include "RocketFilePreviewArea.h"
 
+QPointer < QMenu > RocketFilePreviewWidget::popupMenu;
+
 /*!
    \class RocketFilePreviewWidget
    \short The widget is the list entry in the #RocketFilePreviewArea.
@@ -54,6 +56,12 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
     }
     setMouseTracking(true);
     updatePreview();
+    if (!popupMenu) {
+        popupMenu = new QMenu(parent);
+        popupMenu->addAction(tr("&Delete"))->setObjectName("delete");
+        popupMenu->addAction(tr("&Info"))->setObjectName("info");
+        popupMenu->addAction(tr("&Rename"))->setObjectName("rename");
+    }
 }
 
 void RocketFilePreviewWidget::updatePreview() {
@@ -113,7 +121,7 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     //p.drawRect(5, 5, fileNameRect.width(), fileNameRect.height());
     
     if (!img->isSaved()) {
-        QRect floppy(buttonRect(1, RightToLeft));
+        QRect floppy(buttonRect(1, RightToLeft, floppyIcon));
         p.drawPixmap(floppy.x(), floppy.y(), floppyIcon);
     }
     
@@ -125,20 +133,26 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         p.drawRect(0, 0, width()-1, height()-1);
     }
     
+    QRect trash(buttonRect(1, LeftToRight, trashIcon));
+    QRect question(buttonRect(2, LeftToRight, questionIcon));
+    if (onWidget) {
+        p.setPen(QColor(0, 0, 0, 0));
+        p.setBrush(QColor(0, 0, 64, 192));
+        QRect rct(trash.x()-2, trash.y()-2, (question.right()-trash.left())+5, question.height()+4);
+        QRegion rgn(rct);
+        rgn = rgn.subtract(QRect(rct.left(), rct.top(), 1, 1));
+        rgn = rgn.subtract(QRect(rct.right()-1, rct.top(), 1, 1));
+        foreach (QRect r, rgn.rects()) p.drawRect(r);
+    }
     if (onTrash) {
-        QRect trash(buttonRect(1, LeftToRight));
+        QRect trash(buttonRect(1, LeftToRight, trashLitIcon));
         p.drawPixmap(trash.x(), trash.y(), trashLitIcon);
-        QRect question(buttonRect(2, LeftToRight));
         p.drawPixmap(question.x(), question.y(), questionIcon);
     } else if (onQuestion) {
-        QRect trash(buttonRect(1, LeftToRight));
         p.drawPixmap(trash.x(), trash.y(), trashIcon);
-        QRect question(buttonRect(2, LeftToRight));
         p.drawPixmap(question.x(), question.y(), questionLitIcon);
     } else if (onWidget) {
-        QRect trash(buttonRect(1, LeftToRight));
         p.drawPixmap(trash.x(), trash.y(), trashIcon);
-        QRect question(buttonRect(2, LeftToRight));
         p.drawPixmap(question.x(), question.y(), questionIcon);
     }
 }
@@ -167,15 +181,15 @@ void RocketFilePreviewWidget::leaveEvent(QEvent *event) {
 }
 
 void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
-    onTrash = positionOnButton(event->pos(), 1, LeftToRight);
+    onTrash = positionOnButton(event->pos(), 1, LeftToRight, trashIcon);
     if (onTrash) {
         setToolTip(tr("Delete"));
     }
-    onQuestion = positionOnButton(event->pos(), 2, LeftToRight);
+    onQuestion = positionOnButton(event->pos(), 2, LeftToRight, questionIcon);
     if (onQuestion) {
         setToolTip(tr("Info"));
     }
-    bool onChanged = positionOnButton(event->pos(), 1, RightToLeft);
+    bool onChanged = positionOnButton(event->pos(), 1, RightToLeft, floppyIcon);
     if (onChanged && !img->isSaved()) {
         setToolTip(tr("Changes Made"));
     }
@@ -191,8 +205,8 @@ void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
-    bool leftClick = event->button() == 1;
-    if (positionOnButton(event->pos(), 1, LeftToRight) && leftClick) {
+    bool leftClick = event->button() == Qt::LeftButton;
+    if (positionOnButton(event->pos(), 1, LeftToRight, trashIcon) && leftClick) {
         int response = QMessageBox::question(this, img->getFileName(),
                 tr("Are you sure you want to delete %1?").arg(img->getFileName()),
                 QMessageBox::Yes, QMessageBox::No);
@@ -200,10 +214,14 @@ void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
             return;
         }
         emit deleteMe(this);
-    } else if (positionOnButton(event->pos(), 2, LeftToRight) && leftClick) {
+    } else if (positionOnButton(event->pos(), 2, LeftToRight, questionIcon) && leftClick) {
         emit questionClicked(this);
     } else if (leftClick) {
         emit clicked(this);
+    } else if (event->button() == Qt::RightButton) {
+        popupMenu->disconnect();
+        connect(popupMenu, SIGNAL(triggered(QAction *)), SLOT(popupTriggered(QAction *)));
+        popupMenu->popup(mapToGlobal(event->pos()));
     }
 }
 
@@ -214,13 +232,13 @@ void RocketFilePreviewWidget::resetIcons() {
     }
 }
 
-bool RocketFilePreviewWidget::positionOnButton(QPoint p, int num, Direction d) {
-    return buttonRect(num, d).contains(p);
+bool RocketFilePreviewWidget::positionOnButton(QPoint p, int num, Direction d, const QPixmap &pixmap) {
+    return buttonRect(num, d, pixmap).contains(p);
 }
 
-QRect RocketFilePreviewWidget::buttonRect(int num, Direction d) {
-    int margin = trashIcon.width() / 2;
-    int y = std::max(margin, lastDrawnPosition.y()-margin);
+QRect RocketFilePreviewWidget::buttonRect(int num, Direction d, const QPixmap &pixmap) {
+    int margin = pixmap.width() / 2;
+    int y = std::min(height()-pixmap.height(), height()/2+int(thumbnailSize*.6));
     if (d == LeftToRight) {
         int x = std::max(margin, std::min(lastDrawnPosition.x(), width()/3)-margin)
                 + (trashIcon.width()+2)*(num-1);
@@ -230,7 +248,21 @@ QRect RocketFilePreviewWidget::buttonRect(int num, Direction d) {
         int x = std::max(margin, std::min(lastDrawnPosition.x()+iw,
                         int(width()*(2.0/3.0)))+margin)
                 - (trashIcon.width()+2)*(num-1);
-        return QRect(x, y, trashIcon.width(), trashIcon.height());
+        return QRect(x, y, pixmap.width(), pixmap.height());
+    }
+}
+
+void RocketFilePreviewWidget::popupTriggered(QAction *action) {
+    if (action->objectName() == "delete") {
+        int response = QMessageBox::question(this, img->getFileName(),
+                tr("Are you sure you want to delete %1?").arg(img->getFileName()),
+                QMessageBox::Yes, QMessageBox::No);
+        if (response == QMessageBox::No) {
+            return;
+        }
+        emit deleteMe(this);
+    } else if (action->objectName() == "info") {
+        emit questionClicked(this);
     }
 }
 

@@ -23,12 +23,10 @@ Suite 330, Boston, MA 02111-1307 USA */
 CropViewTool::CropViewTool() {
     selection = ImageRect();
     left = right = top = bottom = move = false;
-    delayedUpdateTimer.setSingleShot(true);
 }
 
 void CropViewTool::setParent(PixmapView *parent) {
     PixmapViewTool::setParent(parent);
-    connect(&delayedUpdateTimer, SIGNAL(timeout()), parent->viewport(), SLOT(update()));
 }
 
 bool CropViewTool::isOnLeft(const QRect &r, const QPoint p) {
@@ -107,6 +105,7 @@ void CropViewTool::mouseMoveEvent(QMouseEvent *e) {
         QPoint p(parent->toImagePoint(ScreenPoint(e->pos().x(), e->pos().y())) - dragStart);
         ImagePoint ip(parent->toImagePoint(PhysicalPoint(p.x(), p.y())));
         bool change = false;
+        ImageRect oldSelection(selection);
         if (left) {
             selection.setLeft(std::min(std::max(preDragSelection.left()+p.x(), 0), selection.right()-1));
             change = true;
@@ -135,7 +134,8 @@ void CropViewTool::mouseMoveEvent(QMouseEvent *e) {
         }
         if (change) {
             emit selectionChanged(selection);
-            if (!delayedUpdateTimer.isActive()) delayedUpdateTimer.start(100);
+            QRect r(oldSelection.unite(selection).adjusted(-3, -3, 3, 3));
+            parent->viewport()->update(parent->toScreenRect(ImageRect::fromRect(r)));
         }
     } else {
         ScreenRect s(parent->toScreenRect(selection));
@@ -159,6 +159,7 @@ void CropViewTool::mouseMoveEvent(QMouseEvent *e) {
 }
 
 void CropViewTool::mousePressEvent(QMouseEvent *e) {
+    if (e->button() != Qt::LeftButton) return;
     QRect sRect(parent->toScreenRect(selection));
     ImagePoint ip(parent->toImagePoint(ScreenPoint::fromPoint(e->pos())));
     ImageRect image(0, 0, parent->getImageSize().width(), parent->getImageSize().height());
@@ -205,7 +206,7 @@ void CropViewTool::mousePressEvent(QMouseEvent *e) {
         preDragSelection = selection;
         right = bottom = true;
         emit selectionChanged(selection);
-        if (!delayedUpdateTimer.isActive()) delayedUpdateTimer.start(100);
+        parent->viewport()->update();
     }
 }
 

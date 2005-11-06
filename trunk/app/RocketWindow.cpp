@@ -370,7 +370,7 @@ void RocketWindow::updateGui() {
     aZoom100->setEnabled(notNull);
     aZoomOut->setEnabled(notNull && view->getZoom() / 2 > 0.01);
     aZoomFit->setEnabled(notNull);
-    RocketImage *img = images.getAsRocketImage(index);
+    RocketImage *img = images.size() ? images.getAsRocketImage(index) : NULL;
     aUndo->setEnabled(img ? img->canUndo() : false);
     aRedo->setEnabled(img ? img->canRedo() : false);
     aSaveFolder->setEnabled(images.size());

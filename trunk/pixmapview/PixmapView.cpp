@@ -202,7 +202,6 @@ void PixmapView::load(const QImage &newImage) {
   \sa resetToBlank()
 */
 void PixmapView::load(const QPixmap &newPixmap, bool hasTransparency) {
-    bool changed = (newPixmap.size() != pix.size());
     transparency = hasTransparency;
     preloader->stop();
     preloadPoints.clear();
@@ -427,12 +426,12 @@ PhysicalPoint PixmapView::getVisibleCenter() const {
         centerX = int(scrH->value() + scrH->pageStep() / 2);
     } else {
         //Non-scrolling to scrolling needs a different formula.
-        centerX = pix.width() * zoom / 2;
+        centerX = int(pix.width() * zoom / 2);
     }
     if (scrollingY) {
         centerY = int(scrV->value() + scrV->pageStep() / 2);
     } else {
-        centerY = pix.height() * zoom / 2;
+        centerY = int(pix.height() * zoom / 2);
     }
     return PhysicalPoint(centerX, centerY);
 }

@@ -37,8 +37,9 @@ protected:
     void leaveEvent(QEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-    bool positionOnButton(QPoint p, int num, Direction d);
-    QRect buttonRect(int num, Direction d);
+    bool positionOnButton(QPoint p, int num, Direction d, const QPixmap &pixmap);
+    QRect buttonRect(int num, Direction d, const QPixmap &pixmap);
+    static QPointer < QMenu > popupMenu;
 public:
     RocketFilePreviewWidget(QWidget *parent, RocketImage *img, int thumbnailSize);
     QSize sizeHint();
@@ -54,6 +55,8 @@ public:
     bool usingHorizontalOrientation() {
         return usingHorizontalLayout;
     }
+protected slots:
+    void popupTriggered(QAction *);
 public slots:
     void updatePreview();
 signals:

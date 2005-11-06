@@ -27,7 +27,6 @@ protected:
     QPoint dragStart;
     ImageRect selection, preDragSelection;
     bool left, right, top, bottom, move;
-    QTimer delayedUpdateTimer;
     bool isOnLeft(const QRect &r, const QPoint p);
     bool isOnRight(const QRect &r, const QPoint p);
     bool isOnTop(const QRect &r, const QPoint p);

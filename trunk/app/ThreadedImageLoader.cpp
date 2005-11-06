@@ -55,7 +55,11 @@ void ThreadedImageLoader::run() {
         restart = false;
         QString f(fileName);
         QImage img(f);
-        emit imageLoaded(f, img);
+        if (imageSize.isNull() || !imageSize.isValid()) {
+            emit imageLoaded(f, img);
+        } else {
+            emit imageLoaded(f, img.scaled(imageSize, aspectRatioMode, transformMode));
+        }
         if (!restart) {
             condition.wait(&mutex);
         }
@@ -67,9 +71,13 @@ void ThreadedImageLoader::run() {
     work. I'm not a threading expert. It's best not to do this anyway, since it blocks. Call it again in a
     a slot connected to #imageLoaded. -- WJC
 */
-void ThreadedImageLoader::loadImage(const QString &fileName) {
+void ThreadedImageLoader::loadImage(const QString &fileName, QSize imageSize,
+            Qt::AspectRatioMode aspectRatioMode, Qt::TransformationMode transformMode) {
     QMutexLocker locker(&mutex);
     this->fileName = fileName;
+    this->imageSize = imageSize;
+    this->aspectRatioMode = aspectRatioMode;
+    this->transformMode = transformMode;
     end = false;
     restart = false;
     if (!isRunning()) {

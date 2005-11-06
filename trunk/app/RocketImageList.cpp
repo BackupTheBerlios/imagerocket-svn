@@ -52,6 +52,10 @@ void RocketImageList::setLocation(QString location) {
     //TODO share this list with RocketWindow
     imageNameFilters << "*.png" << "*.jpg" << "*.gif" << "*.xpm" << "*.bmp";
     QDir dir(location);
+    if (!dir.exists()) {
+        QTimer::singleShot(0, this, SLOT(showMessage()));
+        return;
+    }
     QStringList files = dir.entryList(
             imageNameFilters, QDir::Files|QDir::Readable, QDir::Name);
     foreach (RocketImage *i, list) {

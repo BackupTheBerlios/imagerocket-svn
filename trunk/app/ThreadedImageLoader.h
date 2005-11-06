@@ -30,6 +30,9 @@ class ThreadedImageLoader : public QThread {
 Q_OBJECT
 protected:
     QString fileName;
+    QSize imageSize;
+    Qt::AspectRatioMode aspectRatioMode;
+    Qt::TransformationMode transformMode;
     bool end, restart;
     QWaitCondition condition;
     QMutex mutex;
@@ -37,7 +40,9 @@ protected:
 public:
     ThreadedImageLoader();
     ~ThreadedImageLoader();
-    void loadImage(const QString &fileName);
+    void loadImage(const QString &fileName, QSize imageSize = QSize(),
+            Qt::AspectRatioMode aspectRatioMode = Qt::IgnoreAspectRatio,
+            Qt::TransformationMode transformMode = Qt::FastTransformation);
 signals:
     void imageLoaded(QString, QImage);
 };
