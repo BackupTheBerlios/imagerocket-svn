@@ -1,5 +1,5 @@
 @rem vim: set fileformat=dos:
-@echo off
+echo @echo off
 
 if "%1"=="" (
     echo debug or release should be stated in argument 1
@@ -10,13 +10,17 @@ rem I want to find a better technique here! - WJC
 qmake CONFIG+=%1
 cd app
 qmake CONFIG+=%1
+cd ..\pixmapview
+qmake CONFIG+=%1
 cd ..\lua
 qmake CONFIG+=%1
 cd ..\plugins
 qmake CONFIG+=%1
-cd test
+cd brightness_contrast
+qmake CONFIG+=%1
+cd ..\crop
 qmake CONFIG+=%1
 cd ..\..
-make
+echo make
 
 :bottom
