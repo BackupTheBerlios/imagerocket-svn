@@ -38,6 +38,8 @@ Suite 330, Boston, MA 02111-1307 USA */
 RocketWindow::RocketWindow(lua_State *L) : QMainWindow() {
     this->L = L;
     index = -1;
+    dFiles = NULL;
+    previewsHidden = false;
     initGUI();
     //This improves the perceived speed of the program by delaying some work until
     //after the display of the window.
@@ -49,8 +51,6 @@ void RocketWindow::initGUI() {
     //icon.addFile(":/pixmaps/rocket-24.xpm");
     icon.addFile(":/pixmaps/rocket-16.xpm");
     setWindowIcon(icon);
-    dFiles = NULL;
-    previewsHidden = false;
     
     /* Saving/restoring of window position disabled due to difficulty on X11 and
     // questionable usefulness. I think Windows may do this as well also, so I
@@ -201,10 +201,19 @@ void RocketWindow::initGUI() {
     dPalette->setWindowTitle(tr("Tools"));
     dPalette->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
     dPalette->setFeatures(QDockWidget::AllDockWidgetFeatures);
-    toolbox = new RocketToolBox(dPalette);
+    toolboxContainer = new QWidget(dPalette);
+    new QVBoxLayout(toolboxContainer);
+    toolboxContainer->layout()->setMargin(0);
+    toolboxContainer->layout()->setSpacing(3);
+    toolbox = new RocketToolBox(toolboxContainer);
+    toolboxContainer->layout()->addWidget(toolbox);
+    imageSaveSettingsButton = new QPushButton(tr("Image Save Settings"), toolboxContainer);
+    imageSaveSettingsButton->setCheckable(true);
+    connect(imageSaveSettingsButton, SIGNAL(toggled(bool)), SLOT(imageSaveSettingsToggled(bool)));
+    toolboxContainer->layout()->addWidget(imageSaveSettingsButton);
     connect(toolbox, SIGNAL(itemClicked(QListWidgetItem *)), SLOT(toolClicked(QListWidgetItem *)));
     toolbox->setFrameStyle(QFrame::Box|QFrame::Plain);
-    dPalette->setWidget(toolbox);
+    dPalette->setWidget(toolboxContainer);
     addDockWidget(Qt::RightDockWidgetArea, dPalette);
     
     //add toolbars and dock widgets toggles to View menu
@@ -375,6 +384,7 @@ void RocketWindow::updateGui() {
     aRedo->setEnabled(img ? img->canRedo() : false);
     aSaveFolder->setEnabled(images.size());
     toolbox->setEnabled(notNull);
+    imageSaveSettingsButton->setEnabled(notNull);
     statusZoom->setText(tr("%L1%", "zoom percentage (%L1 is the number)")
             .arg(view->getZoom()*100.0, 0, 'f', 1));
     QSize size = view->getImageSize();
@@ -400,8 +410,10 @@ void RocketWindow::setZoom(double zoom) {
 /*! This resets the display if there are no images open.
 */
 void RocketWindow::setIndex(int index) {
+    setUpdatesEnabled(false);
+    bool recheckSettingsButton = false;
     if (this->index != index) {
-        //sloppy, temporary way of closing the tool settings toolbar.
+        recheckSettingsButton = imageSaveSettingsButton->isChecked();
         delete toolSettingsToolBar;
     }
     if (images.size() <= 1 && dFiles->isVisible()) {
@@ -421,6 +433,10 @@ void RocketWindow::setIndex(int index) {
         statusFile->setText("");
     }
     updateGui();
+    if (recheckSettingsButton && imageSaveSettingsButton->isEnabled()) {
+        imageSaveSettingsButton->setChecked(true);
+    }
+    setUpdatesEnabled(true);
 }
 
 void RocketWindow::updateShownPixmap() {
@@ -467,8 +483,7 @@ void RocketWindow::saveFolderClicked() {
             foreach (RocketImage *i, *images.getVector()) {
                 QFileInfo f(i->getShortFileName());
                 if (!i->isSaved()) {
-                    i->getPixmap().save(i->getFileName(), f.suffix().toAscii());
-                    i->setSaved();
+                    i->save(i->getFileName());
                 }
             }
             filePreviewArea->update();
@@ -478,10 +493,7 @@ void RocketWindow::saveFolderClicked() {
             foreach (RocketImage *i, *images.getVector()) {
                 QFileInfo f(i->getShortFileName());
                 if (!i->isSaved()) {
-                    i->getPixmap().save(
-                            location2.filePath(i->getShortFileName()),
-                            f.suffix().toAscii());
-                    i->setSaved();
+                    i->save(location2.filePath(i->getShortFileName()));
                 }
             }
             filePreviewArea->update();
@@ -665,24 +677,50 @@ void RocketWindow::toolClicked(QListWidgetItem *item) {
         QObject *plugin = plugins[pluginIndex];
         ToolInterface *tool = qobject_cast < ToolInterface * >(plugin);
         assert(tool);
-        delete toolSettingsToolBar;
-        toolSettingsToolBar = tool->getSettingsToolBar(new QPixmap(image->getPixmap()));
-        if (toolSettingsToolBar) {
-            toolSettingsToolBar->hide();
-            toolSettingsToolBar->setParent(viewportContainer);
-            viewportContainerLayout->addWidget(toolSettingsToolBar);
-            toolSettingsToolBar->show();
-        }
+        setToolSettingsToolBar(tool->getSettingsToolBar(new QPixmap(image->getPixmap())));
+        item->setBackgroundColor(palette().highlight().color());
+        item->setTextColor(palette().highlightedText().color());
         PixmapViewTool *t = tool->getViewTool();
         if (t) {
             t->setParent(view);
         }
         view->setTool(t);
-        /*QImage *img = tool->activate(&tmp);
-        assert(img);
-        image->addChange(QPixmap::fromImage(*img));
-        setIndex(index);*/
     }
+}
+
+void RocketWindow::setToolSettingsToolBar(QWidget *widget) {
+    delete toolSettingsToolBar;
+    toolSettingsToolBar = widget;
+    if (toolSettingsToolBar) {
+        toolSettingsToolBar->hide();
+        toolSettingsToolBar->setParent(viewportContainer);
+        viewportContainerLayout->addWidget(toolSettingsToolBar);
+        toolSettingsToolBar->show();
+        connect(toolSettingsToolBar, SIGNAL(destroyed()), SLOT(toolSettingsToolBarDestroyed()));
+    }
+}
+
+void RocketWindow::imageSaveSettingsToggled(bool value) {
+    delete toolSettingsToolBar;
+    toolSettingsToolBar = NULL;
+    if (value) {
+        RocketImage *image = images.getAsRocketImage(index);
+        setToolSettingsToolBar(saveSettingsTool.getSettingsToolBar(image));
+    }
+}
+
+void RocketWindow::toolSettingsToolBarDestroyed() {
+    QColor base(palette().color(QPalette::Base));
+    QColor text(palette().color(QPalette::Text));
+    bool done = false;
+    for (int a=0;a<toolbox->count();a++) {
+        if (toolbox->item(a)->backgroundColor() == palette().highlight().color()) {
+            done = true;
+            toolbox->item(a)->setBackgroundColor(base);
+            toolbox->item(a)->setTextColor(text);
+        }
+    }
+    if (!done) imageSaveSettingsButton->setChecked(false);
 }
 
 void RocketWindow::aboutClicked() {

@@ -26,6 +26,8 @@ void Crop::init(QString &fileName, lua_State *L, QObject *parent) {
     this->fileName = fileName;
     this->parent = parent;
     
+    updating = false;
+    
     QFile script(":/crop.lua");
     script.open(QFile::ReadOnly);
     QTextStream in(&script);
@@ -40,7 +42,9 @@ void Crop::init(QString &fileName, lua_State *L, QObject *parent) {
 
 QImage *Crop::activate(QPixmap *pix) {
     CropWidget *w = settingsToolBar;
-    QPixmap tmp(pix->copy(w->spnX->value(), w->spnY->value(), w->spnW->value(), w->spnH->value()));
+    QRect r(w->spnX->value(), w->spnY->value(), w->spnW->value(), w->spnH->value());
+    assert(r.x() >= 0 && r.y() >= 0 && pix->width() > r.right() && pix->height() > r.bottom());
+    QPixmap tmp(pix->copy(r));
     return new QImage(tmp.toImage());
 }
 
@@ -63,20 +67,32 @@ QWidget *Crop::getSettingsToolBar(QPixmap *pix) {
             SIGNAL(activated()), settingsToolBar->btnCancel, SIGNAL(clicked()));
     connect(settingsToolBar->btnOk, SIGNAL(clicked()), SLOT(okClicked()));
     connect(settingsToolBar->btnCancel, SIGNAL(clicked()), SLOT(cancelClicked()));
-    settingsToolBar->spnX->setRange(0, pix->width()-1);
-    settingsToolBar->spnY->setRange(0, pix->height()-1);
-    settingsToolBar->spnW->setRange(1, pix->width());
-    settingsToolBar->spnH->setRange(1, pix->height());
+    connect(settingsToolBar->spnX, SIGNAL(valueChanged(int)), SLOT(spinBoxesValueChanged()));
+    connect(settingsToolBar->spnY, SIGNAL(valueChanged(int)), SLOT(spinBoxesValueChanged()));
+    connect(settingsToolBar->spnW, SIGNAL(valueChanged(int)), SLOT(spinBoxesValueChanged()));
+    connect(settingsToolBar->spnH, SIGNAL(valueChanged(int)), SLOT(spinBoxesValueChanged()));
     settingsToolBar->setMinimumWidth(1);
     selectionChanged(ImageRect());
     return settingsToolBar;
 }
 
+void Crop::spinBoxesValueChanged() {
+    if (!updating) {
+        updating = true;
+        ImageRect ir(settingsToolBar->spnX->value(), settingsToolBar->spnY->value(),
+                settingsToolBar->spnW->value(), settingsToolBar->spnH->value());
+        emit selectionChanged(ir);
+        updateMaximumValues(ir);
+        updating = false;
+    }
+}
+
 PixmapViewTool *Crop::getViewTool() {
     CropViewTool *tool = new CropViewTool;
     connect(settingsToolBar, SIGNAL(destroyed()), tool, SLOT(deleteLater()));
-    connect(tool, SIGNAL(selectionChanged(ImageRect)), SLOT(selectionChanged(ImageRect)));
+    connect(tool, SIGNAL(selectionChanged(ImageRect)), SLOT(selectionWasChanged(ImageRect)));
     connect(tool, SIGNAL(selected()), settingsToolBar->btnOk, SIGNAL(clicked()));
+    connect(this, SIGNAL(selectionChanged(ImageRect)), tool, SLOT(setSelection(ImageRect)));
     return tool;
 }
 
@@ -113,12 +129,26 @@ void Crop::cancelClicked() {
     delete settingsToolBar;
 }
 
-void Crop::selectionChanged(ImageRect ir) {
-    if (!ir.isNull()) {
+void Crop::updateMaximumValues(ImageRect ir) {
+    int x = pix->width()-ir.width();
+    if (x != settingsToolBar->spnX->maximum()) settingsToolBar->spnX->setMaximum(x);
+    int y = pix->height()-ir.height();
+    if (y != settingsToolBar->spnY->maximum()) settingsToolBar->spnY->setMaximum(y);
+    int w = pix->width()-ir.x();
+    if (w != settingsToolBar->spnW->maximum()) settingsToolBar->spnW->setMaximum(w);
+    int h = pix->height()-ir.y();
+    if (h != settingsToolBar->spnH->maximum()) settingsToolBar->spnH->setMaximum(h);
+}
+
+void Crop::selectionWasChanged(ImageRect ir) {
+    if (!ir.isNull() && !updating) {
+        updating = true;
+        updateMaximumValues(ir);
         settingsToolBar->spnX->setValue(ir.x());
         settingsToolBar->spnY->setValue(ir.y());
         settingsToolBar->spnW->setValue(ir.width());
         settingsToolBar->spnH->setValue(ir.height());
+        updating = false;
     }
     settingsToolBar->stackedLayout->setCurrentIndex(ir.isNull() ? 0 : 1);
 }

@@ -10,6 +10,7 @@ HEADERS =   RocketWindow.h \
             RocketImageList.h \
             RocketImage.h \
             RocketToolBox.h \
+            SaveSettingsTool.h \
             ProgramStarter.h \
             TinyButton.h \
             ThreadedImageLoader.h \
@@ -25,11 +26,12 @@ SOURCES =   main.cpp \
             RocketImageList.cpp \
             RocketToolBox.cpp \
             RocketImage.cpp \
+            SaveSettingsTool.cpp \
             ProgramStarter.cpp \
             TinyButton.cpp \
             ThreadedImageLoader.cpp
 
-FORMS =     aboutdialog.ui savedialog.ui updatedialog.ui
+FORMS =     aboutdialog.ui savedialog.ui updatedialog.ui savesettingstool.ui
 RESOURCES = pixmaps.qrc app.qrc
 INCLUDEPATH += ../lua ../pixmapview .
 MOC_DIR = tmp

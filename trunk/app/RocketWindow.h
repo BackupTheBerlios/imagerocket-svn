@@ -24,6 +24,7 @@ extern "C" {
 #include "lauxlib.h"
 }
 #include "PixmapView.h"
+#include "SaveSettingsTool.h"
 #include "RocketFilePreviewArea.h"
 #include "RocketImageList.h"
 #include "RocketToolBox.h"
@@ -45,6 +46,7 @@ protected:
     RocketImageList images;
     lua_State *L;
     QList < QObject * > plugins;
+    SaveSettingsTool saveSettingsTool;
     QPointer < RocketUpdateChecker > updateChecker;
     int index;
     bool previewsHidden;
@@ -57,7 +59,9 @@ protected:
     QAction *aUndo, *aRedo;
     QAction *aCheckForUpdates, *aAbout;
     QDockWidget *dPalette, *dFiles;
+    QWidget *toolboxContainer;
     RocketToolBox *toolbox;
+    QPushButton *imageSaveSettingsButton;
     QString lastDir;
     
     RocketFilePreviewArea *filePreviewArea;
@@ -70,6 +74,7 @@ protected:
     bool eventFilter(QObject *watched, QEvent *e);
     bool event(QEvent *e);
     void loadPlugins(QString dirPath);
+    void setToolSettingsToolBar(QWidget *widget);
     
 protected slots:
     
@@ -99,6 +104,7 @@ protected slots:
     void checkForUpdatesClicked();
     
     void toolClicked(QListWidgetItem *item);
+    void imageSaveSettingsToggled(bool value);
     
     void questionClicked(RocketImage *img);
     
@@ -113,6 +119,7 @@ public:
     
 public slots:
     
+    void toolSettingsToolBarDestroyed();
     void previewClicked(int index);
 };
 

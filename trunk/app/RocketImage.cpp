@@ -27,6 +27,9 @@ RocketImage::RocketImage(const QString &fileName) {
     changes.append(QPixmap());
     index = 0;
     savedIndex = 0;
+    saveFormat = 0;
+    saveQuality = 85;
+    saveProgressive = true;
     this->fileName = fileName;
     QFileInfo f(fileName);
     shortName = f.fileName();
@@ -72,6 +75,14 @@ void RocketImage::redo() {
         //this is sloppy and should probably be replaced - WJC
         emit thumbnailChanged(thumbnail);
     }
+}
+
+void RocketImage::save(const QString &name) {
+    QFileInfo info(name);
+    QString ext(getSaveFormatAsText());
+    QString fileName(QDir(info.path()).filePath(info.baseName()+"."+ext));
+    getPixmap().save(fileName, ext.toAscii(), saveQuality);
+    setSaved();
 }
 
 void RocketImage::setSaved() {

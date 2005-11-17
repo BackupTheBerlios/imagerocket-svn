@@ -77,9 +77,14 @@ bool CropViewTool::isOnNwSe(const QRect &r, const QPoint p) {
     return isOnNw(r, p) || isOnSe(r, p);
 }
 
-void CropViewTool::setSelection(ImageRect &ir) {
-    selection = ir;
-    parent->viewport()->update();
+void CropViewTool::setSelection(ImageRect ir) {
+    if (ir != selection) {
+        QRect r(ir.unite(selection));
+        parent->viewport()->update(
+                parent->toScreenRect(ImageRect::fromRect(r)).adjusted(-4, -4, 4, 4));
+        selection = ir;
+        emit selectionChanged(selection);
+    }
 }
 
 void CropViewTool::paintEvent(QPainter &p, QPaintEvent *e) {
@@ -134,8 +139,9 @@ void CropViewTool::mouseMoveEvent(QMouseEvent *e) {
         }
         if (change) {
             emit selectionChanged(selection);
-            QRect r(oldSelection.unite(selection).adjusted(-3, -3, 3, 3));
-            parent->viewport()->update(parent->toScreenRect(ImageRect::fromRect(r)));
+            QRect r(oldSelection.unite(selection));
+            parent->viewport()->update(
+                    parent->toScreenRect(ImageRect::fromRect(r)).adjusted(-4, -4, 4, 4));
         }
     } else {
         ScreenRect s(parent->toScreenRect(selection));

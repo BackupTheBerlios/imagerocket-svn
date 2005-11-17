@@ -23,6 +23,41 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 class RocketImage : public QObject {
 Q_OBJECT
+public:
+    enum StatusIcon {TooLarge = 1, Broken, Loading};
+    RocketImage(const QString &fileName);
+    ~RocketImage();
+    QPixmap getPixmap() {return changes[index];}
+    int getIndex() {return index;}
+    bool canUndo() {return index > 0;}
+    bool canRedo() {return index < changes.size()-1;}
+    bool hasTransparency() {return transparency;}
+    QPixmap getThumbnail() {return thumbnail;}
+    QString getFileName() {return fileName;}
+    QString getShortFileName() {return shortName;}
+    int getStatusIconIndex() {return statusIcon;}
+    bool isSaved() {return savedIndex == index;}
+    int getSaveFormat() {return saveFormat;}
+    QString getSaveFormatAsText() {return saveFormat == 0 ? "jpg" : "png";}
+    int getSaveQuality() {return saveQuality;}
+    bool isSaveProgressive() {return saveProgressive;}
+public slots:
+    void undo();
+    void redo();
+    
+    void save(const QString &name);
+    
+    void addChange(const QPixmap &pix);
+    void setActive(bool value);
+    void setSaved();
+    
+    void setThumbnail(const QPixmap &thumb);
+    void setThumbnail(StatusIcon iconType);
+    void setThumbnailWithBackground(const QPixmap &thumb);
+    
+    void setSaveFormat(int format) {saveFormat = format;}
+    void setSaveQuality(int value) {saveQuality = value;}
+    void setSaveProgressive(bool value) {saveProgressive = value;}
 protected:
     QPixmap thumbnail;
     QPixmap xIcon, clickToShowIcon, loadingIcon, backgroundTile;
@@ -33,28 +68,8 @@ protected:
     friend void RocketImageList::setIndex(int index);
     QVector < QPixmap > changes;
     int index;
-public:
-    enum StatusIcon {TooLarge = 1, Broken, Loading};
-    RocketImage(const QString &fileName);
-    ~RocketImage();
-    QPixmap getPixmap() {return changes[index];}
-    void addChange(const QPixmap &pix);
-    void undo();
-    void redo();
-    int getIndex() {return index;}
-    bool canUndo() {return index > 0;}
-    bool canRedo() {return index < changes.size()-1;}
-    void setActive(bool value);
-    bool hasTransparency() {return transparency;}
-    QPixmap getThumbnail() {return thumbnail;}
-    void setThumbnail(const QPixmap &thumb);
-    void setThumbnail(StatusIcon iconType);
-    void setThumbnailWithBackground(const QPixmap &thumb);
-    QString getFileName() {return fileName;}
-    QString getShortFileName() {return shortName;}
-    int getStatusIconIndex() {return statusIcon;}
-    void setSaved();
-    bool isSaved() {return savedIndex == index;}
+    int saveFormat, saveQuality;
+    bool saveProgressive;
 signals:
     void thumbnailChanged(QPixmap pix);
 };

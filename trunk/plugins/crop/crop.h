@@ -28,11 +28,6 @@ class CropWidget;
 class Crop : public QObject, public PluginInterface, public ToolInterface {
 Q_OBJECT
 Q_INTERFACES(PluginInterface ToolInterface)
-protected:
-    QPointer < CropWidget > settingsToolBar;
-    QString fileName;
-    QPixmap *pix;
-    QObject *parent;
 public:
     virtual void init(QString &fileName, lua_State *L, QObject *parent);
     virtual QImage *activate(QPixmap *pix);
@@ -42,9 +37,19 @@ public:
     virtual void reset();
     virtual int length();
     QListWidgetItem *createListEntry(QListWidget *parent);
+protected:
+    QPointer < CropWidget > settingsToolBar;
+    QString fileName;
+    QPixmap *pix;
+    QObject *parent;
+    bool updating;
+    void updateMaximumValues(ImageRect);
 protected slots:
     void okClicked();
     void cancelClicked();
+    void selectionWasChanged(ImageRect);
+    void spinBoxesValueChanged();
+signals:
     void selectionChanged(ImageRect);
 };
 
