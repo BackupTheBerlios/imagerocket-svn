@@ -287,6 +287,10 @@ void RocketWindow::initObject() {
     //QTimer::singleShot(random() % 100, this, SLOT(close())); //debugging crash test - use with prog_test.sh
 }
 
+#ifdef Q_WS_WIN
+#include <windows.h>
+#endif
+
 //! This iterates the given directory and looks in its child directories for plugins.
 void RocketWindow::loadPlugins(QString dirPath) {
     //This could use some cleanup. The error handling code could be streamlined. - WJC
@@ -308,8 +312,20 @@ void RocketWindow::loadPlugins(QString dirPath) {
                 qDebug(QString("Loading ").append(f).toAscii());
                 QLibrary *lib = new QLibrary(f);
                 if (!lib->load()) {
+                    QString msg;
+#ifdef Q_WS_WIN
+                    long err = GetLastError();
+                    LPTSTR s;
+                    if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                            NULL, err, 0, (LPTSTR)&s, 0, NULL) == 0) {
+                        msg = tr("Error: %1").arg(err);
+                    } else {
+                        msg = tr("Error: %1 (%2)").arg(QString::fromUtf16((ushort*)s)).arg(err);
+                    }
+#endif
                     QMessageBox::warning(this, tr("Plugin Loading Failed"),
-                            tr("Plugin %1 is not a valid library and could not be loaded.").arg(f));
+                            tr("Plugin %1 is not a valid library and could not be loaded.\n%2")
+                            .arg(f).arg(msg));
                     delete lib;
                     continue;
                 }
@@ -338,8 +354,10 @@ void RocketWindow::loadPlugins(QString dirPath) {
                 ToolInterface *i2 = qobject_cast< ToolInterface * >(o);
                 if (i2) {
                     QListWidgetItem *i = i2->createListEntry(toolbox);
-                    i->setData(Qt::UserRole, plugins.count()-1);
-                    toolbox->updateMinimumSize();
+                    if (i) {
+                        i->setData(Qt::UserRole, plugins.count()-1);
+                        toolbox->updateMinimumSize();
+                    }
                 }
             }
         }
@@ -681,9 +699,6 @@ void RocketWindow::toolClicked(QListWidgetItem *item) {
         item->setBackgroundColor(palette().highlight().color());
         item->setTextColor(palette().highlightedText().color());
         PixmapViewTool *t = tool->getViewTool();
-        if (t) {
-            t->setParent(view);
-        }
         view->setTool(t);
     }
 }

@@ -19,13 +19,20 @@ program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
 #include "PixmapViewTool.h"
+#include "PixmapView.h"
 
 PixmapViewTool::PixmapViewTool() {
-    parent = NULL;
+    parentView = NULL;
 }
 
-void PixmapViewTool::setParent(PixmapView *parent) {
-    this->parent = parent;
+PixmapViewTool::~PixmapViewTool() {
+    if (parentView) {
+        parentView->setTool(NULL);
+    }
+}
+
+void PixmapViewTool::setParent(PixmapView *parentView) {
+    this->parentView = parentView;
 }
 
 void PixmapViewTool::mousePressEvent(QMouseEvent *e) {

@@ -1,5 +1,5 @@
 @rem vim: set fileformat=dos:
-echo @echo off
+@echo off
 
 if "%1"=="" (
     echo debug or release should be stated in argument 1
@@ -21,6 +21,6 @@ qmake CONFIG+=%1
 cd ..\crop
 qmake CONFIG+=%1
 cd ..\..
-echo make
+make
 
 :bottom

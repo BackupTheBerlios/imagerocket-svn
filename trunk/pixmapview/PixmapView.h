@@ -110,7 +110,7 @@ protected:
     QPoint middleButtonScrollPoint;
     TransparencyPattern transparencyPattern;
     int patternSquareCount;
-    QPointer < PixmapViewTool > tool;
+    PixmapViewTool *tool;
     
     QTimer *preloader;
     QVector < QPoint > preloadPoints;

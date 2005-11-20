@@ -18,7 +18,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketUpdateChecker.h"
 #include "consts.h"
 
-#ifdef Q_OS_WINDOWS
+#ifdef false //Q_WS_WIN
 BOOL InternetGetConnectedState(
     LPDWORD lpdwFlags,
     DWORD dwReserved
@@ -43,7 +43,7 @@ RocketUpdateChecker::~RocketUpdateChecker() {
 
 bool RocketUpdateChecker::mayBeConnected() {
     bool connected = true;
-#ifdef QT_OS_WINDOWS
+#ifdef false //Q_WS_WIN
     if (!InternetGetConnectionState(INTERNET_CONNECTION_LAN, 0)
                 && !InternetGetConnectionState(INTERNET_CONNECTION_MODEM, 0)) {
         connected = false;

@@ -80,8 +80,8 @@ bool CropViewTool::isOnNwSe(const QRect &r, const QPoint p) {
 void CropViewTool::setSelection(ImageRect ir) {
     if (ir != selection) {
         QRect r(ir.unite(selection));
-        parent->viewport()->update(
-                parent->toScreenRect(ImageRect::fromRect(r)).adjusted(-4, -4, 4, 4));
+        parentView->viewport()->update(
+                parentView->toScreenRect(ImageRect::fromRect(r)).adjusted(-4, -4, 4, 4));
         selection = ir;
         emit selectionChanged(selection);
     }
@@ -89,11 +89,11 @@ void CropViewTool::setSelection(ImageRect ir) {
 
 void CropViewTool::paintEvent(QPainter &p, QPaintEvent *e) {
     if (selection.isNull()) return;
-    ScreenPoint drawStart(parent->toScreenPoint(PhysicalPoint(0, 0)));
-    QSize drawSize(parent->getImageSize() * parent->getZoom());
+    ScreenPoint drawStart(parentView->toScreenPoint(PhysicalPoint(0, 0)));
+    QSize drawSize(parentView->getImageSize() * parentView->getZoom());
     QRect darkRect(e->rect().intersect(QRect(drawStart, drawSize)));
     QRegion darkRegion(darkRect);
-    ScreenRect selectedRect(parent->toScreenRect(selection));
+    ScreenRect selectedRect(parentView->toScreenRect(selection));
     darkRegion -= selectedRect;
     foreach (QRect r, darkRegion.rects()) {
         p.fillRect(r, QBrush(QColor(0, 0, 0, 128)));
@@ -107,68 +107,70 @@ void CropViewTool::paintEvent(QPainter &p, QPaintEvent *e) {
 void CropViewTool::mouseMoveEvent(QMouseEvent *e) {
     if (selection.isNull()) return;
     if (e->buttons() & Qt::LeftButton) {
-        QPoint p(parent->toImagePoint(ScreenPoint(e->pos().x(), e->pos().y())) - dragStart);
-        ImagePoint ip(parent->toImagePoint(PhysicalPoint(p.x(), p.y())));
+        QPoint p(parentView->toImagePoint(ScreenPoint(e->pos().x(), e->pos().y())) - dragStart);
+        ImagePoint ip(parentView->toImagePoint(PhysicalPoint(p.x(), p.y())));
         bool change = false;
         ImageRect oldSelection(selection);
         if (left) {
-            selection.setLeft(std::min(std::max(preDragSelection.left()+p.x(), 0), selection.right()-1));
+            selection.setLeft(std::min(
+                    std::max(preDragSelection.left()+p.x(), 0), selection.right()-1));
             change = true;
         }
         if (right) {
             selection.setRight(std::max(std::min(preDragSelection.right()+p.x(),
-                    parent->getImageSize().width()-1), selection.left()+1));
+                    parentView->getImageSize().width()-1), selection.left()+1));
             change = true;
         }
         if (top) {
-            selection.setTop(std::min(std::max(preDragSelection.top()+p.y(), 0), selection.bottom()-1));
+            selection.setTop(std::min(
+                    std::max(preDragSelection.top()+p.y(), 0), selection.bottom()-1));
             change = true;
         }
         if (bottom) {
             selection.setBottom(std::max(std::min(preDragSelection.bottom()+p.y(),
-                    parent->getImageSize().height()-1), selection.top()+1));
+                    parentView->getImageSize().height()-1), selection.top()+1));
             change = true;
         }
         if (move) {
             int x = std::min(std::max(0, preDragSelection.left()+p.x()),
-                    parent->getImageSize().width()-selection.width());
+                    parentView->getImageSize().width()-selection.width());
             int y = std::min(std::max(0, preDragSelection.top()+p.y()),
-                    parent->getImageSize().height()-selection.height());
+                    parentView->getImageSize().height()-selection.height());
             selection.moveTopLeft(QPoint(x,y));
             change = true;
         }
         if (change) {
             emit selectionChanged(selection);
             QRect r(oldSelection.unite(selection));
-            parent->viewport()->update(
-                    parent->toScreenRect(ImageRect::fromRect(r)).adjusted(-4, -4, 4, 4));
+            parentView->viewport()->update(
+                    parentView->toScreenRect(ImageRect::fromRect(r)).adjusted(-4, -4, 4, 4));
         }
     } else {
-        ScreenRect s(parent->toScreenRect(selection));
+        ScreenRect s(parentView->toScreenRect(selection));
         if (isOnNeSw(s, e->pos())) {
-            parent->viewport()->setCursor(Qt::SizeBDiagCursor);
+            parentView->viewport()->setCursor(Qt::SizeBDiagCursor);
             return;
         } else if (isOnNwSe(s, e->pos())) {
-            parent->viewport()->setCursor(Qt::SizeFDiagCursor);
+            parentView->viewport()->setCursor(Qt::SizeFDiagCursor);
             return;
         }
         if (isOnVertical(s, e->pos())) {
-            parent->viewport()->setCursor(Qt::SizeHorCursor);
+            parentView->viewport()->setCursor(Qt::SizeHorCursor);
         } else if (isOnHorizontal(s, e->pos())) {
-            parent->viewport()->setCursor(Qt::SizeVerCursor);
+            parentView->viewport()->setCursor(Qt::SizeVerCursor);
         //} else if (s.contains(e->pos())) {
-        //    parent->viewport()->setCursor(QCursor(Qt::SizeAllCursor));
+        //    parentView->viewport()->setCursor(QCursor(Qt::SizeAllCursor));
         } else {
-            parent->viewport()->setCursor(QCursor());
+            parentView->viewport()->setCursor(QCursor());
         }
     }
 }
 
 void CropViewTool::mousePressEvent(QMouseEvent *e) {
     if (e->button() != Qt::LeftButton) return;
-    QRect sRect(parent->toScreenRect(selection));
-    ImagePoint ip(parent->toImagePoint(ScreenPoint::fromPoint(e->pos())));
-    ImageRect image(0, 0, parent->getImageSize().width(), parent->getImageSize().height());
+    QRect sRect(parentView->toScreenRect(selection));
+    ImagePoint ip(parentView->toImagePoint(ScreenPoint::fromPoint(e->pos())));
+    ImageRect image(0, 0, parentView->getImageSize().width(), parentView->getImageSize().height());
     left = right = top = bottom = move = false;
     if (isOnNw(sRect, e->pos())) {
         dragStart = ip;
@@ -212,7 +214,7 @@ void CropViewTool::mousePressEvent(QMouseEvent *e) {
         preDragSelection = selection;
         right = bottom = true;
         emit selectionChanged(selection);
-        parent->viewport()->update();
+        parentView->viewport()->update();
     }
 }
 

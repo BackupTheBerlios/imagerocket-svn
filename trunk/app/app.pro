@@ -41,6 +41,6 @@ RCC_DIR = tmp
 CONFIG += warn_on
 CONFIG -= debug_and_release
 QT += network
-win32:LIBS += ../lua.dll pixmapview.dll
-unix:LIBS += ../liblua.so ../libpixmapview.so
+win32:LIBS += ../lua.dll ../pixview.dll
+unix:LIBS += ../liblua.so ../libpixview.so
 

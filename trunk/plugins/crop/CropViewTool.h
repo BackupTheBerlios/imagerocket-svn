@@ -21,7 +21,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "interfaces.h"
 #include "PixmapView.h"
 
-class CropViewTool : public PixmapViewTool {
+class CropViewTool : public QObject, public PixmapViewTool {
 Q_OBJECT
 public:
     CropViewTool();

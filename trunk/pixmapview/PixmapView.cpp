@@ -38,6 +38,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 PixmapView::PixmapView(QWidget *parent, int pieceSize)
             : QAbstractScrollArea(parent) {
     zoom = 1.0;
+    tool = NULL;
     inResizeEvent = false;
     blockDrawing = false;
     brokenImage = false;
@@ -451,10 +452,9 @@ QSize PixmapView::getMargin() const {
 }
 
 void PixmapView::setTool(PixmapViewTool *tool) {
-    delete this->tool;
     this->tool = tool;
     if (tool) {
-        connect(tool, SIGNAL(destroyed()), SLOT(update()));
+        tool->setParent(this);
     }
     viewport()->update();
 }

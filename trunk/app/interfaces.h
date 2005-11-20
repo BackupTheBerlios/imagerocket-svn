@@ -35,11 +35,11 @@ public:
 };
 
 class AddChangeToolEvent : public QEvent {
-    public:
-        QPixmap *pixmap;
-        AddChangeToolEvent() : QEvent(static_cast < QEvent::Type > (QEvent::User+1)) {
-            pixmap = NULL;
-        }
+public:
+    QPixmap *pixmap;
+    AddChangeToolEvent() : QEvent(static_cast < QEvent::Type > (QEvent::User+1)) {
+        pixmap = NULL;
+    }
 };
 
 class PluginInterface {

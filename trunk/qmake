@@ -1,2 +1,0 @@
-QTDIR=/usr/local/Trolltech/Qt-4.0.1 /usr/local/Trolltech/Qt-4.0.1/bin/qmake "CONFIG+=debug"
-
