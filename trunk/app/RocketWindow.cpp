@@ -615,12 +615,14 @@ void RocketWindow::lastClicked() {
 }
 
 void RocketWindow::undoClicked() {
+    setToolSettingsToolBar(NULL);
     RocketImage *image = images.getAsRocketImage(index);
     image->undo();
     updateShownPixmap();
 }
 
 void RocketWindow::redoClicked() {
+    setToolSettingsToolBar(NULL);
     RocketImage *image = images.getAsRocketImage(index);
     image->redo();
     updateShownPixmap();
@@ -689,7 +691,7 @@ void RocketWindow::questionClicked(RocketImage *img) {
 }
 
 void RocketWindow::toolClicked(QListWidgetItem *item) {
-    if (item) {
+    if (item && item->backgroundColor() != palette().highlight().color()) {
         int pluginIndex = item->data(Qt::UserRole).toInt();
         RocketImage *image = images.getAsRocketImage(index);
         QObject *plugin = plugins[pluginIndex];

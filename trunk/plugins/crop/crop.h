@@ -56,32 +56,35 @@ signals:
 class CropWidget : public QWidget, public Ui::CropWidget {
     public:
         QHBoxLayout *hboxLayout;
+        QWidget *labelContainer;
         QStackedLayout *stackedLayout;
         QLabel *lblClickAndDrag;
-        QPushButton *btnOk, *btnCancel;
-        QWidget *controls;
+        QPushButton *btnCancel2;
+        QWidget *controlContainer;
         CropWidget(QWidget *parent) : QWidget(parent) {
             QPalette p;
             p.setColor(QPalette::Background, Qt::red);
             setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-            controls = new QWidget(this);
-            setupUi(controls);
-            hboxLayout = new QHBoxLayout(this);
-            hboxLayout->setMargin(4);
-            stackedLayout = new QStackedLayout();
-            stackedLayout->setMargin(0);
-            lblClickAndDrag = new QLabel(this);
-            lblClickAndDrag->setText("<html><span style=\"font-size:12pt; font-style:italic; color:#696969;\">"
+            
+            //page 1
+            labelContainer = new QWidget(this);
+            gridLayout = new QGridLayout(labelContainer); gridLayout->setMargin(3);
+            lblClickAndDrag = new QLabel(labelContainer);
+            lblClickAndDrag->setText("<html><span style=\"font-size:12pt; color:#696969;\">"
                     "Click and Drag Mouse to Select Area</span></html>");
-            stackedLayout->addWidget(lblClickAndDrag);
-            stackedLayout->addWidget(controls);
-            hboxLayout->addLayout(stackedLayout);
-            hboxLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-            btnOk = new QPushButton(tr("OK"), this);
-            hboxLayout->addWidget(btnOk);
-            btnCancel = new QPushButton(tr("Cancel"), this);
-            btnCancel->setFocusPolicy(Qt::NoFocus);
-            hboxLayout->addWidget(btnCancel);
+            gridLayout->addWidget(lblClickAndDrag, 1, 0, 1, 1);
+            gridLayout->setColumnStretch(1, 65535);
+            btnCancel2 = new QPushButton(tr("Cancel"), labelContainer);
+            btnCancel2->setFocusPolicy(Qt::NoFocus);
+            gridLayout->addWidget(btnCancel2, 1, 2);
+            
+            //page 2
+            controlContainer = new QWidget(this);
+            setupUi(controlContainer);
+            stackedLayout = new QStackedLayout(this);
+            
+            stackedLayout->addWidget(labelContainer);
+            stackedLayout->addWidget(controlContainer);
         }
 };
 

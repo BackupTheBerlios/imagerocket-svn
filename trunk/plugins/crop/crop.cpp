@@ -67,6 +67,7 @@ QWidget *Crop::getSettingsToolBar(QPixmap *pix) {
             SIGNAL(activated()), settingsToolBar->btnCancel, SIGNAL(clicked()));
     connect(settingsToolBar->btnOk, SIGNAL(clicked()), SLOT(okClicked()));
     connect(settingsToolBar->btnCancel, SIGNAL(clicked()), SLOT(cancelClicked()));
+    connect(settingsToolBar->btnCancel2, SIGNAL(clicked()), SLOT(cancelClicked()));
     connect(settingsToolBar->spnX, SIGNAL(valueChanged(int)), SLOT(spinBoxesValueChanged()));
     connect(settingsToolBar->spnY, SIGNAL(valueChanged(int)), SLOT(spinBoxesValueChanged()));
     connect(settingsToolBar->spnW, SIGNAL(valueChanged(int)), SLOT(spinBoxesValueChanged()));

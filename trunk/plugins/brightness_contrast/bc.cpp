@@ -2,6 +2,8 @@
 #include <cassert>
 #include <algorithm>
 
+bool BrightnessContrast::previewCheckedByDefault = true;
+
 void BrightnessContrast::init(QString &fileName, lua_State *L, QObject *parent) {
     this->fileName = fileName;
     this->parent = parent;
@@ -69,7 +71,9 @@ QWidget *BrightnessContrast::getSettingsToolBar(QPixmap *pix) {
     connect(settingsToolBar->chkPreview, SIGNAL(toggled(bool)), SLOT(previewToggled(bool)));
     connect(settingsToolBar->sldBrightness, SIGNAL(valueChanged(int)), SLOT(sliderValueChanged(int)));
     connect(settingsToolBar->sldContrast, SIGNAL(valueChanged(int)), SLOT(sliderValueChanged(int)));
-    connect(&updateTimer, SIGNAL(timeout()), SLOT(emitUpdatedPreview()));
+    connect(settingsToolBar, SIGNAL(destroyed()), SLOT(sendPreviewOff()));
+    connect(&updateTimer, SIGNAL(timeout()), SLOT(updatePreview()));
+    settingsToolBar->chkPreview->setChecked(previewCheckedByDefault);
     return settingsToolBar;
 }
 
@@ -101,29 +105,35 @@ void BrightnessContrast::okClicked() {
     event->pixmap = new QPixmap(QPixmap::fromImage(*img));
     delete img;
     QCoreApplication::sendEvent(parent, event);
-    previewToggled(false);
     delete pix;
     delete settingsToolBar;
 }
 
 void BrightnessContrast::cancelClicked() {
-    previewToggled(false);
+    sendPreviewOff();
     delete pix;
     delete settingsToolBar;
 }
 
 void BrightnessContrast::previewToggled(bool checked) {
-    if (pix && checked) {
-        emitUpdatedPreview();
-    } else if (pix) {
-        UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
-        QCoreApplication::sendEvent(parent, event);
-        updateTimer.stop();
+    previewCheckedByDefault = checked;
+    updatePreview(settingsToolBar->chkPreview->isChecked());
+}
+
+void BrightnessContrast::updatePreview(bool checked) {
+    if (checked) {
+        sendPreviewOn();
+    } else {
+        sendPreviewOff();
     }
 }
 
-void BrightnessContrast::emitUpdatedPreview() {
-    if (pix && settingsToolBar->chkPreview->isChecked()) {
+void BrightnessContrast::updatePreview() {
+    updatePreview(settingsToolBar->chkPreview->isChecked());
+}
+
+void BrightnessContrast::sendPreviewOn() {
+    if (pix) {
         UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
         QImage *img = activate(pix);
         event->pixmap = new QPixmap(QPixmap::fromImage(*img));
@@ -132,9 +142,17 @@ void BrightnessContrast::emitUpdatedPreview() {
     }
 }
 
+void BrightnessContrast::sendPreviewOff() {
+    if (pix) {
+        UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
+        QCoreApplication::sendEvent(parent, event);
+        updateTimer.stop();
+    }
+}
+
 void BrightnessContrast::sliderValueChanged(int value) {
     if (pix) {
-        updateTimer.start(1000);
+        updateTimer.start(750);
     }
 }
 

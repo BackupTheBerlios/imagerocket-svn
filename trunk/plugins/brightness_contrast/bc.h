@@ -16,6 +16,7 @@ protected:
     QObject *parent;
     QTimer updateTimer;
     void run();
+    static bool previewCheckedByDefault;
 public:
     virtual void init(QString &fileName, lua_State *L, QObject *parent);
     virtual QImage *activate(QPixmap *pix);
@@ -30,7 +31,10 @@ protected slots:
     void cancelClicked();
     void previewToggled(bool);
     void sliderValueChanged(int);
-    void emitUpdatedPreview();
+    void updatePreview(bool checked);
+    void updatePreview();
+    void sendPreviewOn();
+    void sendPreviewOff();
 };
 
 class BrightnessContrastWidget : public QWidget, public Ui::BrightnessContrastWidget {
