@@ -21,6 +21,11 @@
 <file>pixmaps/x.png</file>
 <file>pixmaps/questionMark.png</file>
 <file>pixmaps/smallTransparentTile.png</file>
+<file>pixmaps/rotate90.png</file>
+<file>pixmaps/rotate180.png</file>
+<file>pixmaps/rotate270.png</file>
+<file>pixmaps/flipv.png</file>
+<file>pixmaps/mirror.png</file>
 </qresource>
 </RCC>
 

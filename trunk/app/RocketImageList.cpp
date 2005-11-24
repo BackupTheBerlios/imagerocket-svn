@@ -85,13 +85,15 @@ void RocketImageList::continueThumbnailGeneration() {
     bool block = false;
     QSettings settings;
     int maxFileSize = settings.value("thumbnail/maxFileSize", 3000000).toInt();
+    int thumbnailSize = settings.value("thumbnail/size", 64).toInt();
     foreach (RocketImage *i, list) {
         if (!block && i->getStatusIconIndex() == RocketImage::Loading) {
             QFileInfo info(i->getFileName());
             if (info.size() > maxFileSize) {
                 i->setThumbnail(RocketImage::TooLarge);
             } else {
-                generator->loadImage(i->getFileName());
+                generator->loadImage(i->getFileName(), QSize(thumbnailSize, thumbnailSize),
+                        Qt::KeepAspectRatio);
                 block = true;
             }
         }
@@ -124,15 +126,11 @@ int RocketImageList::getIndex() {
 }
 
 void RocketImageList::updateThumbnail(const QString fileName, const QImage thumbnail) {
-    QSettings settings;
-    int thumbnailSize = settings.value("thumbnail/size", 64).toInt();
     foreach (RocketImage *i, list) {
         bool nameMatch = (i->getFileName() == fileName);
         if (nameMatch && !thumbnail.isNull()) {
             if (i->getStatusIconIndex() == RocketImage::Loading) {
-                QPixmap tmp(QPixmap::fromImage(
-                        thumbnail.scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio)));
-                i->setThumbnailWithBackground(tmp);
+                i->setThumbnailWithBackground(QPixmap::fromImage(thumbnail));
             }
         } else if (nameMatch) {
             i->setThumbnail(RocketImage::Broken);

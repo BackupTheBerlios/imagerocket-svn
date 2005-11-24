@@ -47,9 +47,9 @@ RocketImage::~RocketImage() {
 }
 
 void RocketImage::addChange(const QPixmap &pix) {
-    changes.insert(index+1, pix);
-    index = index+1;
-    if (index+1<changes.size()-1) {
+    ++index;
+    changes.insert(index, pix);
+    if (index < changes.size()-1) {
         changes.remove(index+1, changes.size()-index-1);
     }
     if (index == savedIndex) {

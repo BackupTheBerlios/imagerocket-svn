@@ -51,11 +51,14 @@ protected:
     int index;
     bool previewsHidden;
     QLabel *statusFile, *statusZoom, *statusSize;
-    QMenu *mFile, *mEdit, *mView, *mHelp;
+    QMenu *mFile, *mEdit, *mView, *mImage, *mHelp;
     QAction *aOpenFolder, *aSaveFolder, *aExit;
     QAction *aFirst, *aBack, *aForward, *aLast;
     QAction *aUseLargeThumbnails;
     QAction *aZoomOut, *aZoom100, *aZoomIn, *aZoomFit;
+    QSignalMapper rotateMapper;
+    QActionGroup *rotateGroup;
+    QAction *aRotate90, *aRotate180, *aRotate270, *aFlipVertical, *aMirror;
     QAction *aUndo, *aRedo;
     QAction *aCheckForUpdates, *aAbout;
     QDockWidget *dPalette, *dFiles;
@@ -81,27 +84,31 @@ protected slots:
     void initGUI();
     void initObject();
     
-    void openFolderClicked();
-    void saveFolderClicked();
-    void exitClicked();
+    void openFolderTriggered();
+    void saveFolderTriggered();
+    void exitTriggered();
     
-    void firstClicked();
-    void backClicked();
-    void forwardClicked();
-    void lastClicked();
+    void firstTriggered();
+    void backTriggered();
+    void forwardTriggered();
+    void lastTriggered();
     
     void useLargeThumbnailsToggled(bool);
     
-    void undoClicked();
-    void redoClicked();
+    void undoTriggered();
+    void redoTriggered();
     
-    void zoomInClicked();
-    void zoom100Clicked();
-    void zoomOutClicked();
+    void zoomInTriggered();
+    void zoom100Triggered();
+    void zoomOutTriggered();
     void zoomFitToggled(bool);
     
-    void aboutClicked();
-    void checkForUpdatesClicked();
+    void rotateTriggered(int value);
+    void flipTriggered();
+    void mirrorTriggered();
+    
+    void aboutTriggered();
+    void checkForUpdatesTriggered();
     
     void toolClicked(QListWidgetItem *item);
     void imageSaveSettingsToggled(bool value);

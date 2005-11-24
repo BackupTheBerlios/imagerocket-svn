@@ -92,107 +92,136 @@ void RocketWindow::initGUI() {
     status->addWidget(statusSize);
     setStatusBar(status);
     
-    QToolBar *tbar = addToolBar(tr("Main Toolbar"));
+    QToolBar *mainToolBar = addToolBar(tr("Main Toolbar"));
+    QToolBar *imageToolBar = addToolBar(tr("Image Toolbar"));
     mFile = menuBar()->addMenu(tr("&File"));
     mEdit = menuBar()->addMenu(tr("&Edit"));
     mView = menuBar()->addMenu(tr("&View"));
+    mImage = menuBar()->addMenu(tr("&Image"));
     mHelp = menuBar()->addMenu(tr("&Help"));
-    tbar->setIconSize(QSize(24, 24));
+    mainToolBar->setIconSize(QSize(24, 24));
     QAction *a;
-    a = aUndo = new QAction(QIcon(":/pixmaps/undo.png"),
-            tr("&Undo"), this);
-    a->setShortcut(QKeySequence(tr("Ctrl+Z", "undo")));
-    a->setStatusTip(tr("Undo the last operation"));
-    connect(a, SIGNAL(triggered()), SLOT(undoClicked()));
-    tbar->addAction(a);
-    mEdit->addAction(a);
-    a = aRedo = new QAction(QIcon(":/pixmaps/redo.png"),
-            tr("&Redo"), this);
-    a->setShortcut(QKeySequence(tr("Ctrl+Y", "redo")));
-    connect(aRedo, SIGNAL(triggered()), SLOT(redoClicked()));
-    tbar->addAction(a);
-    mEdit->addAction(a);
-    tbar->addSeparator();
-    a = aZoomIn = new QAction(QIcon(":/pixmaps/zoom-in.png"),
-            tr("Zoom &In"), this);
-    a->setShortcut(QKeySequence(tr("=", "zoom in")));
-    connect(a, SIGNAL(triggered()), SLOT(zoomInClicked()));
-    tbar->addAction(a);
-    mView->addAction(a);
-    a = aZoom100 = new QAction(QIcon(":/pixmaps/zoom-100.png"),
-            tr("&Zoom to 100%"), this);
-    a->setShortcut(QKeySequence(tr("_", "zoom 100%")));
-    connect(a, SIGNAL(triggered()), SLOT(zoom100Clicked()));
-    tbar->addAction(a);
-    mView->addAction(a);
-    a = aZoomOut = new QAction(QIcon(":/pixmaps/zoom-out.png"),
-            tr("Zoom &Out"), this);
-    a->setShortcut(QKeySequence(tr("-", "zoom out")));
-    connect(a, SIGNAL(triggered()), SLOT(zoomOutClicked()));
-    tbar->addAction(a);
-    mView->addAction(a);
-    mView->addSeparator();
-    tbar->addSeparator();
-    a = aZoomFit = new QAction(QIcon(":/pixmaps/zoom-fit.png"),
-                               tr("&Fit to Window"), this);
-    a->setShortcut(QKeySequence(tr("+", "fit to window")));
-    a->setCheckable(true);
-    connect(a, SIGNAL(toggled(bool)), SLOT(zoomFitToggled(bool)));
-    tbar->addAction(a);
-    mView->addAction(a);
-    mView->addSeparator();
-    tbar->addSeparator();
-    a = aUseLargeThumbnails = new QAction(tr("Use &Large Thumbnails"), this);
-    a->setShortcut(QKeySequence(tr("Ctrl+L", "use large thumbnails")));
-    connect(a, SIGNAL(toggled(bool)), SLOT(useLargeThumbnailsToggled(bool)));
-    a->setCheckable(true);
-    mView->addAction(a);
-    a = aOpenFolder = new QAction(tr("&Open Folder..."),
-            this);
+    a = aOpenFolder = new QAction(tr("&Open Folder..."), this);
     a->setShortcut(QKeySequence(tr("Ctrl+O", "open folder")));
-    connect(a, SIGNAL(triggered()), SLOT(openFolderClicked()));
+    connect(a, SIGNAL(triggered()), SLOT(openFolderTriggered()));
     mFile->addAction(a);
     mFile->addSeparator();
-    a = aSaveFolder = new QAction(tr("&Save Folder..."),
-                                  this);
+    a = aSaveFolder = new QAction(tr("&Save Folder..."), this);
     a->setShortcut(QKeySequence(tr("Ctrl+S", "save folder")));
-    connect(a, SIGNAL(triggered()), SLOT(saveFolderClicked()));
+    connect(a, SIGNAL(triggered()), SLOT(saveFolderTriggered()));
     mFile->addAction(a);
     mFile->addSeparator();
     a = aFirst = new QAction(QIcon(":/pixmaps/first.png"),
             tr("To &First"), this);
     a->setShortcut(QKeySequence(tr("Home", "to first")));
-    connect(a, SIGNAL(triggered()), SLOT(firstClicked()));
-    tbar->addAction(a);
+    connect(a, SIGNAL(triggered()), SLOT(firstTriggered()));
+    mainToolBar->addAction(a);
     mFile->addAction(a);
     a = aBack = new QAction(QIcon(":/pixmaps/back.png"),
             tr("&Back"), this);
     a->setShortcut(QKeySequence(tr("Backspace", "go back")));
-    connect(a, SIGNAL(triggered()), SLOT(backClicked()));
-    tbar->addAction(a);
+    connect(a, SIGNAL(triggered()), SLOT(backTriggered()));
+    mainToolBar->addAction(a);
     mFile->addAction(a);
-    a = aForward = new QAction(QIcon(":/pixmaps/forward.png"),
-            tr("&Forward"), this);
+    a = aForward = new QAction(QIcon(":/pixmaps/forward.png"), tr("&Forward"), this);
     a->setShortcut(QKeySequence(tr("Space", "go forward")));
-    connect(a, SIGNAL(triggered()), SLOT(forwardClicked()));
-    tbar->addAction(a);
+    connect(a, SIGNAL(triggered()), SLOT(forwardTriggered()));
+    mainToolBar->addAction(a);
     mFile->addAction(a);
-    a = aLast = new QAction(QIcon(":/pixmaps/last.png"),
-            tr("To &Last"), this);
+    a = aLast = new QAction(QIcon(":/pixmaps/last.png"), tr("To &Last"), this);
     a->setShortcut(QKeySequence(tr("End", "to last")));
-    connect(a, SIGNAL(triggered()), SLOT(lastClicked()));
-    tbar->addAction(a);
+    connect(a, SIGNAL(triggered()), SLOT(lastTriggered()));
+    mainToolBar->addAction(a);
     mFile->addAction(a);
     mFile->addSeparator();
+    a = aZoomIn = new QAction(QIcon(":/pixmaps/zoom-in.png"),
+            tr("Zoom &In"), this);
+    a->setShortcut(QKeySequence(tr("=", "zoom in")));
+    connect(a, SIGNAL(triggered()), SLOT(zoomInTriggered()));
+    imageToolBar->addAction(a);
+    mView->addAction(a);
+    a = aZoom100 = new QAction(QIcon(":/pixmaps/zoom-100.png"),
+            tr("&Zoom to 100%"), this);
+    a->setShortcut(QKeySequence(tr("_", "zoom 100%")));
+    connect(a, SIGNAL(triggered()), SLOT(zoom100Triggered()));
+    imageToolBar->addAction(a);
+    mView->addAction(a);
+    a = aZoomOut = new QAction(QIcon(":/pixmaps/zoom-out.png"),
+            tr("Zoom &Out"), this);
+    a->setShortcut(QKeySequence(tr("-", "zoom out")));
+    connect(a, SIGNAL(triggered()), SLOT(zoomOutTriggered()));
+    imageToolBar->addAction(a);
+    mView->addAction(a);
+    mView->addSeparator();
+    a = aZoomFit = new QAction(QIcon(":/pixmaps/zoom-fit.png"),
+                               tr("&Fit to Window"), this);
+    a->setShortcut(QKeySequence(tr("+", "fit to window")));
+    a->setCheckable(true);
+    connect(a, SIGNAL(toggled(bool)), SLOT(zoomFitToggled(bool)));
+    imageToolBar->addAction(a);
+    imageToolBar->addSeparator();
+    mView->addAction(a);
+    mView->addSeparator();
+    a = aUndo = new QAction(QIcon(":/pixmaps/undo.png"),
+            tr("&Undo"), this);
+    a->setShortcut(QKeySequence(tr("Ctrl+Z", "undo")));
+    a->setStatusTip(tr("Undo the last operation"));
+    connect(a, SIGNAL(triggered()), SLOT(undoTriggered()));
+    imageToolBar->addAction(a);
+    mEdit->addAction(a);
+    a = aRedo = new QAction(QIcon(":/pixmaps/redo.png"),
+            tr("&Redo"), this);
+    a->setShortcut(QKeySequence(tr("Ctrl+Y", "redo")));
+    connect(aRedo, SIGNAL(triggered()), SLOT(redoTriggered()));
+    imageToolBar->addAction(a);
+    mEdit->addAction(a);
+    imageToolBar->addSeparator();
+    a = aUseLargeThumbnails = new QAction(tr("Use &Large Thumbnails"), this);
+    a->setShortcut(QKeySequence(tr("Ctrl+L", "use large thumbnails")));
+    connect(a, SIGNAL(toggled(bool)), SLOT(useLargeThumbnailsToggled(bool)));
+    a->setCheckable(true);
+    mView->addAction(a);
     a = aExit = new QAction(tr("E&xit"), this);
-    connect(a, SIGNAL(triggered()), SLOT(exitClicked()));
+    connect(a, SIGNAL(triggered()), SLOT(exitTriggered()));
     mFile->addAction(a);
+    rotateGroup = new QActionGroup(this);
+    a = aRotate270 = new QAction(QIcon(":/pixmaps/rotate270.png"),
+            trUtf8("Rotate &-90°"), rotateGroup);
+    a->setShortcut(QKeySequence(tr("[", "rotate -90 degrees")));
+    connect(a, SIGNAL(triggered()), &rotateMapper, SLOT(map()));
+    rotateMapper.setMapping(a, 270);
+    mImage->addAction(a);
+    imageToolBar->addAction(a);
+    a = aRotate90 = new QAction(QIcon(":/pixmaps/rotate90.png"),
+            trUtf8("Rotate &90°"), rotateGroup);
+    a->setShortcut(QKeySequence(tr("]", "rotate 90 degrees")));
+    connect(a, SIGNAL(triggered()), &rotateMapper, SLOT(map()));
+    rotateMapper.setMapping(a, 90);
+    mImage->addAction(a);
+    imageToolBar->addAction(a);
+    a = aRotate180 = new QAction(QIcon(":/pixmaps/rotate180.png"),
+            trUtf8("Rotate &180°"), rotateGroup);
+    connect(a, SIGNAL(triggered()), &rotateMapper, SLOT(map()));
+    rotateMapper.setMapping(a, 180);
+    mImage->addAction(a);
+    mImage->addSeparator();
+    connect(&rotateMapper, SIGNAL(mapped(int)), SLOT(rotateTriggered(int)));
+    a = aFlipVertical = new QAction(QIcon(":/pixmaps/flipv.png"),
+            tr("&Flip"), rotateGroup);
+    connect(a, SIGNAL(triggered()), SLOT(flipTriggered()));
+    mImage->addAction(a);
+    imageToolBar->addAction(a);
+    a = aMirror = new QAction(QIcon(":/pixmaps/mirror.png"),
+            tr("&Mirror"), rotateGroup);
+    connect(a, SIGNAL(triggered()), SLOT(mirrorTriggered()));
+    mImage->addAction(a);
+    imageToolBar->addAction(a);
     a = aCheckForUpdates = new QAction(tr("Check for &Updates"), this);
-    connect(a, SIGNAL(triggered()), SLOT(checkForUpdatesClicked()));
+    connect(a, SIGNAL(triggered()), SLOT(checkForUpdatesTriggered()));
     mHelp->addAction(a);
     mHelp->addSeparator();
     a = aAbout = new QAction(tr("&About"), this);
-    connect(a, SIGNAL(triggered()), SLOT(aboutClicked()));
+    connect(a, SIGNAL(triggered()), SLOT(aboutTriggered()));
     mHelp->addAction(a);
     
     useLargeThumbnailsToggled(false);
@@ -284,7 +313,8 @@ void RocketWindow::initObject() {
     }
     loadPlugins("/usr/local/imagerocket/plugins");
     
-    //QTimer::singleShot(random() % 100, this, SLOT(close())); //debugging crash test - use with prog_test.sh
+    ////debugging crash test - use with prog_test.sh
+    //QTimer::singleShot(random() % 100, this, SLOT(close()));
 }
 
 #ifdef Q_WS_WIN
@@ -298,14 +328,11 @@ void RocketWindow::loadPlugins(QString dirPath) {
     if (!dir.exists()) {
         return;
     }
-    QStringList dirList(dir.entryList(QDir::Dirs|QDir::Readable));
+    QStringList dirList(dir.entryList(QDir::Dirs|QDir::Readable|QDir::NoDotAndDotDot));
     foreach (QString file, dirList) {
-        if (file == "." || file == "..") {
-            continue;
-        }
         QString dir2s = dir.filePath(file);
         QDir dir2(dir2s);
-        QStringList dir2List(dir2.entryList(QDir::Files|QDir::Readable));
+        QStringList dir2List(dir2.entryList(QDir::Files|QDir::Readable|QDir::NoDotAndDotDot));
         foreach (QString file2, dir2List) {
             QString f(dir2.filePath(file2));
             if (QLibrary::isLibrary(f)) {
@@ -397,6 +424,7 @@ void RocketWindow::updateGui() {
     aZoom100->setEnabled(notNull);
     aZoomOut->setEnabled(notNull && view->getZoom() / 2 > 0.01);
     aZoomFit->setEnabled(notNull);
+    rotateGroup->setEnabled(notNull);
     RocketImage *img = images.size() ? images.getAsRocketImage(index) : NULL;
     aUndo->setEnabled(img ? img->canUndo() : false);
     aRedo->setEnabled(img ? img->canRedo() : false);
@@ -482,7 +510,7 @@ void RocketWindow::previewClicked(int index) {
     setIndex(index);
 }
 
-void RocketWindow::openFolderClicked() {
+void RocketWindow::openFolderTriggered() {
     QString s = QFileDialog::getExistingDirectory(this, tr("Open Folder..."), lastDir);
     if (s.isEmpty()) {
         return;
@@ -493,7 +521,7 @@ void RocketWindow::openFolderClicked() {
     setDirectory(s);
 }
 
-void RocketWindow::saveFolderClicked() {
+void RocketWindow::saveFolderTriggered() {
     RocketSaveDialog dialog(this);
     if (dialog.exec() == QDialog::Accepted) {
         RocketSaveDialog::SaveType type = dialog.getSaveType();
@@ -594,41 +622,41 @@ bool RocketWindow::eventFilter(QObject *watched, QEvent *e) {
     return false;
 }
 
-void RocketWindow::exitClicked() {
+void RocketWindow::exitTriggered() {
     close();
 }
 
-void RocketWindow::firstClicked() {
+void RocketWindow::firstTriggered() {
     setIndex(0);
 }
 
-void RocketWindow::backClicked() {
+void RocketWindow::backTriggered() {
     setIndex(index - 1);
 }
 
-void RocketWindow::forwardClicked() {
+void RocketWindow::forwardTriggered() {
     setIndex(index + 1);
 }
 
-void RocketWindow::lastClicked() {
+void RocketWindow::lastTriggered() {
     setIndex(images.size() - 1);
 }
 
-void RocketWindow::undoClicked() {
+void RocketWindow::undoTriggered() {
     setToolSettingsToolBar(NULL);
     RocketImage *image = images.getAsRocketImage(index);
     image->undo();
     updateShownPixmap();
 }
 
-void RocketWindow::redoClicked() {
+void RocketWindow::redoTriggered() {
     setToolSettingsToolBar(NULL);
     RocketImage *image = images.getAsRocketImage(index);
     image->redo();
     updateShownPixmap();
 }
 
-void RocketWindow::zoomInClicked() {
+void RocketWindow::zoomInTriggered() {
     //find a zoom value one step larger than current zoom
     double z = 0.015625;
     do {z *= 2;} while (z < 16.0 && view->getZoom() >= z);
@@ -637,7 +665,7 @@ void RocketWindow::zoomInClicked() {
     setZoom(z);
 }
 
-void RocketWindow::zoomOutClicked() {
+void RocketWindow::zoomOutTriggered() {
     //find a zoom value one step smaller than current zoom
     double z = 16.0;
     do {z /= 2;} while (z > 0.015625 && view->getZoom() <= z);
@@ -646,7 +674,7 @@ void RocketWindow::zoomOutClicked() {
     setZoom(z);
 }
 
-void RocketWindow::zoom100Clicked() {
+void RocketWindow::zoom100Triggered() {
     aZoomFit->setChecked(false);
     if (view->getZoom() != 1.0) {
         setZoom(1.0);
@@ -658,6 +686,34 @@ void RocketWindow::zoomFitToggled(bool value) {
     if (!value) {
         setZoom(1.0);
     }
+}
+
+void RocketWindow::rotateTriggered(int degrees) {
+    //XXX As of Qt 4.1.0, image rotation is broken. Extra rows of transparent pixels are
+    //added to the rotated image. I've filed this as a bug, and it may be fixed in 4.1.1. - WJC
+    delete toolSettingsToolBar;
+    toolSettingsToolBar = NULL;
+    RocketImage *image = images.getAsRocketImage(index);
+    QMatrix matrix;
+    matrix.rotate(degrees);
+    image->addChange(image->getPixmap().transformed(matrix));
+    updateShownPixmap();
+}
+
+void RocketWindow::flipTriggered() {
+    delete toolSettingsToolBar;
+    toolSettingsToolBar = NULL;
+    RocketImage *image = images.getAsRocketImage(index);
+    image->addChange(QPixmap::fromImage(image->getPixmap().toImage().mirrored(false, true)));
+    updateShownPixmap();
+}
+
+void RocketWindow::mirrorTriggered() {
+    delete toolSettingsToolBar;
+    toolSettingsToolBar = NULL;
+    RocketImage *image = images.getAsRocketImage(index);
+    image->addChange(QPixmap::fromImage(image->getPixmap().toImage().mirrored(true, false)));
+    updateShownPixmap();
 }
 
 void RocketWindow::useLargeThumbnailsToggled(bool value) {
@@ -740,12 +796,12 @@ void RocketWindow::toolSettingsToolBarDestroyed() {
     if (!done) imageSaveSettingsButton->setChecked(false);
 }
 
-void RocketWindow::aboutClicked() {
+void RocketWindow::aboutTriggered() {
     RocketAboutDialog about(this);
     about.exec();
 }
 
-void RocketWindow::checkForUpdatesClicked() {
+void RocketWindow::checkForUpdatesTriggered() {
     delete updateChecker;
     updateChecker = new RocketUpdateChecker(this);
     connect(updateChecker, SIGNAL(done(bool)), SLOT(updateCheckerDone(bool)));
