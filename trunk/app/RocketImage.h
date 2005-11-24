@@ -28,6 +28,10 @@ public:
     RocketImage(const QString &fileName);
     ~RocketImage();
     QPixmap getPixmap() {return changes[index];}
+    QString getDescription() {return descriptions[index];}
+    QString getDescriptionOfNext() {
+        return canRedo() ? descriptions[index+1] : QString();
+    }
     int getIndex() {return index;}
     bool canUndo() {return index > 0;}
     bool canRedo() {return index < changes.size()-1;}
@@ -47,7 +51,7 @@ public slots:
     
     void save(const QString &name);
     
-    void addChange(const QPixmap &pix);
+    void addChange(const QPixmap &pix, QString description);
     void setActive(bool value);
     void setSaved();
     
@@ -67,6 +71,7 @@ protected:
     void setSelected(bool value);
     friend void RocketImageList::setIndex(int index);
     QVector < QPixmap > changes;
+    QVector < QString > descriptions;
     int index;
     int saveFormat, saveQuality;
     bool saveProgressive;

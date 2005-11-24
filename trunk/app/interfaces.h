@@ -37,6 +37,7 @@ public:
 class AddChangeToolEvent : public QEvent {
 public:
     QPixmap *pixmap;
+    QString changeDesc;
     AddChangeToolEvent() : QEvent(static_cast < QEvent::Type > (QEvent::User+1)) {
         pixmap = NULL;
     }

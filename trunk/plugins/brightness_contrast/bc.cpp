@@ -103,8 +103,20 @@ void BrightnessContrast::okClicked() {
     AddChangeToolEvent *event = new AddChangeToolEvent;
     QImage *img = activate(pix);
     event->pixmap = new QPixmap(QPixmap::fromImage(*img));
+    int bright = settingsToolBar->sldBrightness->value();
+    int contrast = settingsToolBar->sldContrast->value();
+    QString text;
     delete img;
-    QCoreApplication::sendEvent(parent, event);
+    if (bright && contrast) {
+        event->changeDesc = tr("Brighten %1/Contrast %2").arg(bright).arg(contrast);
+        QCoreApplication::sendEvent(parent, event);
+    } else if (bright) {
+        event->changeDesc = tr("Brighten %1").arg(bright);
+        QCoreApplication::sendEvent(parent, event);
+    } else if (contrast) {
+        event->changeDesc = tr("Contrast %1").arg(contrast);
+        QCoreApplication::sendEvent(parent, event);
+    }
     delete pix;
     delete settingsToolBar;
 }

@@ -427,7 +427,11 @@ void RocketWindow::updateGui() {
     rotateGroup->setEnabled(notNull);
     RocketImage *img = images.size() ? images.getAsRocketImage(index) : NULL;
     aUndo->setEnabled(img ? img->canUndo() : false);
+    aUndo->setText((img && img->canUndo())
+            ? tr("&Undo %1").arg(img->getDescription()) : tr("&Undo"));
     aRedo->setEnabled(img ? img->canRedo() : false);
+    aRedo->setText((img && img->canRedo())
+            ? tr("&Redo %1").arg(img->getDescriptionOfNext()) : tr("&Redo"));
     aSaveFolder->setEnabled(images.size());
     toolbox->setEnabled(notNull);
     imageSaveSettingsButton->setEnabled(notNull);
@@ -566,7 +570,7 @@ bool RocketWindow::event(QEvent *e) {
     } else if (e->type() == 1001) {
         AddChangeToolEvent *event = static_cast < AddChangeToolEvent * >(e);
         RocketImage *image = images.getAsRocketImage(index);
-        image->addChange(*event->pixmap);
+        image->addChange(*event->pixmap, event->changeDesc);
         updateShownPixmap();
         delete event->pixmap;
         return true;
@@ -696,7 +700,7 @@ void RocketWindow::rotateTriggered(int degrees) {
     RocketImage *image = images.getAsRocketImage(index);
     QMatrix matrix;
     matrix.rotate(degrees);
-    image->addChange(image->getPixmap().transformed(matrix));
+    image->addChange(image->getPixmap().transformed(matrix), trUtf8("Rotate %1°").arg(degrees));
     updateShownPixmap();
 }
 
@@ -704,7 +708,8 @@ void RocketWindow::flipTriggered() {
     delete toolSettingsToolBar;
     toolSettingsToolBar = NULL;
     RocketImage *image = images.getAsRocketImage(index);
-    image->addChange(QPixmap::fromImage(image->getPixmap().toImage().mirrored(false, true)));
+    image->addChange(QPixmap::fromImage(image->getPixmap().toImage().mirrored(false, true)),
+            tr("Vertical Flip"));
     updateShownPixmap();
 }
 
@@ -712,7 +717,8 @@ void RocketWindow::mirrorTriggered() {
     delete toolSettingsToolBar;
     toolSettingsToolBar = NULL;
     RocketImage *image = images.getAsRocketImage(index);
-    image->addChange(QPixmap::fromImage(image->getPixmap().toImage().mirrored(true, false)));
+    image->addChange(QPixmap::fromImage(image->getPixmap().toImage().mirrored(true, false)),
+            tr("Mirror"));
     updateShownPixmap();
 }
 

@@ -119,6 +119,7 @@ void Crop::okClicked() {
     AddChangeToolEvent *event = new AddChangeToolEvent;
     QImage *img = activate(pix);
     event->pixmap = new QPixmap(QPixmap::fromImage(*img));
+    event->changeDesc = tr("Crop");
     delete img;
     QCoreApplication::sendEvent(parent, event);
     delete pix;

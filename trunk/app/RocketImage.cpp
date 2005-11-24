@@ -25,6 +25,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 RocketImage::RocketImage(const QString &fileName) {
     changes.append(QPixmap());
+    descriptions.append(QString());
     index = 0;
     savedIndex = 0;
     saveFormat = 0;
@@ -46,11 +47,13 @@ RocketImage::RocketImage(const QString &fileName) {
 RocketImage::~RocketImage() {
 }
 
-void RocketImage::addChange(const QPixmap &pix) {
+void RocketImage::addChange(const QPixmap &pix, QString description) {
     ++index;
     changes.insert(index, pix);
+    descriptions.insert(index, description);
     if (index < changes.size()-1) {
         changes.remove(index+1, changes.size()-index-1);
+        descriptions.remove(index+1, changes.size()-index-1);
     }
     if (index == savedIndex) {
         //in-memory pixmaps will never again match the file on disk, to the program's knowledge,
