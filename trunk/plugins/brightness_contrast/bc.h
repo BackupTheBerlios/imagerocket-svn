@@ -9,14 +9,6 @@ class BrightnessContrastWidget;
 class BrightnessContrast : public QObject, public PluginInterface, public ToolInterface {
 Q_OBJECT
 Q_INTERFACES(PluginInterface ToolInterface)
-protected:
-    QPointer < BrightnessContrastWidget > settingsToolBar;
-    QString fileName;
-    QPixmap *pix;
-    QObject *parent;
-    QTimer updateTimer;
-    void run();
-    static bool previewCheckedByDefault;
 public:
     virtual void init(QString &fileName, lua_State *L, QObject *parent);
     virtual QImage *activate(QPixmap *pix);
@@ -25,7 +17,16 @@ public:
     virtual PixmapViewTool *getViewTool();
     virtual void reset();
     virtual int length();
-    QListWidgetItem *createListEntry(QListWidget *parent);
+    virtual QListWidgetItem *createListEntry(QListWidget *parent);
+    virtual QKeySequence getShortcutSequence();
+protected:
+    QPointer < BrightnessContrastWidget > settingsToolBar;
+    QString fileName;
+    QPixmap *pix;
+    QObject *parent;
+    QTimer updateTimer;
+    void run();
+    static bool previewCheckedByDefault;
 protected slots:
     void okClicked();
     void cancelClicked();

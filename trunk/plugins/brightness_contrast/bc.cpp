@@ -94,9 +94,14 @@ QListWidgetItem *BrightnessContrast::createListEntry(QListWidget *parent) {
     QString name(thisDir.filePath("bc.png"));
     QIcon icon(name);
     QListWidgetItem *item = new QListWidgetItem(tr("Bright/Contrast"), parent);
+    item->setToolTip(tr("Brightness/Contrast - b"));
     item->setIcon(icon);
     item->setFlags(Qt::ItemIsEnabled);
     return item;
+}
+
+QKeySequence BrightnessContrast::getShortcutSequence() {
+    return QKeySequence(tr("b", "brightness/contrast tool"));
 }
 
 void BrightnessContrast::okClicked() {

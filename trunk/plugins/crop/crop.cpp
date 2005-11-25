@@ -63,8 +63,12 @@ QWidget *Crop::getSettingsToolBar(QPixmap *pix) {
             settingsToolBar->btnOk, SIGNAL(clicked()));
     connect(new QShortcut(QKeySequence("Enter"), settingsToolBar->btnOk), SIGNAL(activated()),
             settingsToolBar->btnOk, SIGNAL(clicked()));
+    //Both of the following connections seem to be necessary, since they don't seem to
+    //trigger when their recipient is invisible. I guess this is safe. - WJC
     connect(new QShortcut(QKeySequence("Esc"), settingsToolBar->btnCancel),
             SIGNAL(activated()), settingsToolBar->btnCancel, SIGNAL(clicked()));
+    connect(new QShortcut(QKeySequence("Esc"), settingsToolBar->btnCancel2),
+            SIGNAL(activated()), settingsToolBar->btnCancel2, SIGNAL(clicked()));
     connect(settingsToolBar->btnOk, SIGNAL(clicked()), SLOT(okClicked()));
     connect(settingsToolBar->btnCancel, SIGNAL(clicked()), SLOT(cancelClicked()));
     connect(settingsToolBar->btnCancel2, SIGNAL(clicked()), SLOT(cancelClicked()));
@@ -110,9 +114,14 @@ QListWidgetItem *Crop::createListEntry(QListWidget *parent) {
     QString name(thisDir.filePath("crop.png"));
     QIcon icon(name);
     QListWidgetItem *item = new QListWidgetItem(tr("Crop"), parent);
+    item->setToolTip(tr("Crop - c"));
     item->setIcon(icon);
     item->setFlags(Qt::ItemIsEnabled);
     return item;
+}
+
+QKeySequence Crop::getShortcutSequence() {
+    return QKeySequence(tr("c", "crop tool"));
 }
 
 void Crop::okClicked() {
@@ -128,7 +137,9 @@ void Crop::okClicked() {
 
 void Crop::cancelClicked() {
     delete pix;
+    pix = NULL;
     delete settingsToolBar;
+    
 }
 
 void Crop::updateMaximumValues(ImageRect ir) {

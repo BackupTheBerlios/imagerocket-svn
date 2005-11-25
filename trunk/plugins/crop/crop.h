@@ -34,9 +34,10 @@ public:
     virtual QImage *activate(QImage *img);
     virtual QWidget *getSettingsToolBar(QPixmap *pix);
     virtual PixmapViewTool *getViewTool();
+    virtual QKeySequence getShortcutSequence();
     virtual void reset();
     virtual int length();
-    QListWidgetItem *createListEntry(QListWidget *parent);
+    virtual QListWidgetItem *createListEntry(QListWidget *parent);
 protected:
     QPointer < CropWidget > settingsToolBar;
     QString fileName;
