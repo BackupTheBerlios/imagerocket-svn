@@ -189,7 +189,7 @@ void RocketWindow::initGUI() {
             trUtf8("Rotate &-90°"), rotateGroup);
     a->setShortcut(QKeySequence(tr("[", "rotate -90 degrees")));
     connect(a, SIGNAL(triggered()), &rotateMapper, SLOT(map()));
-    rotateMapper.setMapping(a, 270);
+    rotateMapper.setMapping(a, -90);
     mImage->addAction(a);
     imageToolBar->addAction(a);
     a = aRotate90 = new QAction(QIcon(":/pixmaps/rotate90.png"),
@@ -236,7 +236,7 @@ void RocketWindow::initGUI() {
     toolboxContainer->layout()->setSpacing(3);
     toolbox = new RocketToolBox(toolboxContainer);
     toolboxContainer->layout()->addWidget(toolbox);
-    imageSaveSettingsButton = new QPushButton(tr("Image Save Settings"), toolboxContainer);
+    imageSaveSettingsButton = new QPushButton(tr("Image Save &Settings"), toolboxContainer);
     imageSaveSettingsButton->setCheckable(true);
     connect(imageSaveSettingsButton, SIGNAL(toggled(bool)), SLOT(imageSaveSettingsToggled(bool)));
     toolboxContainer->layout()->addWidget(imageSaveSettingsButton);
@@ -302,6 +302,8 @@ void RocketWindow::initObject() {
         lua_error(L);
     }
     
+    connect(&pluginShortcutMapper, SIGNAL(mapped(int)),
+            SLOT(toolShortcutPressed(int)));
     QDir appDir(QCoreApplication::applicationDirPath());
     loadPlugins(appDir.filePath("plugins"));
     loadPlugins(QDir::home().filePath("imagerocket/plugins"));
@@ -383,6 +385,12 @@ void RocketWindow::loadPlugins(QString dirPath) {
                     QListWidgetItem *i = i2->createListEntry(toolbox);
                     if (i) {
                         i->setData(Qt::UserRole, plugins.count()-1);
+                        QKeySequence seq(i2->getShortcutSequence());
+                        if (!seq.isEmpty()) {
+                            QShortcut *s = new QShortcut(seq, this);
+                            connect(s, SIGNAL(activated()), &pluginShortcutMapper, SLOT(map()));
+                            pluginShortcutMapper.setMapping(s, toolbox->count()-1);
+                        }
                         toolbox->updateMinimumSize();
                     }
                 }
@@ -765,6 +773,10 @@ void RocketWindow::toolClicked(QListWidgetItem *item) {
         PixmapViewTool *t = tool->getViewTool();
         view->setTool(t);
     }
+}
+
+void RocketWindow::toolShortcutPressed(int index) {
+    toolClicked(toolbox->item(index));
 }
 
 void RocketWindow::setToolSettingsToolBar(QWidget *widget) {

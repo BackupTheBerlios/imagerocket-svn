@@ -48,7 +48,7 @@
    <item>
     <widget class="QRadioButton" name="replaceFilesRadio" >
      <property name="text" >
-      <string>Over Existing Files</string>
+      <string>&amp;Over Existing Files</string>
      </property>
      <property name="checked" >
       <bool>true</bool>
@@ -69,7 +69,7 @@
      <item>
       <widget class="QRadioButton" name="newLocationRadio" >
        <property name="text" >
-        <string>New Location</string>
+        <string>&amp;New Location</string>
        </property>
        <property name="autoExclusive" >
         <bool>false</bool>
@@ -86,7 +86,7 @@
      <item>
       <widget class="TinyButton" name="selectDirButton" >
        <property name="text" >
-        <string>...</string>
+        <string>&amp;...</string>
        </property>
       </widget>
      </item>

@@ -46,6 +46,7 @@ protected:
     RocketImageList images;
     lua_State *L;
     QList < QObject * > plugins;
+    QSignalMapper pluginShortcutMapper;
     SaveSettingsTool saveSettingsTool;
     QPointer < RocketUpdateChecker > updateChecker;
     int index;
@@ -111,6 +112,7 @@ protected slots:
     void checkForUpdatesTriggered();
     
     void toolClicked(QListWidgetItem *item);
+    void toolShortcutPressed(int index);
     void imageSaveSettingsToggled(bool value);
     
     void questionClicked(RocketImage *img);
