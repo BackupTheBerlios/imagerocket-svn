@@ -31,7 +31,6 @@ protected slots:
     void okClicked();
     void cancelClicked();
     void previewToggled(bool);
-    void sliderValueChanged(int);
     void updatePreview(bool checked);
     void updatePreview();
     void sendPreviewOn();

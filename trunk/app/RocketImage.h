@@ -50,6 +50,7 @@ public slots:
     void redo();
     
     void save(const QString &name);
+    void generateSavedFileInMemory(QBuffer &buffer);
     
     void addChange(const QPixmap &pix, QString description);
     void setActive(bool value);

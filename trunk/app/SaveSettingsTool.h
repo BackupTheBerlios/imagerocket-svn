@@ -36,9 +36,12 @@ public:
 protected:
     RocketImage *img;
     QPointer < SaveSettingsWidget > widget;
-    bool previewEnabled;
+    static bool previewCheckedByDefault;
+    QTimer updateTimer;
 protected slots:
+    void updatePreview();
     void previewToggled(bool);
+    void sendPreviewOff();
 };
 
 #endif

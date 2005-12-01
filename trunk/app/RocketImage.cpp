@@ -88,6 +88,13 @@ void RocketImage::save(const QString &name) {
     setSaved();
 }
 
+//! This saves the image into memory and gets the size.
+void RocketImage::generateSavedFileInMemory(QBuffer &buffer) {
+    QImageWriter writer(&buffer, getSaveFormatAsText().toAscii());
+    writer.setQuality(saveQuality);
+    writer.write(getPixmap().toImage());
+}
+
 void RocketImage::setSaved() {
     savedIndex = index;
     if (!thumbnail.isNull()) {

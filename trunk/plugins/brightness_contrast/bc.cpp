@@ -8,6 +8,8 @@ void BrightnessContrast::init(QString &fileName, lua_State *L, QObject *parent) 
     this->fileName = fileName;
     this->parent = parent;
     updateTimer.setSingleShot(true);
+    updateTimer.setInterval(750);
+    connect(&updateTimer, SIGNAL(timeout()), SLOT(updatePreview()));
     
     QFile script(":/bc.lua");
     script.open(QFile::ReadOnly);
@@ -69,10 +71,11 @@ QWidget *BrightnessContrast::getSettingsToolBar(QPixmap *pix) {
     connect(settingsToolBar->btnOk, SIGNAL(clicked()), SLOT(okClicked()));
     connect(settingsToolBar->btnCancel, SIGNAL(clicked()), SLOT(cancelClicked()));
     connect(settingsToolBar->chkPreview, SIGNAL(toggled(bool)), SLOT(previewToggled(bool)));
-    connect(settingsToolBar->sldBrightness, SIGNAL(valueChanged(int)), SLOT(sliderValueChanged(int)));
-    connect(settingsToolBar->sldContrast, SIGNAL(valueChanged(int)), SLOT(sliderValueChanged(int)));
+    connect(settingsToolBar->sldBrightness, SIGNAL(valueChanged(int)),
+            &updateTimer, SLOT(start()));
+    connect(settingsToolBar->sldContrast, SIGNAL(valueChanged(int)),
+            &updateTimer, SLOT(start()));
     connect(settingsToolBar, SIGNAL(destroyed()), SLOT(sendPreviewOff()));
-    connect(&updateTimer, SIGNAL(timeout()), SLOT(updatePreview()));
     settingsToolBar->chkPreview->setChecked(previewCheckedByDefault);
     return settingsToolBar;
 }
@@ -164,12 +167,6 @@ void BrightnessContrast::sendPreviewOff() {
         UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
         QCoreApplication::sendEvent(parent, event);
         updateTimer.stop();
-    }
-}
-
-void BrightnessContrast::sliderValueChanged(int value) {
-    if (pix) {
-        updateTimer.start(750);
     }
 }
 

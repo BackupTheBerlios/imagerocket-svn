@@ -226,14 +226,16 @@ void RocketWindow::initGUI() {
     
     useLargeThumbnailsToggled(false);
     
+    saveSettingsTool = new SaveSettingsTool(this);
+    
     dPalette = new QDockWidget(this);
     dPalette->setWindowTitle(tr("Tools"));
     dPalette->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
     dPalette->setFeatures(QDockWidget::AllDockWidgetFeatures);
     toolboxContainer = new QWidget(dPalette);
     new QVBoxLayout(toolboxContainer);
-    toolboxContainer->layout()->setMargin(0);
-    toolboxContainer->layout()->setSpacing(1);
+    toolboxContainer->layout()->setMargin(1);
+    toolboxContainer->layout()->setSpacing(3);
     toolbox = new RocketToolBox(toolboxContainer);
     toolboxContainer->layout()->addWidget(toolbox);
     imageSaveSettingsButton = new QPushButton(tr("Image Save &Settings"), toolboxContainer);
@@ -241,7 +243,7 @@ void RocketWindow::initGUI() {
     connect(imageSaveSettingsButton, SIGNAL(toggled(bool)), SLOT(imageSaveSettingsToggled(bool)));
     toolboxContainer->layout()->addWidget(imageSaveSettingsButton);
     connect(toolbox, SIGNAL(itemClicked(QListWidgetItem *)), SLOT(toolClicked(QListWidgetItem *)));
-    toolbox->setFrameStyle(QFrame::NoFrame);
+    toolbox->setFrameStyle(QFrame::Box|QFrame::Plain);
     dPalette->setWidget(toolboxContainer);
     addDockWidget(Qt::RightDockWidgetArea, dPalette);
     
@@ -796,7 +798,7 @@ void RocketWindow::imageSaveSettingsToggled(bool value) {
     toolSettingsToolBar = NULL;
     if (value) {
         RocketImage *image = images.getAsRocketImage(index);
-        setToolSettingsToolBar(saveSettingsTool.getSettingsToolBar(image));
+        setToolSettingsToolBar(saveSettingsTool->getSettingsToolBar(image));
     }
 }
 

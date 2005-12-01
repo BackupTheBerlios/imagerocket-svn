@@ -47,7 +47,7 @@ protected:
     lua_State *L;
     QList < QObject * > plugins;
     QSignalMapper pluginShortcutMapper;
-    SaveSettingsTool saveSettingsTool;
+    SaveSettingsTool *saveSettingsTool;
     QPointer < RocketUpdateChecker > updateChecker;
     int index;
     bool previewsHidden;
