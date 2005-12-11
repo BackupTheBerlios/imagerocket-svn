@@ -25,7 +25,6 @@ SaveSettingsWidget::SaveSettingsWidget() {
 bool SaveSettingsTool::previewCheckedByDefault = true;
 
 SaveSettingsTool::SaveSettingsTool(QObject *parent) : QObject(parent) {
-    updateTimer.setInterval(750);
     updateTimer.setSingleShot(true);
     connect(&updateTimer, SIGNAL(timeout()), SLOT(updatePreview()));
 }
@@ -51,7 +50,7 @@ QWidget *SaveSettingsTool::getSettingsToolBar(RocketImage *img) {
     connect(widget->chkProgressiveLoading, SIGNAL(toggled(bool)), img, SLOT(setSaveProgressive(bool)));
     connect(widget->chkShowPreview, SIGNAL(toggled(bool)), SLOT(previewToggled(bool)));
     connect(widget->chkShowPreview, SIGNAL(toggled(bool)), &updateTimer, SLOT(start()));
-    updatePreview();
+    updateTimer.start(200);
     return widget;
 }
 
@@ -74,6 +73,8 @@ void SaveSettingsTool::updatePreview() {
         widget->lblSize->setText(tr("<html><i>Check \"Preview Toggled\" to see size</i></html>"));
         sendPreviewOff();
     }
+    //needed since getSettingsToolBar starts it with a short interval - WJC
+    updateTimer.setInterval(750);
 }
 
 void SaveSettingsTool::sendPreviewOff() {

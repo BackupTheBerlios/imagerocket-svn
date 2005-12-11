@@ -240,6 +240,7 @@ void RocketWindow::initGUI() {
     toolboxContainer->layout()->addWidget(toolbox);
     imageSaveSettingsButton = new QPushButton(tr("Image Save &Settings"), toolboxContainer);
     imageSaveSettingsButton->setCheckable(true);
+    imageSaveSettingsButton->setFocusPolicy(Qt::NoFocus);
     connect(imageSaveSettingsButton, SIGNAL(toggled(bool)), SLOT(imageSaveSettingsToggled(bool)));
     toolboxContainer->layout()->addWidget(imageSaveSettingsButton);
     connect(toolbox, SIGNAL(itemClicked(QListWidgetItem *)), SLOT(toolClicked(QListWidgetItem *)));
@@ -774,6 +775,8 @@ void RocketWindow::toolClicked(QListWidgetItem *item) {
         item->setTextColor(palette().highlightedText().color());
         PixmapViewTool *t = tool->getViewTool();
         view->setTool(t);
+    } else if (item && item->backgroundColor() == palette().highlight().color()) {
+        delete toolSettingsToolBar;
     }
 }
 

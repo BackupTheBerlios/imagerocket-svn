@@ -27,17 +27,6 @@ void Crop::init(QString &fileName, lua_State *L, QObject *parent) {
     this->parent = parent;
     
     updating = false;
-    
-    QFile script(":/crop.lua");
-    script.open(QFile::ReadOnly);
-    QTextStream in(&script);
-    QString scriptStr(in.readAll());
-    if (luaL_loadbuffer(L, scriptStr.toAscii(), scriptStr.length(), "<lua>")
-        || lua_pcall(L, 0, 0, 0)) {
-        lua_pushfstring(L, "Error loading bc.lua -- %s",
-                        lua_tostring(L, -1));
-        lua_error(L);
-    }
 }
 
 QImage *Crop::activate(QPixmap *pix) {

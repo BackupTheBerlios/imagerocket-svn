@@ -1,10 +1,27 @@
-#include "bc.h"
+#include "gamma.h"
 #include <cassert>
+#include <cmath>
 #include <algorithm>
 
-bool BrightnessContrast::previewCheckedByDefault = true;
+#define EQUALS(a, b) ((a-.0001<b) && (a+.0001>b))
 
-void BrightnessContrast::init(QString &fileName, lua_State *L, QObject *parent) {
+class GammaTable {
+public:
+    char table[256];
+    GammaTable(double gamma);
+    char operator[](int index) {return table[index];}
+};
+
+GammaTable::GammaTable(double gamma) {
+    for (int a=0;a<256;a++) {
+        table[a] = char(std::max(0, std::min(255,
+                int(std::pow(a/255.0, 1.0/gamma)*255.0 + 0.5))));;
+    }
+}
+
+bool Gamma::previewCheckedByDefault = true;
+
+void Gamma::init(QString &fileName, lua_State *L, QObject *parent) {
     this->fileName = fileName;
     this->parent = parent;
     updateTimer.setSingleShot(true);
@@ -12,23 +29,23 @@ void BrightnessContrast::init(QString &fileName, lua_State *L, QObject *parent) 
     connect(&updateTimer, SIGNAL(timeout()), SLOT(updatePreview()));
 }
 
-QImage *BrightnessContrast::activate(QPixmap *pix) {
+QImage *Gamma::activate(QPixmap *pix) {
     QImage img(pix->toImage());
     img.detach();
-    //img.invertPixels(QImage::InvertRgb);
     assert(img.depth() == 32);
-    double contrast = (100.0 + settingsToolBar->sldContrast->value()) / 100;
-    contrast *= contrast;
-    int brightness = settingsToolBar->sldBrightness->value();
+    double master = settingsToolBar->spnMaster->value();
+    GammaTable color[] = {
+            GammaTable(master * settingsToolBar->spnRed->value()),
+            GammaTable(master * settingsToolBar->spnGreen->value()),
+            GammaTable(master * settingsToolBar->spnBlue->value())
+    };
     for (int y=0;y<img.height();++y) {
         uint *line = reinterpret_cast< uint * >(img.scanLine(y));
         for (int x=0;x<img.width();++x) {
             uint *pixel = line + x;
             int arr[3] = {qRed(*pixel), qGreen(*pixel), qBlue(*pixel)};
             for (int a=0;a<3;a++) {
-                int tmp = arr[a] + brightness;
-                tmp = (int)(((tmp - 255 / 2 ) * contrast) + 255 / 2);
-                arr[a] = std::max(0, std::min(255, tmp));
+                arr[a] = color[a][arr[a]];
             }
             if (img.hasAlphaChannel()) {
                 *pixel = qRgba(arr[0], arr[1], arr[2], qAlpha(*pixel));
@@ -40,17 +57,17 @@ QImage *BrightnessContrast::activate(QPixmap *pix) {
     return new QImage(img);
 }
 
-QImage *BrightnessContrast::activate(QImage *img) {
+QImage *Gamma::activate(QImage *img) {
     return NULL;
 }
 
-QWidget *BrightnessContrast::getSettingsToolBar(QPixmap *pix) {
+QWidget *Gamma::getSettingsToolBar(QPixmap *pix) {
     if (settingsToolBar) {
         assert(0); //The settings toolbar already exists. It should be deleted first.
     }
     assert(pix);
     this->pix = pix;
-    settingsToolBar = new BrightnessContrastWidget(NULL);
+    settingsToolBar = new GammaWidget(NULL);
     connect(new QShortcut(QKeySequence("Return"), settingsToolBar->btnOk), SIGNAL(activated()),
             settingsToolBar->btnOk, SIGNAL(clicked()));
     connect(new QShortcut(QKeySequence("Enter"), settingsToolBar->btnOk), SIGNAL(activated()),
@@ -60,90 +77,94 @@ QWidget *BrightnessContrast::getSettingsToolBar(QPixmap *pix) {
     connect(settingsToolBar->btnOk, SIGNAL(clicked()), SLOT(okClicked()));
     connect(settingsToolBar->btnCancel, SIGNAL(clicked()), SLOT(cancelClicked()));
     connect(settingsToolBar->chkPreview, SIGNAL(toggled(bool)), SLOT(previewToggled(bool)));
-    connect(settingsToolBar->sldBrightness, SIGNAL(valueChanged(int)),
+    connect(settingsToolBar->spnMaster, SIGNAL(valueChanged(double)),
             &updateTimer, SLOT(start()));
-    connect(settingsToolBar->sldContrast, SIGNAL(valueChanged(int)),
+    connect(settingsToolBar->spnRed, SIGNAL(valueChanged(double)),
+            &updateTimer, SLOT(start()));
+    connect(settingsToolBar->spnGreen, SIGNAL(valueChanged(double)),
+            &updateTimer, SLOT(start()));
+    connect(settingsToolBar->spnBlue, SIGNAL(valueChanged(double)),
             &updateTimer, SLOT(start()));
     connect(settingsToolBar, SIGNAL(destroyed()), SLOT(sendPreviewOff()));
     settingsToolBar->chkPreview->setChecked(previewCheckedByDefault);
     return settingsToolBar;
 }
 
-int BrightnessContrast::length() {
+int Gamma::length() {
     return 1;
 }
 
-void BrightnessContrast::reset() {
+void Gamma::reset() {
 }
 
-PixmapViewTool *BrightnessContrast::getViewTool() {
+PixmapViewTool *Gamma::getViewTool() {
     return NULL;
 }
 
-QListWidgetItem *BrightnessContrast::createListEntry(QListWidget *parent) {
+QListWidgetItem *Gamma::createListEntry(QListWidget *parent) {
     //take the abs path of library and get the icon in the same directory
     QDir thisDir(QFileInfo(fileName).absoluteDir());
-    QString name(thisDir.filePath("bc.png"));
+    QString name(thisDir.filePath("gamma.png"));
     QIcon icon(name);
-    QListWidgetItem *item = new QListWidgetItem(tr("Bright/Contrast"), parent);
-    item->setToolTip(tr("Brightness/Contrast - b"));
+    QListWidgetItem *item = new QListWidgetItem(tr("Gamma Adjust"), parent);
+    item->setToolTip(tr("Gamma Adjust - g"));
     item->setIcon(icon);
     item->setFlags(Qt::ItemIsEnabled);
     return item;
 }
 
-QKeySequence BrightnessContrast::getShortcutSequence() {
-    return QKeySequence(tr("b", "brightness/contrast tool"));
+QKeySequence Gamma::getShortcutSequence() {
+    return QKeySequence(tr("g", "gamma adjust tool"));
 }
 
-void BrightnessContrast::okClicked() {
+void Gamma::okClicked() {
     AddChangeToolEvent *event = new AddChangeToolEvent;
     QImage *img = activate(pix);
     event->pixmap = new QPixmap(QPixmap::fromImage(*img));
-    int bright = settingsToolBar->sldBrightness->value();
-    int contrast = settingsToolBar->sldContrast->value();
-    QString text;
     delete img;
-    if (bright && contrast) {
-        event->changeDesc = tr("Brighten %1/Contrast %2").arg(bright).arg(contrast);
+    double m = settingsToolBar->spnMaster->value();
+    double r = settingsToolBar->spnRed->value();
+    double g = settingsToolBar->spnGreen->value();
+    double b = settingsToolBar->spnBlue->value();
+    if (!EQUALS(m, 1.0) && (!EQUALS(r, 1.0) || !EQUALS(g, 1.0) || !EQUALS(b, 1.0))) {
+        event->changeDesc = tr("Gamma Adjust M%1 / R%2 / G%3 / B%4").arg(m).arg(r).arg(g).arg(b);
         QCoreApplication::sendEvent(parent, event);
-    } else if (bright) {
-        event->changeDesc = tr("Brighten %1").arg(bright);
-        QCoreApplication::sendEvent(parent, event);
-    } else if (contrast) {
-        event->changeDesc = tr("Contrast %1").arg(contrast);
+    } else if (!EQUALS(m, 1.0)) {
+        event->changeDesc = tr("Gamma Adjust %1").arg(m);
         QCoreApplication::sendEvent(parent, event);
     }
     delete pix;
     delete settingsToolBar;
 }
 
-void BrightnessContrast::cancelClicked() {
+void Gamma::cancelClicked() {
     sendPreviewOff();
     delete pix;
     delete settingsToolBar;
 }
 
-void BrightnessContrast::previewToggled(bool checked) {
+void Gamma::previewToggled(bool checked) {
     previewCheckedByDefault = checked;
     updatePreview(settingsToolBar->chkPreview->isChecked());
 }
 
-void BrightnessContrast::updatePreview(bool checked) {
+void Gamma::updatePreview(bool checked) {
     if (checked && settingsToolBar
-            && (settingsToolBar->sldBrightness->value() != 0
-            || settingsToolBar->sldContrast->value() != 0)) {
+            && (!EQUALS(settingsToolBar->spnMaster->value(), 1.0)
+            || !EQUALS(settingsToolBar->spnRed->value(), 1.0)
+            || !EQUALS(settingsToolBar->spnGreen->value(), 1.0)
+            || !EQUALS(settingsToolBar->spnBlue->value(), 1.0))) {
         sendPreviewOn();
     } else {
         sendPreviewOff();
     }
 }
 
-void BrightnessContrast::updatePreview() {
+void Gamma::updatePreview() {
     updatePreview(settingsToolBar->chkPreview->isChecked());
 }
 
-void BrightnessContrast::sendPreviewOn() {
+void Gamma::sendPreviewOn() {
     if (pix) {
         UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
         QImage *img = activate(pix);
@@ -153,7 +174,7 @@ void BrightnessContrast::sendPreviewOn() {
     }
 }
 
-void BrightnessContrast::sendPreviewOff() {
+void Gamma::sendPreviewOff() {
     if (pix) {
         UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
         QCoreApplication::sendEvent(parent, event);
@@ -161,5 +182,5 @@ void BrightnessContrast::sendPreviewOff() {
     }
 }
 
-Q_EXPORT_PLUGIN(BrightnessContrast)
+Q_EXPORT_PLUGIN(Gamma)
 
