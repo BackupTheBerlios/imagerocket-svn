@@ -90,11 +90,8 @@ QWidget *Gamma::getSettingsToolBar(QPixmap *pix) {
     return settingsToolBar;
 }
 
-int Gamma::length() {
-    return 1;
-}
-
-void Gamma::reset() {
+QString Gamma::getInternalName() {
+    return QString::fromLatin1("gamma");
 }
 
 PixmapViewTool *Gamma::getViewTool() {

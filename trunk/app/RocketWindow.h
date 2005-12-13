@@ -77,7 +77,7 @@ protected:
     void closeEvent(QCloseEvent *e);
     bool eventFilter(QObject *watched, QEvent *e);
     bool event(QEvent *e);
-    void loadPlugins(QString dirPath);
+    void loadPlugins(QString dirPath, QHash < QString, QListWidgetItem * > &entries);
     void setToolSettingsToolBar(QWidget *widget);
     
 protected slots:

@@ -307,17 +307,36 @@ void RocketWindow::initObject() {
     
     connect(&pluginShortcutMapper, SIGNAL(mapped(int)),
             SLOT(toolShortcutPressed(int)));
+    QHash < QString, QListWidgetItem * > entries;
     QDir appDir(QCoreApplication::applicationDirPath());
-    loadPlugins(appDir.filePath("plugins"));
-    loadPlugins(QDir::home().filePath("imagerocket/plugins"));
-    loadPlugins(QDir::home().filePath(".imagerocket/plugins"));
+    loadPlugins(appDir.filePath("plugins"), entries);
+    loadPlugins(QDir::home().filePath("imagerocket/plugins"), entries);
+    loadPlugins(QDir::home().filePath(".imagerocket/plugins"), entries);
     QSettings settings;
     QString data(settings.value("app/dataLocation").toString());
     if (!data.isEmpty()) {
-        loadPlugins(data.append("/plugins"));
+        loadPlugins(data.append("/plugins"), entries);
     }
-    loadPlugins("/usr/local/imagerocket/plugins");
-    
+    loadPlugins("/usr/local/imagerocket/plugins", entries);
+    //add qlistwidgetitems in the order listed in the toolbox-order file
+    QFile file(":/toolbox.txt");
+    file.open(QFile::ReadOnly);
+    QTextStream stream(&file);
+    while (!stream.atEnd()) {
+        QString line(stream.readLine());
+        if (entries.contains(line)) {
+            toolbox->addItem(entries[line]);
+            toolbox->updateMinimumSize();
+            entries.remove(line);
+        }
+    }
+    //add the plugins not mentioned in the toolbox-order file
+    QHashIterator < QString, QListWidgetItem * > iter(entries);
+    while (iter.hasNext()) {
+        iter.next();
+        toolbox->addItem(iter.value());
+        toolbox->updateMinimumSize();
+    }
     ////debugging crash test - use with prog_test.sh
     //QTimer::singleShot(random() % 100, this, SLOT(close()));
 }
@@ -327,7 +346,7 @@ void RocketWindow::initObject() {
 #endif
 
 //! This iterates the given directory and looks in its child directories for plugins.
-void RocketWindow::loadPlugins(QString dirPath) {
+void RocketWindow::loadPlugins(QString dirPath, QHash < QString, QListWidgetItem * > &entries) {
     //This could use some cleanup. The error handling code could be streamlined. - WJC
     QDir dir(QDir::convertSeparators(dirPath));
     if (!dir.exists()) {
@@ -385,16 +404,20 @@ void RocketWindow::loadPlugins(QString dirPath) {
                 plugins.append(o);
                 ToolInterface *i2 = qobject_cast< ToolInterface * >(o);
                 if (i2) {
-                    QListWidgetItem *i = i2->createListEntry(toolbox);
-                    if (i) {
-                        i->setData(Qt::UserRole, plugins.count()-1);
+                    QListWidgetItem *item = i2->createListEntry(NULL);
+                    if (item && !entries.contains(i2->getInternalName())) {
+                        entries[i2->getInternalName()] = item;
+                        item->setData(Qt::UserRole, plugins.count()-1);
                         QKeySequence seq(i2->getShortcutSequence());
                         if (!seq.isEmpty()) {
                             QShortcut *s = new QShortcut(seq, this);
                             connect(s, SIGNAL(activated()), &pluginShortcutMapper, SLOT(map()));
                             pluginShortcutMapper.setMapping(s, toolbox->count()-1);
                         }
-                        toolbox->updateMinimumSize();
+                    } else if (item) {
+                        statusBar()->showMessage(
+                                tr("Multiple plugins exist with the same name. Only one will be loaded."),
+                                10000);
                     }
                 }
             }

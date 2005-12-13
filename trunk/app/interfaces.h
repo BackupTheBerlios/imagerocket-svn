@@ -60,8 +60,7 @@ public:
     virtual QWidget *getSettingsToolBar(QPixmap *pix) = 0;
     virtual PixmapViewTool *getViewTool() = 0;
     virtual QKeySequence getShortcutSequence() = 0;
-    virtual int length() = 0;
-    virtual void reset() = 0;
+    virtual QString getInternalName() = 0;
     virtual ~ToolInterface() {}
 };
 

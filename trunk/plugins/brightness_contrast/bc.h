@@ -15,8 +15,7 @@ public:
     virtual QImage *activate(QImage *img);
     virtual QWidget *getSettingsToolBar(QPixmap *pix);
     virtual PixmapViewTool *getViewTool();
-    virtual void reset();
-    virtual int length();
+    virtual QString getInternalName();
     virtual QListWidgetItem *createListEntry(QListWidget *parent);
     virtual QKeySequence getShortcutSequence();
 protected:

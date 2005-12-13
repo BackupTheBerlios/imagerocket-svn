@@ -90,11 +90,8 @@ PixmapViewTool *Crop::getViewTool() {
     return tool;
 }
 
-int Crop::length() {
-    return 1;
-}
-
-void Crop::reset() {
+QString Crop::getInternalName() {
+    return QString::fromLatin1("crop");
 }
 
 QListWidgetItem *Crop::createListEntry(QListWidget *parent) {

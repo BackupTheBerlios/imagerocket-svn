@@ -22,6 +22,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include <QPainter>
 #include <QTime>
 #include <algorithm>
+#include <cmath>
 
 /*!
   \class PixmapDividedZoomer
@@ -98,8 +99,10 @@ void PixmapDividedZoomer::setCached(int x, int y, bool newState) {
         QSize scaled(getPieceSize(x, y));
         if (hasTransparency) {
             QPixmap temp(source.copy(
-                    int(x * transparent.width() / zoom), int(y * transparent.height() / zoom),
-                    int(scaled.width() / zoom), int(scaled.height() / zoom)));
+                    int(ceil(x * transparent.width() / zoom)),
+                    int(ceil(y * transparent.height() / zoom)),
+                    int(ceil(scaled.width() / zoom)),
+                    int(ceil(scaled.height() / zoom))));
             assert(!temp.isNull());
             pieces[index] = new CountingPixmap(scaled.width(), scaled.height());
             QPainter pPiece(pieces[index]);

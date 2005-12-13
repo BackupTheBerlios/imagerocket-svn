@@ -55,7 +55,7 @@ void ThreadedImageLoader::run() {
         restart = false;
         QString f(fileName);
         QImage img(f);
-        if (imageSize.isNull() || !imageSize.isValid()) {
+        if (img.isNull() || imageSize.isNull() || !imageSize.isValid()) {
             emit imageLoaded(f, img);
         } else {
             emit imageLoaded(f, img.scaled(imageSize, aspectRatioMode, transformMode));

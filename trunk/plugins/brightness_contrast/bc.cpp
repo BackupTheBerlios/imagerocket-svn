@@ -69,11 +69,8 @@ QWidget *BrightnessContrast::getSettingsToolBar(QPixmap *pix) {
     return settingsToolBar;
 }
 
-int BrightnessContrast::length() {
-    return 1;
-}
-
-void BrightnessContrast::reset() {
+QString BrightnessContrast::getInternalName() {
+    return QString::fromLatin1("brightnesscontrast");
 }
 
 PixmapViewTool *BrightnessContrast::getViewTool() {
