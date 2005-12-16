@@ -1,5 +1,5 @@
-/* TinyButton
-This is a button unconstrained by QApplication::globalStrut, so it's as small as its text.
+/* ImageRocket
+An image-editing program written for editing speed and ease of use.
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
@@ -15,29 +15,25 @@ You should have received a copy of the GNU General Public License along with thi
 program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
-#ifndef TINY_BUTTON
-#define TINY_BUTTON
+#ifndef RESIZE_VIEW_TOOL
+#define RESIZE_VIEW_TOOL
 
-#include <QStyleOptionButton>
-#include <QPushButton>
+#include "interfaces.h"
+#include "PixmapView.h"
 
-class TinyButton : public QPushButton {
+class ResizeViewTool : public QObject, public PixmapViewTool {
 Q_OBJECT
-protected:
-    bool widthForcedToHeight;
-    QStyleOptionButton getButtonStyleOption() const;
 public:
-    TinyButton(QWidget *parent);
-    QSize sizeHint() const;
-    //!This forces the width to be at least equal to the height.
-    void setWidthForcedToHeight(bool value) {
-        widthForcedToHeight = value;
-        update();
-        updateGeometry();
-    }
-    bool isWidthForcedToHeight() const {
-        return widthForcedToHeight;
-    }
+    ResizeViewTool();
+    virtual void paintEvent(QPainter &p, QPaintEvent *e);
+    virtual void mousePressEvent(QMouseEvent *e);
+    virtual void mouseDoubleClickEvent(QMouseEvent *e);
+    virtual void mouseMoveEvent(QMouseEvent *e);
+    virtual void setParent(PixmapView *parent);
+public slots:
+    void setSize(QSize imageSize);
+protected:
+    QSize imageSize;
 };
 
 #endif

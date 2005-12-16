@@ -123,7 +123,7 @@ void Gamma::okClicked() {
     double r = settingsToolBar->spnRed->value();
     double g = settingsToolBar->spnGreen->value();
     double b = settingsToolBar->spnBlue->value();
-    if (!EQUALS(m, 1.0) && (!EQUALS(r, 1.0) || !EQUALS(g, 1.0) || !EQUALS(b, 1.0))) {
+    if (!EQUALS(r, 1.0) || !EQUALS(g, 1.0) || !EQUALS(b, 1.0)) {
         event->changeDesc = tr("Gamma Adjust M%1 / R%2 / G%3 / B%4").arg(m).arg(r).arg(g).arg(b);
         QCoreApplication::sendEvent(parent, event);
     } else if (!EQUALS(m, 1.0)) {

@@ -12,7 +12,6 @@ HEADERS =   RocketWindow.h \
             RocketToolBox.h \
             SaveSettingsTool.h \
             ProgramStarter.h \
-            TinyButton.h \
             ThreadedImageLoader.h \
             interfaces.h \
             consts.h
@@ -28,7 +27,6 @@ SOURCES =   main.cpp \
             RocketImage.cpp \
             SaveSettingsTool.cpp \
             ProgramStarter.cpp \
-            TinyButton.cpp \
             ThreadedImageLoader.cpp
 
 FORMS =     aboutdialog.ui savedialog.ui updatedialog.ui savesettingstool.ui

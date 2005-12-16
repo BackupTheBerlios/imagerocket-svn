@@ -39,6 +39,8 @@ class RocketWindow : public QMainWindow {
 Q_OBJECT
 protected:
     
+    typedef QPair < QListWidgetItem *, QKeySequence > PluginListItemEntry;
+    
     PixmapView *view;
     QPointer < QWidget > toolSettingsToolBar;
     QWidget *viewportContainer;
@@ -77,7 +79,7 @@ protected:
     void closeEvent(QCloseEvent *e);
     bool eventFilter(QObject *watched, QEvent *e);
     bool event(QEvent *e);
-    void loadPlugins(QString dirPath, QHash < QString, QListWidgetItem * > &entries);
+    void loadPlugins(QString dirPath, QHash < QString, PluginListItemEntry > &entries);
     void setToolSettingsToolBar(QWidget *widget);
     
 protected slots:

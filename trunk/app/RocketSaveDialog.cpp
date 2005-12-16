@@ -26,9 +26,7 @@ RocketSaveDialog::RocketSaveDialog(QWidget *parent)
     QButtonGroup *group = new QButtonGroup(this);
     group->addButton(newLocationRadio);
     group->addButton(replaceFilesRadio);
-    
-    selectDirButton->setWidthForcedToHeight(true);
-    
+        
     connect(selectDirButton, SIGNAL(clicked()), SLOT(selectDirButtonClicked()));
 }
 

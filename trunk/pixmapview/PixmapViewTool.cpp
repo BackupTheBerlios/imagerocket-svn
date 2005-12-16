@@ -26,7 +26,8 @@ PixmapViewTool::PixmapViewTool() {
 }
 
 PixmapViewTool::~PixmapViewTool() {
-    if (parentView) {
+    //pointer check to avoid unsetting another tool
+    if (parentView && parentView->getTool() == this) {
         parentView->setTool(NULL);
     }
 }

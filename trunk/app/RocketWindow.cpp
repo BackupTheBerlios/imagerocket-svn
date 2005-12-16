@@ -238,7 +238,7 @@ void RocketWindow::initGUI() {
     toolboxContainer->layout()->setSpacing(3);
     toolbox = new RocketToolBox(toolboxContainer);
     toolboxContainer->layout()->addWidget(toolbox);
-    imageSaveSettingsButton = new QPushButton(tr("Image Save &Settings"), toolboxContainer);
+    imageSaveSettingsButton = new QPushButton(tr("Save &Settings"), toolboxContainer);
     imageSaveSettingsButton->setCheckable(true);
     imageSaveSettingsButton->setFocusPolicy(Qt::NoFocus);
     connect(imageSaveSettingsButton, SIGNAL(toggled(bool)), SLOT(imageSaveSettingsToggled(bool)));
@@ -307,7 +307,7 @@ void RocketWindow::initObject() {
     
     connect(&pluginShortcutMapper, SIGNAL(mapped(int)),
             SLOT(toolShortcutPressed(int)));
-    QHash < QString, QListWidgetItem * > entries;
+    QHash < QString, PluginListItemEntry > entries;
     QDir appDir(QCoreApplication::applicationDirPath());
     loadPlugins(appDir.filePath("plugins"), entries);
     loadPlugins(QDir::home().filePath("imagerocket/plugins"), entries);
@@ -325,16 +325,28 @@ void RocketWindow::initObject() {
     while (!stream.atEnd()) {
         QString line(stream.readLine());
         if (entries.contains(line)) {
-            toolbox->addItem(entries[line]);
+            toolbox->addItem(entries[line].first);
+            QKeySequence seq(entries[line].second);
+            if (!seq.isEmpty()) {
+                QShortcut *s = new QShortcut(seq, this);
+                connect(s, SIGNAL(activated()), &pluginShortcutMapper, SLOT(map()));
+                pluginShortcutMapper.setMapping(s, toolbox->count()-1);
+            }
             toolbox->updateMinimumSize();
             entries.remove(line);
         }
     }
     //add the plugins not mentioned in the toolbox-order file
-    QHashIterator < QString, QListWidgetItem * > iter(entries);
+    QHashIterator < QString, PluginListItemEntry > iter(entries);
     while (iter.hasNext()) {
         iter.next();
-        toolbox->addItem(iter.value());
+        toolbox->addItem(iter.value().first);
+        QKeySequence seq(iter.value().second);
+        if (!seq.isEmpty()) {
+            QShortcut *s = new QShortcut(seq, this);
+            connect(s, SIGNAL(activated()), &pluginShortcutMapper, SLOT(map()));
+            pluginShortcutMapper.setMapping(s, toolbox->count()-1);
+        }
         toolbox->updateMinimumSize();
     }
     ////debugging crash test - use with prog_test.sh
@@ -346,7 +358,7 @@ void RocketWindow::initObject() {
 #endif
 
 //! This iterates the given directory and looks in its child directories for plugins.
-void RocketWindow::loadPlugins(QString dirPath, QHash < QString, QListWidgetItem * > &entries) {
+void RocketWindow::loadPlugins(QString dirPath, QHash < QString, PluginListItemEntry > &entries) {
     //This could use some cleanup. The error handling code could be streamlined. - WJC
     QDir dir(QDir::convertSeparators(dirPath));
     if (!dir.exists()) {
@@ -406,14 +418,9 @@ void RocketWindow::loadPlugins(QString dirPath, QHash < QString, QListWidgetItem
                 if (i2) {
                     QListWidgetItem *item = i2->createListEntry(NULL);
                     if (item && !entries.contains(i2->getInternalName())) {
-                        entries[i2->getInternalName()] = item;
+                        entries[i2->getInternalName()] =
+                                PluginListItemEntry(item, i2->getShortcutSequence());
                         item->setData(Qt::UserRole, plugins.count()-1);
-                        QKeySequence seq(i2->getShortcutSequence());
-                        if (!seq.isEmpty()) {
-                            QShortcut *s = new QShortcut(seq, this);
-                            connect(s, SIGNAL(activated()), &pluginShortcutMapper, SLOT(map()));
-                            pluginShortcutMapper.setMapping(s, toolbox->count()-1);
-                        }
                     } else if (item) {
                         statusBar()->showMessage(
                                 tr("Multiple plugins exist with the same name. Only one will be loaded."),

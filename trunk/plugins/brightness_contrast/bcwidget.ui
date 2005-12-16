@@ -25,14 +25,20 @@
    <item row="0" column="0" >
     <widget class="QLabel" name="label" >
      <property name="text" >
-      <string>Brightness</string>
+      <string>&amp;Brightness</string>
+     </property>
+     <property name="buddy" >
+      <cstring>spnBrightness</cstring>
      </property>
     </widget>
    </item>
    <item row="0" column="1" >
     <widget class="QLabel" name="label_2" >
      <property name="text" >
-      <string>Contrast</string>
+      <string>&amp;Contrast</string>
+     </property>
+     <property name="buddy" >
+      <cstring>spnContrast</cstring>
      </property>
     </widget>
    </item>
@@ -176,8 +182,8 @@
      <y>53</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>218</x>
-     <y>58</y>
+     <x>193</x>
+     <y>59</y>
     </hint>
    </hints>
   </connection>
@@ -188,12 +194,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>414</x>
-     <y>57</y>
+     <x>328</x>
+     <y>59</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>477</x>
-     <y>52</y>
+     <x>388</x>
+     <y>59</y>
     </hint>
    </hints>
   </connection>
@@ -204,8 +210,8 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>252</x>
-     <y>43</y>
+     <x>193</x>
+     <y>59</y>
     </hint>
     <hint type="destinationlabel" >
      <x>45</x>
@@ -220,12 +226,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>484</x>
-     <y>42</y>
+     <x>388</x>
+     <y>59</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>329</x>
-     <y>57</y>
+     <x>328</x>
+     <y>59</y>
     </hint>
    </hints>
   </connection>

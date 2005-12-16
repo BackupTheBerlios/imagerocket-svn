@@ -1,3 +1,4 @@
 crop
+resize
 brightnesscontrast
 gamma

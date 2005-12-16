@@ -98,7 +98,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QWidget" name="" >
+  <widget class="QWidget" name="widget" >
    <property name="geometry" >
     <rect>
      <x>10</x>
@@ -111,6 +111,12 @@
  </widget>
  <layoutdefault spacing="0" margin="0" />
  <pixmapfunction></pixmapfunction>
+ <tabstops>
+  <tabstop>spnX</tabstop>
+  <tabstop>spnY</tabstop>
+  <tabstop>spnW</tabstop>
+  <tabstop>spnH</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
