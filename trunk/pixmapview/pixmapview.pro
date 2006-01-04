@@ -1,5 +1,5 @@
 TEMPLATE = lib
-CONFIG += staticlib dll
+CONFIG += dll
 
 DESTDIR = ..
 HEADERS += PixmapView.h PixmapViewTool.h PixmapDividedZoomer.h

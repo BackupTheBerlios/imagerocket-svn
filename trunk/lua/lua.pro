@@ -1,5 +1,5 @@
 TEMPLATE = lib
-CONFIG += staticlib dll
+CONFIG += dll
 
 DESTDIR = ..
 HEADERS += lapi.h lauxlib.h lcode.h ldebug.h ldo.h lfunc.h lgc.h llex.h llimits.h lmem.h lobject.h lopcodes.h lparser.h lstate.h lstring.h ltable.h ltm.h luaconf.h lua.h lualib.h lundump.h lvm.h lzio.h

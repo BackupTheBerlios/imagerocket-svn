@@ -208,11 +208,13 @@ void RocketWindow::initGUI() {
     connect(&rotateMapper, SIGNAL(mapped(int)), SLOT(rotateTriggered(int)));
     a = aFlipVertical = new QAction(QIcon(":/pixmaps/flipv.png"),
             tr("&Flip"), rotateGroup);
+    a->setShortcut(QKeySequence(tr("f", "flip")));
     connect(a, SIGNAL(triggered()), SLOT(flipTriggered()));
     mImage->addAction(a);
     imageToolBar->addAction(a);
     a = aMirror = new QAction(QIcon(":/pixmaps/mirror.png"),
             tr("&Mirror"), rotateGroup);
+    a->setShortcut(QKeySequence(tr("m", "mirror")));
     connect(a, SIGNAL(triggered()), SLOT(mirrorTriggered()));
     mImage->addAction(a);
     imageToolBar->addAction(a);
@@ -277,13 +279,12 @@ void RocketWindow::initGUI() {
     setCentralWidget(viewportContainer);
     view->setFocus(Qt::OtherFocusReason);
     connect(view, SIGNAL(zoomChanged(double)), this, SLOT(updateGui()));
-    view->viewport()->installEventFilter(this);
+    setAcceptDrops(true);
+    installEventFilter(this);
     
     //This works around the problem with QMainWindow in which the dock widgets get shrunk if the
     //window is resized smaller than their height. I hope this will be fixed upstream. - WJC
     setMinimumSize(500, 400);
-    
-    setAcceptDrops(true);
     
     updateGui();
 }
@@ -452,6 +453,7 @@ void RocketWindow::setDirectory(QString dirName) {
     }
     images.setLocation(dirName);
     setIndex(0);
+    setToolSettingsToolBar(NULL);
 }
 
 //! This updates the buttons, the statusbar, etc. for the program's various states.
@@ -621,8 +623,8 @@ bool RocketWindow::event(QEvent *e) {
 }
 
 bool RocketWindow::eventFilter(QObject *watched, QEvent *e) {
-    //The handlers for DragEnter/Drop are messy, but seem to work with the following:
-    //Nautilus/Linux, Konqueror/Linux, Firefox/Linux, and Explorer/Windows
+    //The handlers seem to work with the following:
+    //Nautilus/Linux, Konqueror/Linux, and Explorer/Windows
     //This should still be tested on the Mac as well.
     if (e->type() == QEvent::DragEnter) {
         QDragEnterEvent *de = static_cast< QDragEnterEvent * >(e);
@@ -631,8 +633,7 @@ bool RocketWindow::eventFilter(QObject *watched, QEvent *e) {
         while ((text = de->format(a++)) && text[0] != '\0') {
             qDebug("%d - %s", a, text);
         }
-        if (de->mimeData()->hasFormat("text/uri-list")
-                    || de->mimeData()->hasFormat("text/x-moz-url")) {
+        if (de->mimeData()->hasFormat("text/uri-list")) {
             de->acceptProposedAction();
         }
         return true;
@@ -643,18 +644,6 @@ bool RocketWindow::eventFilter(QObject *watched, QEvent *e) {
             QList < QUrl > urlList(de->mimeData()->urls());
             if (urlList.size() > 0) {
                 string = urlList[0].toLocalFile();
-                if (urlList.size() > 1) {
-                    statusBar()->showMessage(tr("Only one folder can be opened at a time."), 5000);
-                }
-            }
-        } else {
-            //This is a hack needed for Qt/X11. I'm not sure what causes the above
-            //code to fail under that setup. - WJC
-            QString urls(de->mimeData()->text());
-            urls.replace(" ", "%20");
-            QStringList urlList = urls.split(QRegExp("[\\r\\n]+"));
-            if (urlList.size() > 0) {
-                string = QUrl::fromEncoded(urlList[0].toAscii()).toLocalFile();
                 if (urlList.size() > 1) {
                     statusBar()->showMessage(tr("Only one folder can be opened at a time."), 5000);
                 }

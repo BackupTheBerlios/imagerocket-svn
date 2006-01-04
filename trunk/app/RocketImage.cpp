@@ -140,7 +140,6 @@ void RocketImage::setThumbnailWithBackground(const QPixmap &thumb) {
 void RocketImage::setThumbnail(StatusIcon iconType) {
     QSettings settings;
     int thumbnailSize = settings.value("thumbnail/size", 64).toInt();
-    //"x.png" must be loaded from file, so it's code is a little different from the others.
     QString size(QString::number(thumbnailSize));
     QString fileX(":/pixmaps/x.png"), fileLoading(":/pixmaps/loading"), fileClickToShow(":/pixmaps/cts");
     fileLoading.append(size);
