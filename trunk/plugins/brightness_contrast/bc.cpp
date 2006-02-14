@@ -1,4 +1,5 @@
 #include "bc.h"
+#include "plugin_functions.h"
 #include <cassert>
 #include <algorithm>
 
@@ -20,18 +21,20 @@ QImage *BrightnessContrast::activate(QPixmap *pix) {
     double contrast = (100.0 + settingsToolBar->sldContrast->value()) / 100;
     contrast *= contrast;
     int brightness = settingsToolBar->sldBrightness->value();
+    bool usingAlphaPm = (img.format() == QImage::Format_ARGB32_Premultiplied);
     for (int y=0;y<img.height();++y) {
         uint *line = reinterpret_cast< uint * >(img.scanLine(y));
         for (int x=0;x<img.width();++x) {
             uint *pixel = line + x;
-            int arr[3] = {qRed(*pixel), qGreen(*pixel), qBlue(*pixel)};
+            uint nonPmPixel = usingAlphaPm ? INV_PREMUL(*pixel) : *pixel;
+            int arr[] = {qRed(nonPmPixel), qGreen(nonPmPixel), qBlue(nonPmPixel)};
             for (int a=0;a<3;a++) {
                 int tmp = arr[a] + brightness;
                 tmp = (int)(((tmp - 255 / 2 ) * contrast) + 255 / 2);
                 arr[a] = std::max(0, std::min(255, tmp));
             }
-            if (img.hasAlphaChannel()) {
-                *pixel = qRgba(arr[0], arr[1], arr[2], qAlpha(*pixel));
+            if (usingAlphaPm) {
+                *pixel = PREMUL(qRgba(arr[0], arr[1], arr[2], qAlpha(nonPmPixel)));
             } else {
                 *pixel = qRgb(arr[0], arr[1], arr[2]);
             }

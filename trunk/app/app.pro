@@ -14,7 +14,8 @@ HEADERS =   RocketWindow.h \
             ProgramStarter.h \
             ThreadedImageLoader.h \
             interfaces.h \
-            consts.h
+            consts.h \
+            plugin_functions.h
 SOURCES =   main.cpp \
             RocketWindow.cpp \
             RocketAboutDialog.cpp \

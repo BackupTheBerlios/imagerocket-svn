@@ -800,7 +800,7 @@ void RocketWindow::toolClicked(QListWidgetItem *item) {
 }
 
 void RocketWindow::toolShortcutPressed(int index) {
-    toolClicked(toolbox->item(index));
+    if (toolbox->isEnabled()) toolClicked(toolbox->item(index));
 }
 
 void RocketWindow::setToolSettingsToolBar(QWidget *widget) {
@@ -825,14 +825,13 @@ void RocketWindow::imageSaveSettingsToggled(bool value) {
 }
 
 void RocketWindow::toolSettingsToolBarDestroyed() {
-    QColor base(palette().color(QPalette::Base));
-    QColor text(palette().color(QPalette::Text));
     bool done = false;
     for (int a=0;a<toolbox->count();a++) {
-        if (toolbox->item(a)->backgroundColor() == palette().highlight().color()) {
+        if (toolbox->item(a)->backgroundColor().isValid()) {
             done = true;
-            toolbox->item(a)->setBackgroundColor(base);
-            toolbox->item(a)->setTextColor(text);
+            toolbox->item(a)->setBackgroundColor(QColor());
+            toolbox->item(a)->setTextColor(QColor());
+            break;
         }
     }
     if (!done) imageSaveSettingsButton->setChecked(false);

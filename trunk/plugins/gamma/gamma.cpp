@@ -1,23 +1,10 @@
 #include "gamma.h"
+#include "plugin_functions.h"
 #include <cassert>
 #include <cmath>
 #include <algorithm>
 
 #define EQUALS(a, b) ((a-.0001<b) && (a+.0001>b))
-
-class GammaTable {
-public:
-    char table[256];
-    GammaTable(double gamma);
-    char operator[](int index) {return table[index];}
-};
-
-GammaTable::GammaTable(double gamma) {
-    for (int a=0;a<256;a++) {
-        table[a] = char(std::max(0, std::min(255,
-                int(std::pow(a/255.0, 1.0/gamma)*255.0 + 0.5))));;
-    }
-}
 
 bool Gamma::previewCheckedByDefault = true;
 
@@ -39,16 +26,18 @@ QImage *Gamma::activate(QPixmap *pix) {
             GammaTable(master * settingsToolBar->spnGreen->value()),
             GammaTable(master * settingsToolBar->spnBlue->value())
     };
+    bool usingAlphaPm = (img.format() == QImage::Format_ARGB32_Premultiplied);
     for (int y=0;y<img.height();++y) {
         uint *line = reinterpret_cast< uint * >(img.scanLine(y));
         for (int x=0;x<img.width();++x) {
             uint *pixel = line + x;
-            int arr[3] = {qRed(*pixel), qGreen(*pixel), qBlue(*pixel)};
+            uint nonPmPixel = usingAlphaPm ? INV_PREMUL(*pixel) : *pixel;
+            int arr[] = {qRed(nonPmPixel), qGreen(nonPmPixel), qBlue(nonPmPixel)};
             for (int a=0;a<3;a++) {
                 arr[a] = color[a][arr[a]];
             }
-            if (img.hasAlphaChannel()) {
-                *pixel = qRgba(arr[0], arr[1], arr[2], qAlpha(*pixel));
+            if (usingAlphaPm) {
+                *pixel = PREMUL(qRgba(arr[0], arr[1], arr[2], qAlpha(nonPmPixel)));
             } else {
                 *pixel = qRgb(arr[0], arr[1], arr[2]);
             }
