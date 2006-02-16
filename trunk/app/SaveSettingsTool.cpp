@@ -43,15 +43,23 @@ QWidget *SaveSettingsTool::getSettingsToolBar(RocketImage *img) {
     widget->sldQuality->setValue(img->getSaveQuality());
     connect(widget->sldQuality, SIGNAL(valueChanged(int)), img, SLOT(setSaveQuality(int)));
     connect(widget->sldQuality, SIGNAL(valueChanged(int)), &updateTimer, SLOT(start()));
-    widget->cmbType->setCurrentIndex(img->getSaveFormat());
-    connect(widget->cmbType, SIGNAL(activated(int)), img, SLOT(setSaveFormat(int)));
-    connect(widget->cmbType, SIGNAL(activated(int)), &updateTimer, SLOT(start()));
+    connect(widget->cmbType, SIGNAL(activated(int)), SLOT(setSaveFormat(int)));
     widget->chkProgressiveLoading->setChecked(img->isSaveProgressive());
     connect(widget->chkProgressiveLoading, SIGNAL(toggled(bool)), img, SLOT(setSaveProgressive(bool)));
     connect(widget->chkShowPreview, SIGNAL(toggled(bool)), SLOT(previewToggled(bool)));
     connect(widget->chkShowPreview, SIGNAL(toggled(bool)), &updateTimer, SLOT(start()));
-    updateTimer.start(200);
+    setSaveFormat(img->getSaveFormat());
     return widget;
+}
+
+void SaveSettingsTool::setSaveFormat(int format) {
+    widget->cmbType->setCurrentIndex(img->getSaveFormat());
+    widget->sldQuality->setEnabled(format == 0);
+    widget->chkProgressiveLoading->setEnabled(format == 0);
+    widget->lblQuality->setEnabled(format == 0);
+    widget->lblQualityValue->setEnabled(format == 0);
+    img->setSaveFormat(format);
+    updateTimer.start(250);
 }
 
 void SaveSettingsTool::updatePreview() {

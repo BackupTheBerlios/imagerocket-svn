@@ -35,8 +35,7 @@ Suite 330, Boston, MA 02111-1307 USA */
    This class, apart from its primary function, manages the image list and plugins.
 */
 
-RocketWindow::RocketWindow(lua_State *L) : QMainWindow() {
-    this->L = L;
+RocketWindow::RocketWindow() : QMainWindow() {
     index = -1;
     dFiles = NULL;
     previewsHidden = false;
@@ -295,17 +294,6 @@ void RocketWindow::initObject() {
         setIndex(0);
     }
     
-    QFile script(":/main.lua");
-    script.open(QFile::ReadOnly);
-    QTextStream in(&script);
-    QString scriptStr(in.readAll());
-    if (luaL_loadbuffer(L, scriptStr.toAscii(), scriptStr.length(), "<lua>")
-                || lua_pcall(L, 0, 0, 0)) {
-        lua_pushfstring(L, "Error loading main.lua -- %s",
-                        lua_tostring(L, -1));
-        lua_error(L);
-    }
-    
     connect(&pluginShortcutMapper, SIGNAL(mapped(int)),
             SLOT(toolShortcutPressed(int)));
     QHash < QString, PluginListItemEntry > entries;
@@ -413,7 +401,7 @@ void RocketWindow::loadPlugins(QString dirPath, QHash < QString, PluginListItemE
                     delete plugin;
                     continue;
                 }
-                i->init(f, L, this);
+                i->init(f, this);
                 plugins.append(o);
                 ToolInterface *i2 = qobject_cast< ToolInterface * >(o);
                 if (i2) {

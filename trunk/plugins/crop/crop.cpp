@@ -22,7 +22,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include <cassert>
 #include <algorithm>
 
-void Crop::init(QString &fileName, lua_State *L, QObject *parent) {
+void Crop::init(QString &fileName, QObject *parent) {
     this->fileName = fileName;
     this->parent = parent;
     

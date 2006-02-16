@@ -20,11 +20,6 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 class PixmapViewTool;
 #include <QtGui>
-extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
 
 class UpdatePreviewToolEvent : public QEvent {
 public:
@@ -45,7 +40,7 @@ public:
 
 class PluginInterface {
 public:
-    virtual void init(QString &fileName, lua_State *L, QObject *parent) = 0;
+    virtual void init(QString &fileName, QObject *parent) = 0;
     virtual ~PluginInterface() {}
 };
 

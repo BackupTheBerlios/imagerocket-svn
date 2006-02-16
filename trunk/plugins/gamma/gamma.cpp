@@ -8,7 +8,7 @@
 
 bool Gamma::previewCheckedByDefault = true;
 
-void Gamma::init(QString &fileName, lua_State *L, QObject *parent) {
+void Gamma::init(QString &fileName, QObject *parent) {
     this->fileName = fileName;
     this->parent = parent;
     updateTimer.setSingleShot(true);

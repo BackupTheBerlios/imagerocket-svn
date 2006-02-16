@@ -3,7 +3,6 @@
 
 if not exist build (
     mkdir build
-    copy lua.dll build
     copy %QTDIR%\bin\QtCore4.dll build
     copy %QTDIR%\bin\QtGui4.dll build
     mkdir build\imageformats
@@ -20,7 +19,7 @@ if not exist build (
         echo Can't find MinGW support DLL
     )
 ) else (
-    echo Using lua/qt/mingw-support DLL's in "build" dir for zip file
+    echo Using qt/mingw-support DLL's in "build" dir for zip file
     echo Delete "build" dir to re-copy.
 )
 copy imagerocket.exe build

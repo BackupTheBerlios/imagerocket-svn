@@ -18,11 +18,6 @@ Suite 330, Boston, MA 02111-1307 USA */
 #ifndef ROCKET_WINDOW_H
 #define ROCKET_WINDOW_H
 
-extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
 #include "PixmapView.h"
 #include "SaveSettingsTool.h"
 #include "RocketFilePreviewArea.h"
@@ -46,7 +41,6 @@ protected:
     QWidget *viewportContainer;
     QLayout *viewportContainerLayout;
     RocketImageList images;
-    lua_State *L;
     QList < QObject * > plugins;
     QSignalMapper pluginShortcutMapper;
     SaveSettingsTool *saveSettingsTool;
@@ -124,7 +118,7 @@ protected slots:
     
 public:
     
-    RocketWindow(lua_State *L);
+    RocketWindow();
     virtual ~RocketWindow();
     void setDirectory(QString dirName);
     

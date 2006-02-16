@@ -10,7 +10,7 @@ class Gamma : public QObject, public PluginInterface, public ToolInterface {
 Q_OBJECT
 Q_INTERFACES(PluginInterface ToolInterface)
 public:
-    virtual void init(QString &fileName, lua_State *L, QObject *parent);
+    virtual void init(QString &fileName, QObject *parent);
     virtual QImage *activate(QPixmap *pix);
     virtual QImage *activate(QImage *img);
     virtual QWidget *getSettingsToolBar(QPixmap *pix);

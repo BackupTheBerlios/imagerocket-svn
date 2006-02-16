@@ -22,7 +22,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include <cassert>
 #include <algorithm>
 
-void Resize::init(QString &fileName, lua_State *L, QObject *parent) {
+void Resize::init(QString &fileName, QObject *parent) {
     this->fileName = fileName;
     this->parent = parent;
     locked = false;

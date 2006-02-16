@@ -5,7 +5,7 @@
 
 bool BrightnessContrast::previewCheckedByDefault = true;
 
-void BrightnessContrast::init(QString &fileName, lua_State *L, QObject *parent) {
+void BrightnessContrast::init(QString &fileName, QObject *parent) {
     this->fileName = fileName;
     this->parent = parent;
     updateTimer.setSingleShot(true);

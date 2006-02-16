@@ -42,6 +42,7 @@ protected slots:
     void updatePreview();
     void previewToggled(bool);
     void sendPreviewOff();
+    void setSaveFormat(int);
 };
 
 #endif
