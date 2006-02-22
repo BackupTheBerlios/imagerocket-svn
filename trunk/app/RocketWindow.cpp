@@ -505,14 +505,20 @@ void RocketWindow::setIndex(int index) {
         previewsHidden = false;
     }
     this->index = index;
-    updateShownPixmap();
     if (images.size()) {
         view->resetZoomAndPosition();
         QFileInfo f(images.getAsString(index));
         statusFile->setText(f.fileName());
+        if (index < images.size()) {
+            //if old selection index is valid, inform old selection of its loss.
+            images.getAsRocketImage(index)->setActive(false);
+        }
+        filePreviewArea->setActive(index);
+        images.getAsRocketImage(index)->setActive(true);
     } else {
         statusFile->setText("");
     }
+    updateShownPixmap();
     updateGui();
     if (recheckSettingsButton && imageSaveSettingsButton->isEnabled()) {
         imageSaveSettingsButton->setChecked(true);
@@ -522,14 +528,8 @@ void RocketWindow::setIndex(int index) {
 
 void RocketWindow::updateShownPixmap() {
     if (images.size()) {
-        if (this->index < images.size()) {
-            //if old selection index is valid, inform old selection of its loss.
-            images.getAsRocketImage(this->index)->setActive(false);
-        }
-        filePreviewArea->setActive(index);
-        RocketImage *img = images.getAsRocketImage(index);
-        img->setActive(true);
         QSize oldSize(view->getPixmap().size());
+        RocketImage *img = images.getAsRocketImage(index);
         view->load(img->getPixmap(), img->hasTransparency());
         QSize newSize(view->getPixmap().size());
         if (oldSize != newSize) {

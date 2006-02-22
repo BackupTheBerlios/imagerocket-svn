@@ -6,7 +6,7 @@ SOURCES = gamma.cpp
 FORMS = gammawidget.ui
 TARGET = gamma
 DESTDIR = .
-INCLUDEPATH += ../../app ../../lua
+INCLUDEPATH += ../../app
 CONFIG += qt warn_on
 CONFIG -= debug_and_release
 

@@ -76,6 +76,7 @@ protected:
     int index;
     int saveFormat, saveQuality;
     bool saveProgressive;
+    void updateThumbnail();
 signals:
     void thumbnailChanged(QPixmap pix);
 };

@@ -9,14 +9,13 @@ void BrightnessContrast::init(QString &fileName, QObject *parent) {
     this->fileName = fileName;
     this->parent = parent;
     updateTimer.setSingleShot(true);
-    updateTimer.setInterval(750);
+    updateTimer.setInterval(600);
     connect(&updateTimer, SIGNAL(timeout()), SLOT(updatePreview()));
 }
 
 QImage *BrightnessContrast::activate(QPixmap *pix) {
     QImage img(pix->toImage());
     img.detach();
-    //img.invertPixels(QImage::InvertRgb);
     assert(img.depth() == 32);
     double contrast = (100.0 + settingsToolBar->sldContrast->value()) / 100;
     contrast *= contrast;

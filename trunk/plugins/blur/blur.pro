@@ -1,10 +1,10 @@
 TEMPLATE = lib
 CONFIG += plugin
 
-HEADERS = bc.h
-SOURCES = bc.cpp
-FORMS = bcwidget.ui
-TARGET = bc
+HEADERS = blur.h
+SOURCES = blur.cpp
+FORMS = blurwidget.ui
+TARGET = blur
 DESTDIR = .
 INCLUDEPATH += ../../app
 CONFIG += qt warn_on

@@ -60,6 +60,7 @@ void RocketImage::addChange(const QPixmap &pix, QString description) {
         //since the saved pixmap is lost.
         savedIndex = -1;
     }
+    updateThumbnail();
 }
 
 void RocketImage::undo() {
@@ -69,6 +70,7 @@ void RocketImage::undo() {
         //this is sloppy and should probably be replaced - WJC
         emit thumbnailChanged(thumbnail);
     }
+    updateThumbnail();
 }
 
 void RocketImage::redo() {
@@ -78,6 +80,7 @@ void RocketImage::redo() {
         //this is sloppy and should probably be replaced - WJC
         emit thumbnailChanged(thumbnail);
     }
+    updateThumbnail();
 }
 
 void RocketImage::save(const QString &name) {
@@ -111,14 +114,23 @@ void RocketImage::setActive(bool value) {
         transparency = img.hasAlphaChannel();
         if (!img.isNull()) {
             changes[0] = QPixmap::fromImage(img);
-            QPixmap thumb(getPixmap().scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio));
-            setThumbnailWithBackground(thumb);
+            if (getStatusIconIndex() != 0) {
+                QPixmap thumb(getPixmap().scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio));
+                setThumbnailWithBackground(thumb);
+            }
         } else {
             setThumbnail(Broken);
         }
     } else {
         changes[0] = QPixmap();
     }
+}
+
+void RocketImage::updateThumbnail() {
+    QSettings settings;
+    int thumbnailSize = settings.value("thumbnail/size", 64).toInt();
+    QPixmap thumb(getPixmap().scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio));
+    setThumbnailWithBackground(thumb);
 }
 
 void RocketImage::setThumbnail(const QPixmap &thumb) {

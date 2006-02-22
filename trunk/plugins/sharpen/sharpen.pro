@@ -1,10 +1,10 @@
 TEMPLATE = lib
 CONFIG += plugin
 
-HEADERS = bc.h
-SOURCES = bc.cpp
-FORMS = bcwidget.ui
-TARGET = bc
+HEADERS = sharpen.h
+SOURCES = sharpen.cpp
+FORMS = sharpenwidget.ui
+TARGET = sharpen
 DESTDIR = .
 INCLUDEPATH += ../../app
 CONFIG += qt warn_on
