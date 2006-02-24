@@ -1,6 +1,8 @@
 crop
 resize
+*
 brightnesscontrast
 gamma
+*
 blur
 sharpen

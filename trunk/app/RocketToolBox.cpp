@@ -20,16 +20,29 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 RocketToolBox::RocketToolBox(QWidget *parent) : QListWidget(parent) {
     setFocusPolicy(Qt::NoFocus);
+    setSpacing(1);
+    QFont f(font());
+    f.setPointSize(f.pointSize()+2);
+    setFont(f);
 }
 
 void RocketToolBox::updateMinimumSize() {
     int fitWidth = 0;
     for (int a=0;a<count();++a) {
-        fitWidth = std::max(visualItemRect(item(a)).width(), fitWidth);
+        fitWidth = std::max(rectForIndex(indexFromItem(item(a))).width(), fitWidth);
     }
-    setMinimumWidth(fitWidth + 10);
+    setMinimumWidth(fitWidth + 5);
 }
 
 QSize RocketToolBox::sizeHint() const {
     return QSize(30, 50);
+}
+
+void RocketToolBox::addSeparator() {
+    QFrame *line = new QFrame(this);
+    line->setEnabled(false);
+    line->setFrameShape(QFrame::HLine);
+    addItem("");
+    item(count()-1)->setSizeHint(QSize(1, 4));
+    setItemWidget(item(count()-1), line);
 }

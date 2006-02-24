@@ -36,13 +36,12 @@ void ProgramStarter::openWebBrowser(QString address) {
     /*QStringList webBrowserCommands;
     webBrowserCommands << "urlview" << "x-www-browser" << "firefox";
     webBrowserCommands << "mozilla-firefox" << "konqueror";
-    InternalJob *job = new InternalJob;
-    job->commands = webBrowserCommands;
-    job->args = QStringList(address);
     foreach (QString a, webBrowserCommands) {
-        
+        if (QProcess::startDetached(a, QStringList(address))) {
+            break;
+        }
     }*/
-    //QProcess::startDetached("firefox", QStringList(address));
+    QProcess::startDetached("x-www-browser", QStringList(address));
 }
 
 /*void ProgramStarter::timeout() {

@@ -141,7 +141,7 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         QRect rct(trash.x()-2, trash.y()-2, (question.right()-trash.left())+5, question.height()+4);
         QRegion rgn(rct);
         rgn = rgn.subtract(QRect(rct.left(), rct.top(), 1, 1));
-        rgn = rgn.subtract(QRect(rct.right()-1, rct.top(), 1, 1));
+        rgn = rgn.subtract(QRect(rct.right(), rct.top(), 1, 1));
         foreach (QRect r, rgn.rects()) p.drawRect(r);
     }
     if (onTrash) {

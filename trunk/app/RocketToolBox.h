@@ -24,8 +24,10 @@ class RocketToolBox : public QListWidget {
 Q_OBJECT
 public:
     RocketToolBox(QWidget *parent);
-    void updateMinimumSize();
     QSize sizeHint() const;
+    void addSeparator();
+public slots:
+    void updateMinimumSize();
 };
 
 #endif

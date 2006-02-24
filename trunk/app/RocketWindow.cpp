@@ -313,7 +313,11 @@ void RocketWindow::initObject() {
     QTextStream stream(&file);
     while (!stream.atEnd()) {
         QString line(stream.readLine());
-        if (entries.contains(line)) {
+        if (line == "*") {
+            //add line to toolbox
+            toolbox->addSeparator();
+        } else if (entries.contains(line)) {
+            //add entry to toolbox
             toolbox->addItem(entries[line].first);
             QKeySequence seq(entries[line].second);
             if (!seq.isEmpty()) {
@@ -771,7 +775,7 @@ void RocketWindow::questionClicked(RocketImage *img) {
 }
 
 void RocketWindow::toolClicked(QListWidgetItem *item) {
-    if (item && item->backgroundColor() != palette().highlight().color()) {
+    if (item && !item->text().isEmpty() && item->backgroundColor() != palette().highlight().color()) {
         int pluginIndex = item->data(Qt::UserRole).toInt();
         RocketImage *image = images.getAsRocketImage(index);
         QObject *plugin = plugins[pluginIndex];
@@ -782,7 +786,7 @@ void RocketWindow::toolClicked(QListWidgetItem *item) {
         item->setTextColor(palette().highlightedText().color());
         PixmapViewTool *t = tool->getViewTool();
         view->setTool(t);
-    } else if (item && item->backgroundColor() == palette().highlight().color()) {
+    } else if (item && !item->text().isEmpty() && item->backgroundColor() == palette().highlight().color()) {
         delete toolSettingsToolBar;
     }
 }
@@ -843,7 +847,7 @@ void RocketWindow::updateCheckerDone(bool error) {
             RocketUpdateDialog *d = updateChecker->createDialog(this);
             d->exec();
             if (d->getSelected() == 1) {
-                ProgramStarter::instance()->openWebBrowser(tr("http://www.crossmans.net"));
+                ProgramStarter::instance()->openWebBrowser(tr("http://developer.berlios.de/projects/imagerocket"));
             }
         } else {
             QMessageBox::information(this, tr("Check for Updates"),
