@@ -21,6 +21,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketSaveDialog.h"
 #include "RocketFilePreviewWidget.h"
 #include "ProgramStarter.h"
+#include "ImageRotate.h"
 
 #include "interfaces.h"
 #include "consts.h"
@@ -185,21 +186,21 @@ void RocketWindow::initGUI() {
     mFile->addAction(a);
     rotateGroup = new QActionGroup(this);
     a = aRotate270 = new QAction(QIcon(":/pixmaps/rotate270.png"),
-            trUtf8("Rotate &-90°"), rotateGroup);
+            tr("Rotate &-90\260"), rotateGroup);
     a->setShortcut(QKeySequence(tr("[", "rotate -90 degrees")));
     connect(a, SIGNAL(triggered()), &rotateMapper, SLOT(map()));
     rotateMapper.setMapping(a, -90);
     mImage->addAction(a);
     imageToolBar->addAction(a);
     a = aRotate90 = new QAction(QIcon(":/pixmaps/rotate90.png"),
-            trUtf8("Rotate &90°"), rotateGroup);
+            tr("Rotate &90\260"), rotateGroup);
     a->setShortcut(QKeySequence(tr("]", "rotate 90 degrees")));
     connect(a, SIGNAL(triggered()), &rotateMapper, SLOT(map()));
     rotateMapper.setMapping(a, 90);
     mImage->addAction(a);
     imageToolBar->addAction(a);
     a = aRotate180 = new QAction(QIcon(":/pixmaps/rotate180.png"),
-            trUtf8("Rotate &180°"), rotateGroup);
+            tr("Rotate &180\260"), rotateGroup);
     connect(a, SIGNAL(triggered()), &rotateMapper, SLOT(map()));
     rotateMapper.setMapping(a, 180);
     mImage->addAction(a);
@@ -314,7 +315,7 @@ void RocketWindow::initObject() {
     while (!stream.atEnd()) {
         QString line(stream.readLine());
         if (line == "*") {
-            //add line to toolbox
+            //add separator line to toolbox
             toolbox->addSeparator();
         } else if (entries.contains(line)) {
             //add entry to toolbox
@@ -329,18 +330,21 @@ void RocketWindow::initObject() {
             entries.remove(line);
         }
     }
-    //add the plugins not mentioned in the toolbox-order file
-    QHashIterator < QString, PluginListItemEntry > iter(entries);
-    while (iter.hasNext()) {
-        iter.next();
-        toolbox->addItem(iter.value().first);
-        QKeySequence seq(iter.value().second);
-        if (!seq.isEmpty()) {
-            QShortcut *s = new QShortcut(seq, this);
-            connect(s, SIGNAL(activated()), &pluginShortcutMapper, SLOT(map()));
-            pluginShortcutMapper.setMapping(s, toolbox->count()-1);
+    if (entries.count()) {
+        //add the plugins not mentioned in the toolbox-order file
+        toolbox->addSeparator();
+        QHashIterator < QString, PluginListItemEntry > iter(entries);
+        while (iter.hasNext()) {
+            iter.next();
+            toolbox->addItem(iter.value().first);
+            QKeySequence seq(iter.value().second);
+            if (!seq.isEmpty()) {
+                QShortcut *s = new QShortcut(seq, this);
+                connect(s, SIGNAL(activated()), &pluginShortcutMapper, SLOT(map()));
+                pluginShortcutMapper.setMapping(s, toolbox->count()-1);
+            }
+            toolbox->updateMinimumSize();
         }
-        toolbox->updateMinimumSize();
     }
     ////debugging crash test - use with prog_test.sh
     //QTimer::singleShot(random() % 100, this, SLOT(close()));
@@ -715,14 +719,12 @@ void RocketWindow::zoomFitToggled(bool value) {
 }
 
 void RocketWindow::rotateTriggered(int degrees) {
-    //XXX As of Qt 4.1.0, image rotation is broken. Extra rows of transparent pixels are
-    //added to the rotated image. I've filed this as a bug, and it may be fixed in 4.1.1. - WJC
     delete toolSettingsToolBar;
     toolSettingsToolBar = NULL;
     RocketImage *image = images.getAsRocketImage(index);
-    QMatrix matrix;
-    matrix.rotate(degrees);
-    image->addChange(image->getPixmap().transformed(matrix), trUtf8("Rotate %1°").arg(degrees));
+    image->addChange(
+            QPixmap::fromImage(ImageRotate::rotate(degrees, image->getPixmap().toImage())),
+            tr("Rotate %1\260").arg(degrees));
     updateShownPixmap();
 }
 
@@ -847,7 +849,8 @@ void RocketWindow::updateCheckerDone(bool error) {
             RocketUpdateDialog *d = updateChecker->createDialog(this);
             d->exec();
             if (d->getSelected() == 1) {
-                ProgramStarter::instance()->openWebBrowser(tr("http://developer.berlios.de/projects/imagerocket"));
+                ProgramStarter::instance()->openWebBrowser(
+                        tr("http://developer.berlios.de/projects/imagerocket"));
             }
         } else {
             QMessageBox::information(this, tr("Check for Updates"),

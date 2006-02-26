@@ -88,9 +88,10 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     int centerX = width()/2, centerY = height()/2 - fileNameRect.height()/2;
     int left = centerX-pix.width()/2, top = centerY-pix.height()/2;
     if (!img->getStatusIconIndex()) {
-        p.setPen(bg.dark(150));
+        p.setPen(bg.dark(200));
         p.drawLine(left, top+pix.height()+1, left+pix.width()+1, top+pix.height()+1);
         p.drawLine(left+pix.width()+1, top, left+pix.width()+1, top+pix.height()+1);
+        p.setPen(bg.dark(150));
         p.drawLine(left+1, top+pix.height()+2, left+pix.width()+2, top+pix.height()+2);
         p.drawLine(left+pix.width()+2, top+1, left+pix.width()+2, top+pix.height()+2);
         p.setPen(Qt::black);
@@ -198,7 +199,9 @@ void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
         //hack which seems to destroy widget's tooltips
         QToolTip::showText(QPoint(), QString(), this);
     }
-    onWidget = true;
+    if (event->buttons() == 0) {
+        onWidget = true;
+    }
     //possible optimization: this updates on each mousemove. we could update on
     //each state change instead. - WJC
     update();
