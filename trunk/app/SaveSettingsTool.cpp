@@ -48,12 +48,12 @@ QWidget *SaveSettingsTool::getSettingsToolBar(RocketImage *img) {
     connect(widget->chkProgressiveLoading, SIGNAL(toggled(bool)), img, SLOT(setSaveProgressive(bool)));
     connect(widget->chkShowPreview, SIGNAL(toggled(bool)), SLOT(previewToggled(bool)));
     connect(widget->chkShowPreview, SIGNAL(toggled(bool)), &updateTimer, SLOT(start()));
+    widget->cmbType->setCurrentIndex(img->getSaveFormat());
     setSaveFormat(img->getSaveFormat());
     return widget;
 }
 
 void SaveSettingsTool::setSaveFormat(int format) {
-    widget->cmbType->setCurrentIndex(img->getSaveFormat());
     widget->sldQuality->setEnabled(format == 0);
     widget->chkProgressiveLoading->setEnabled(format == 0);
     widget->lblQuality->setEnabled(format == 0);

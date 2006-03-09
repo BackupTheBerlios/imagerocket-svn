@@ -16,7 +16,7 @@ program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
 #include "blur.h"
-#include "plugin_functions.h"
+#include "ImageTools.h"
 #include <cassert>
 #include <algorithm>
 
@@ -35,7 +35,7 @@ QImage *Blur::activate(QPixmap *pix) {
     dst.detach();
     QImage src(dst.convertToFormat(QImage::Format_ARGB32));
     int strength = settingsToolBar->sldStrength->value();
-    ConvolutionMatrix matrix(3, 3);
+    ImageTools::ImageConvolutionMatrix matrix(3, 3);
     matrix.set(0, 0, 1);
     matrix.set(0, 1, 2);
     matrix.set(0, 2, 1);
@@ -46,10 +46,9 @@ QImage *Blur::activate(QPixmap *pix) {
     matrix.set(2, 0, 1);
     matrix.set(2, 1, 2);
     matrix.set(2, 2, 1);
-    ImageConvolutionMatrix icMatrix(matrix);
     for (int x=0;x<dst.width();x++) {
         for (int y=0;y<dst.height();y++) {
-            icMatrix.apply(dst, src, x, y);
+            matrix.alphaWeightedApply(dst, src, x, y);
         }
     }
     return new QImage(dst);

@@ -21,7 +21,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketSaveDialog.h"
 #include "RocketFilePreviewWidget.h"
 #include "ProgramStarter.h"
-#include "ImageRotate.h"
+#include "ImageTools.h"
 
 #include "interfaces.h"
 #include "consts.h"
@@ -240,11 +240,11 @@ void RocketWindow::initGUI() {
     toolboxContainer->layout()->setSpacing(3);
     toolbox = new RocketToolBox(toolboxContainer);
     toolboxContainer->layout()->addWidget(toolbox);
-    imageSaveSettingsButton = new QPushButton(tr("Save &Settings"), toolboxContainer);
-    imageSaveSettingsButton->setCheckable(true);
-    imageSaveSettingsButton->setFocusPolicy(Qt::NoFocus);
-    connect(imageSaveSettingsButton, SIGNAL(toggled(bool)), SLOT(imageSaveSettingsToggled(bool)));
-    toolboxContainer->layout()->addWidget(imageSaveSettingsButton);
+    fileSettingsButton = new QPushButton(tr("File &Settings"), toolboxContainer);
+    fileSettingsButton->setCheckable(true);
+    fileSettingsButton->setFocusPolicy(Qt::NoFocus);
+    connect(fileSettingsButton, SIGNAL(toggled(bool)), SLOT(imageSaveSettingsToggled(bool)));
+    toolboxContainer->layout()->addWidget(fileSettingsButton);
     connect(toolbox, SIGNAL(itemClicked(QListWidgetItem *)), SLOT(toolClicked(QListWidgetItem *)));
     toolbox->setFrameStyle(QFrame::Box|QFrame::Plain);
     dPalette->setWidget(toolboxContainer);
@@ -473,7 +473,7 @@ void RocketWindow::updateGui() {
             ? tr("&Redo %1").arg(img->getDescriptionOfNext()) : tr("&Redo"));
     aSaveFolder->setEnabled(images.size());
     toolbox->setEnabled(notNull);
-    imageSaveSettingsButton->setEnabled(notNull);
+    fileSettingsButton->setEnabled(notNull);
     statusZoom->setText(tr("%L1%", "zoom percentage (%L1 is the number)")
             .arg(view->getZoom()*100.0, 0, 'f', 1));
     QSize size = view->getImageSize();
@@ -502,7 +502,7 @@ void RocketWindow::setIndex(int index) {
     setUpdatesEnabled(false);
     bool recheckSettingsButton = false;
     if (this->index != index) {
-        recheckSettingsButton = imageSaveSettingsButton->isChecked();
+        recheckSettingsButton = fileSettingsButton->isChecked();
         delete toolSettingsToolBar;
     }
     if (images.size() <= 1 && dFiles->isVisible()) {
@@ -528,8 +528,8 @@ void RocketWindow::setIndex(int index) {
     }
     updateShownPixmap();
     updateGui();
-    if (recheckSettingsButton && imageSaveSettingsButton->isEnabled()) {
-        imageSaveSettingsButton->setChecked(true);
+    if (recheckSettingsButton && fileSettingsButton->isEnabled()) {
+        fileSettingsButton->setChecked(true);
     }
     setUpdatesEnabled(true);
 }
@@ -723,7 +723,7 @@ void RocketWindow::rotateTriggered(int degrees) {
     toolSettingsToolBar = NULL;
     RocketImage *image = images.getAsRocketImage(index);
     image->addChange(
-            QPixmap::fromImage(ImageRotate::rotate(degrees, image->getPixmap().toImage())),
+            QPixmap::fromImage(ImageTools::rotate(degrees, image->getPixmap().toImage())),
             tr("Rotate %1\260").arg(degrees));
     updateShownPixmap();
 }
@@ -828,7 +828,7 @@ void RocketWindow::toolSettingsToolBarDestroyed() {
             break;
         }
     }
-    if (!done) imageSaveSettingsButton->setChecked(false);
+    if (!done) fileSettingsButton->setChecked(false);
 }
 
 void RocketWindow::aboutTriggered() {

@@ -61,7 +61,7 @@ protected:
     QDockWidget *dPalette, *dFiles;
     QWidget *toolboxContainer;
     RocketToolBox *toolbox;
-    QPushButton *imageSaveSettingsButton;
+    QPushButton *fileSettingsButton;
     QString lastDir;
     
     RocketFilePreviewArea *filePreviewArea;

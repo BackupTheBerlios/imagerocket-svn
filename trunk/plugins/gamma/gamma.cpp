@@ -16,7 +16,7 @@ program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
 #include "gamma.h"
-#include "plugin_functions.h"
+#include "ImageTools.h"
 #include <cassert>
 #include <cmath>
 #include <algorithm>
@@ -38,23 +38,23 @@ QImage *Gamma::activate(QPixmap *pix) {
     img.detach();
     assert(img.depth() == 32);
     double master = settingsToolBar->spnMaster->value();
-    GammaTable color[] = {
-            GammaTable(master * settingsToolBar->spnRed->value()),
-            GammaTable(master * settingsToolBar->spnGreen->value()),
-            GammaTable(master * settingsToolBar->spnBlue->value())
+    ImageTools::GammaTable color[] = {
+            ImageTools::GammaTable(master * settingsToolBar->spnRed->value()),
+            ImageTools::GammaTable(master * settingsToolBar->spnGreen->value()),
+            ImageTools::GammaTable(master * settingsToolBar->spnBlue->value())
     };
     bool usingAlphaPm = (img.format() == QImage::Format_ARGB32_Premultiplied);
     for (int y=0;y<img.height();++y) {
         uint *line = reinterpret_cast< uint * >(img.scanLine(y));
         for (int x=0;x<img.width();++x) {
             uint *pixel = line + x;
-            uint nonPmPixel = usingAlphaPm ? INV_PREMUL(*pixel) : *pixel;
+            uint nonPmPixel = usingAlphaPm ? ImageTools::decodePremultiplied(*pixel) : *pixel;
             int arr[] = {qRed(nonPmPixel), qGreen(nonPmPixel), qBlue(nonPmPixel)};
             for (int a=0;a<3;a++) {
                 arr[a] = color[a][arr[a]];
             }
             if (usingAlphaPm) {
-                *pixel = PREMUL(qRgba(arr[0], arr[1], arr[2], qAlpha(nonPmPixel)));
+                *pixel = ImageTools::premultiply(qRgba(arr[0], arr[1], arr[2], qAlpha(nonPmPixel)));
             } else {
                 *pixel = qRgb(arr[0], arr[1], arr[2]);
             }
