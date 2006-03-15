@@ -28,5 +28,4 @@ xcopy /S plugins build\plugins
 cd build
 if exist imagerocket-exe.zip (del imagerocket-exe.zip)
 ..\zip a -tzip imagerocket-exe.zip *
-ftp -s:..\ftp_commands.txt crossmans.net
 cd ..

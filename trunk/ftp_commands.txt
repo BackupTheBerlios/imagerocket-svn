@@ -1,6 +1,0 @@
-imagerocket@crossmans.net
-cpp
-binary
-put imagerocket-exe.zip
-quit
-
