@@ -18,7 +18,13 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketFilePreviewWidget.h"
 #include "RocketFilePreviewArea.h"
 
-QPointer < QMenu > RocketFilePreviewWidget::popupMenu;
+namespace RocketFilePreviewWidget {
+    QMenu *RocketFilePreviewWidget::popupMenu = 0;
+    QPixmap *floppyIcon = 0;
+    QMap < int, QPixmap * > trashIcon, trashLitIcon, questionIcon, questionLitIcon;
+}
+
+const int FADING_STEPS = 3;
 
 /*!
    \class RocketFilePreviewWidget
@@ -32,36 +38,36 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
     this->img = img;
     connect(img, SIGNAL(thumbnailChanged(QPixmap)), this, SLOT(updatePreview()));
     onTrash = onQuestion = onWidget = active = usingHorizontalLayout = false;
-    QString file(":/pixmaps/trash.png");
-    QString file2(":/pixmaps/trashLit.png");
-    QString file3(":/pixmaps/question.png");
-    QString file4(":/pixmaps/questionLit.png");
-    QString file5(":/pixmaps/floppy.png");
     font.setPointSize(10);
-    if (!QPixmapCache::find(file, trashIcon)
-         || !QPixmapCache::find(file2, trashLitIcon)
-         || !QPixmapCache::find(file3, questionIcon)
-         || !QPixmapCache::find(file4, questionLitIcon)
-         || !QPixmapCache::find(file5, floppyIcon)) {
-        trashIcon.load(file);
-        QPixmapCache::insert(file, trashIcon);
-        trashLitIcon.load(file2);
-        QPixmapCache::insert(file2, trashLitIcon);
-        questionIcon.load(file3);
-        QPixmapCache::insert(file3, questionIcon);
-        questionLitIcon.load(file4);
-        QPixmapCache::insert(file4, questionLitIcon);
-        floppyIcon.load(file5);
-        QPixmapCache::insert(file5, floppyIcon);
-    }
-    setMouseTracking(true);
-    updatePreview();
     if (!popupMenu) {
+        //create shared popup menu
         popupMenu = new QMenu(parent);
         popupMenu->addAction(tr("&Delete"))->setObjectName("delete");
         popupMenu->addAction(tr("&Info"))->setObjectName("info");
         popupMenu->addAction(tr("&Rename"))->setObjectName("rename");
+        //load images and create shared pixmaps of various opacities for fading
+        floppyIcon = new QPixmap(":/pixmaps/floppy.png");
+        trashIcon[255] = new QPixmap(":/pixmaps/trash.png");
+        trashLitIcon[255] = new QPixmap(":/pixmaps/trashLit.png");
+        questionIcon[255] = new QPixmap(":/pixmaps/question.png");
+        questionLitIcon[255] = new QPixmap(":/pixmaps/questionLit.png");
+        for (int a=1;a<FADING_STEPS;a++) {
+            int alpha = 255/FADING_STEPS*a;
+            trashIcon[alpha] = new QPixmap(QPixmap::fromImage(
+                    createAlphaErasedImage(trashIcon[255]->toImage(), alpha)));
+            trashLitIcon[alpha] = new QPixmap(QPixmap::fromImage(
+                    createAlphaErasedImage(trashLitIcon[255]->toImage(), alpha)));
+            questionIcon[alpha] = new QPixmap(QPixmap::fromImage(
+                    createAlphaErasedImage(questionIcon[255]->toImage(), alpha)));
+            questionLitIcon[alpha] = new QPixmap(QPixmap::fromImage(
+                    createAlphaErasedImage(questionLitIcon[255]->toImage(), alpha)));
+        }
     }
+    setMouseTracking(true);
+    updatePreview();
+    fadeTimer.setInterval(50);
+    connect(&fadeTimer, SIGNAL(timeout()), SLOT(fadeEvent()));
+    toolboxFading = 0;
 }
 
 void RocketFilePreviewWidget::updatePreview() {
@@ -122,8 +128,8 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     //p.drawRect(5, 5, fileNameRect.width(), fileNameRect.height());
     
     if (!img->isSaved()) {
-        QRect floppy(buttonRect(1, RightToLeft, floppyIcon));
-        p.drawPixmap(floppy.x(), floppy.y(), floppyIcon);
+        QRect floppy(buttonRect(1, RightToLeft, *floppyIcon));
+        p.drawPixmap(floppy.x(), floppy.y(), *floppyIcon);
     }
     
     if (active) {
@@ -134,28 +140,35 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         p.drawRect(0, 0, width()-1, height()-1);
     }
     
-    QRect trash(buttonRect(1, LeftToRight, trashIcon));
-    QRect question(buttonRect(2, LeftToRight, questionIcon));
-    if (onWidget) {
+    QRect trash(buttonRect(1, LeftToRight, *trashIcon[255]));
+    QRect question(buttonRect(2, LeftToRight, *questionIcon[255]));
+    if (onWidget || toolboxFading) {
+        int toolboxAlpha = 192/FADING_STEPS * toolboxFading;
+        int buttonAlpha = (toolboxFading != FADING_STEPS)
+                ? (255/FADING_STEPS * toolboxFading) : 255;
         p.setPen(QColor(0, 0, 0, 0));
-        p.setBrush(QColor(0, 0, 64, 192));
-        QRect rct(trash.x()-2, trash.y()-2, (question.right()-trash.left())+5, question.height()+4);
+        p.setBrush(QColor(0, 0, 64, toolboxAlpha));
+        QRect rct(trash.x()-2, trash.y()-2,
+                (question.right()-trash.left())+5, question.height()+4);
         QRegion rgn(rct);
         rgn = rgn.subtract(QRect(rct.left(), rct.top(), 1, 1));
         rgn = rgn.subtract(QRect(rct.right(), rct.top(), 1, 1));
         foreach (QRect r, rgn.rects()) p.drawRect(r);
+        p.drawPixmap(trash.x(), trash.y(),
+                onTrash ? *trashLitIcon[buttonAlpha] : *trashIcon[buttonAlpha]);
+        p.drawPixmap(question.x(), question.y(),
+                onQuestion ? *questionLitIcon[buttonAlpha] : *questionIcon[buttonAlpha]);
     }
-    if (onTrash) {
-        QRect trash(buttonRect(1, LeftToRight, trashLitIcon));
-        p.drawPixmap(trash.x(), trash.y(), trashLitIcon);
-        p.drawPixmap(question.x(), question.y(), questionIcon);
-    } else if (onQuestion) {
-        p.drawPixmap(trash.x(), trash.y(), trashIcon);
-        p.drawPixmap(question.x(), question.y(), questionLitIcon);
-    } else if (onWidget) {
-        p.drawPixmap(trash.x(), trash.y(), trashIcon);
-        p.drawPixmap(question.x(), question.y(), questionIcon);
-    }
+}
+
+QImage RocketFilePreviewWidget::createAlphaErasedImage(const QImage &img, int alpha) {
+    QImage src(img.copy()), eraser(img.copy());
+    eraser.fill(qRgba(0, 0, 0, alpha));
+    QPainter p(&src);
+    p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+    p.drawImage(0, 0, eraser);
+    p.end();
+    return src;
 }
 
 void RocketFilePreviewWidget::setActive(bool value) {
@@ -178,19 +191,22 @@ void RocketFilePreviewWidget::setOrientation(bool horizontal) {
 }
 
 void RocketFilePreviewWidget::leaveEvent(QEvent *event) {
+    if (toolboxFading == FADING_STEPS) {
+        fadeTimer.start();
+    }
     resetIcons();
 }
 
 void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
-    onTrash = positionOnButton(event->pos(), 1, LeftToRight, trashIcon);
+    onTrash = positionOnButton(event->pos(), 1, LeftToRight, *trashIcon[255]);
     if (onTrash) {
         setToolTip(tr("Delete"));
     }
-    onQuestion = positionOnButton(event->pos(), 2, LeftToRight, questionIcon);
+    onQuestion = positionOnButton(event->pos(), 2, LeftToRight, *questionIcon[255]);
     if (onQuestion) {
         setToolTip(tr("Info"));
     }
-    bool onChanged = positionOnButton(event->pos(), 1, RightToLeft, floppyIcon);
+    bool onChanged = positionOnButton(event->pos(), 1, RightToLeft, *floppyIcon);
     if (onChanged && !img->isSaved()) {
         setToolTip(tr("Changes Made"));
     }
@@ -199,8 +215,12 @@ void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
         //hack which seems to destroy widget's tooltips
         QToolTip::showText(QPoint(), QString(), this);
     }
-    if (event->buttons() == 0) {
+    if (!onWidget) {
         onWidget = true;
+        if (toolboxFading == 0) {
+            toolboxFading = 1;
+            fadeTimer.start();
+        }
     }
     //possible optimization: this updates on each mousemove. we could update on
     //each state change instead. - WJC
@@ -209,7 +229,7 @@ void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
 
 void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
     bool leftClick = event->button() == Qt::LeftButton;
-    if (positionOnButton(event->pos(), 1, LeftToRight, trashIcon) && leftClick) {
+    if (positionOnButton(event->pos(), 1, LeftToRight, *trashIcon[255]) && leftClick) {
         int response = QMessageBox::question(this, img->getFileName(),
                 tr("Are you sure you want to delete %1?").arg(img->getFileName()),
                 QMessageBox::Yes, QMessageBox::No);
@@ -217,7 +237,7 @@ void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
             return;
         }
         emit deleteMe(this);
-    } else if (positionOnButton(event->pos(), 2, LeftToRight, questionIcon) && leftClick) {
+    } else if (positionOnButton(event->pos(), 2, LeftToRight, *questionIcon[255]) && leftClick) {
         emit questionClicked(this);
     } else if (leftClick) {
         emit clicked(this);
@@ -226,6 +246,17 @@ void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
         connect(popupMenu, SIGNAL(triggered(QAction *)), SLOT(popupTriggered(QAction *)));
         popupMenu->popup(mapToGlobal(event->pos()));
     }
+}
+
+void RocketFilePreviewWidget::fadeEvent() {
+    if (!onWidget && toolboxFading) {
+        --toolboxFading;
+    } else if (onWidget && toolboxFading < FADING_STEPS) {
+        ++toolboxFading;
+    } else {
+        fadeTimer.stop();
+    }
+    update();
 }
 
 void RocketFilePreviewWidget::resetIcons() {
@@ -244,13 +275,13 @@ QRect RocketFilePreviewWidget::buttonRect(int num, Direction d, const QPixmap &p
     int y = std::min(height()-pixmap.height(), height()/2+int(thumbnailSize*.6));
     if (d == LeftToRight) {
         int x = std::max(margin, std::min(lastDrawnPosition.x(), width()/3)-margin)
-                + (trashIcon.width()+2)*(num-1);
-        return QRect(x, y, trashIcon.width(), trashIcon.height());
+                + (trashIcon[255]->width()+2)*(num-1);
+        return QRect(x, y, trashIcon[255]->width(), trashIcon[255]->height());
     } else {
         int iw = img->getThumbnail().width();
         int x = std::max(margin, std::min(lastDrawnPosition.x()+iw,
                         int(width()*(2.0/3.0)))+margin)
-                - (trashIcon.width()+2)*(num-1);
+                - (trashIcon[255]->width()+2)*(num-1);
         return QRect(x, y, pixmap.width(), pixmap.height());
     }
 }

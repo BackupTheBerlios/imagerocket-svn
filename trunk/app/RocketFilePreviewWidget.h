@@ -24,14 +24,18 @@ Suite 330, Boston, MA 02111-1307 USA */
 class RocketFilePreviewWidget : public QWidget {
 Q_OBJECT
 protected:
-    QPixmap trashIcon, trashLitIcon, questionIcon, questionLitIcon, floppyIcon;
+    static QMap < int, QPixmap * > trashIcon, trashLitIcon, questionIcon, questionLitIcon;
+    static QPixmap *floppyIcon;
+    static QMenu *popupMenu;
     QFont font;
     RocketImage *img;
     QPoint lastDrawnPosition;
     int thumbnailSize;
     bool onTrash, onQuestion, onWidget;
+    int toolboxFading;
     bool active, usingHorizontalLayout;
     QSize oldPrefSize;
+    QTimer fadeTimer;
     enum Direction {LeftToRight, RightToLeft};
     void paintEvent(QPaintEvent *event);
     void leaveEvent(QEvent *event);
@@ -39,7 +43,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     bool positionOnButton(QPoint p, int num, Direction d, const QPixmap &pixmap);
     QRect buttonRect(int num, Direction d, const QPixmap &pixmap);
-    static QPointer < QMenu > popupMenu;
+    QImage createAlphaErasedImage(const QImage &img, int alpha);
 public:
     RocketFilePreviewWidget(QWidget *parent, RocketImage *img, int thumbnailSize);
     QSize sizeHint();
@@ -57,6 +61,7 @@ public:
     }
 protected slots:
     void popupTriggered(QAction *);
+    void fadeEvent();
 public slots:
     void updatePreview();
 signals:

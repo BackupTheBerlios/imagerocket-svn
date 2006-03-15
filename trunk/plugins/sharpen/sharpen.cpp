@@ -36,7 +36,6 @@ QImage *Sharpen::activate(QPixmap *pix) {
     QImage src(dst.convertToFormat(QImage::Format_ARGB32));
     int strength = settingsToolBar->sldStrength->value();
     ImageTools::ImageConvolutionMatrix matrix(3, 3);
-    matrix.setApplyToAlpha(false);
     matrix.set(0, 0, -1);
     matrix.set(0, 1, -2);
     matrix.set(0, 2, -1);

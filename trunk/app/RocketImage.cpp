@@ -87,7 +87,11 @@ void RocketImage::save(const QString &name) {
     QFileInfo info(name);
     QString ext(getSaveFormatAsText());
     QString fileName(QDir(info.path()).filePath(info.baseName()+"."+ext));
-    getPixmap().save(fileName, ext.toAscii(), saveQuality);
+    if (getSaveFormatAsText() == "png") {
+        getPixmap().toImage().convertToFormat(QImage::Format_ARGB32).save(fileName, ext.toAscii(), saveQuality);
+    } else {
+        getPixmap().save(fileName, ext.toAscii(), saveQuality);
+    }
     setSaved();
 }
 
@@ -95,7 +99,12 @@ void RocketImage::save(const QString &name) {
 void RocketImage::generateSavedFileInMemory(QBuffer &buffer) {
     QImageWriter writer(&buffer, getSaveFormatAsText().toAscii());
     writer.setQuality(saveQuality);
-    writer.write(getPixmap().toImage());
+    QImage image(getPixmap().toImage());
+    if (getSaveFormatAsText() == "png") {
+        writer.write(image.convertToFormat(QImage::Format_ARGB32));
+    } else {
+        writer.write(image);
+    }
 }
 
 void RocketImage::setSaved() {

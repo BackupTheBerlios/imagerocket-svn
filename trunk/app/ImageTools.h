@@ -76,7 +76,7 @@ namespace ImageTools {
         x |= t | (a << 24);
         return x;
     }
-    uint decodePremultipled(uint x) {
+    uint decodePremultiplied(uint x) {
         //from Qt
         if (qAlpha(x) == 0) {
             return 0;
