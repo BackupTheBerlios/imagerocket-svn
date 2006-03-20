@@ -31,6 +31,7 @@ void Blur::init(QString &fileName, QObject *parent) {
 }
 
 QImage *Blur::activate(QPixmap *pix) {
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     QImage dst(pix->toImage());
     dst.detach();
     QImage src(dst.convertToFormat(QImage::Format_ARGB32));
@@ -51,6 +52,7 @@ QImage *Blur::activate(QPixmap *pix) {
             matrix.alphaWeightedApply(dst, src, x, y);
         }
     }
+    QApplication::restoreOverrideCursor();
     return new QImage(dst);
 }
 

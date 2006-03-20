@@ -282,6 +282,10 @@ void RocketWindow::initGUI() {
     setAcceptDrops(true);
     installEventFilter(this);
     
+    switchImageBlocked = false;
+    switchImageBlockedTimer.setSingleShot(true);
+    connect(&switchImageBlockedTimer, SIGNAL(timeout()), SLOT(switchImageBlockedTimeout()));
+    
     //This works around the problem with QMainWindow in which the dock widgets get shrunk if the
     //window is resized smaller than their height. I hope this will be fixed upstream. - WJC
     setMinimumSize(500, 400);
@@ -532,6 +536,7 @@ void RocketWindow::setIndex(int index) {
         fileSettingsButton->setChecked(true);
     }
     setUpdatesEnabled(true);
+    switchImageBlockedTimer.start(50);
 }
 
 void RocketWindow::updateShownPixmap() {
@@ -657,19 +662,35 @@ void RocketWindow::exitTriggered() {
 }
 
 void RocketWindow::firstTriggered() {
-    setIndex(0);
+    if (!switchImageBlocked) {
+        switchImageBlocked = true;
+        setIndex(0);
+    }
 }
 
 void RocketWindow::backTriggered() {
-    setIndex(index - 1);
+    if (!switchImageBlocked) {
+        switchImageBlocked = true;
+        setIndex(index - 1);
+    }
 }
 
 void RocketWindow::forwardTriggered() {
-    setIndex(index + 1);
+    if (!switchImageBlocked) {
+        switchImageBlocked = true;
+        setIndex(index + 1);
+    }
 }
 
 void RocketWindow::lastTriggered() {
-    setIndex(images.size() - 1);
+    if (!switchImageBlocked) {
+        switchImageBlocked = true;
+        setIndex(images.size() - 1);
+    }
+}
+
+void RocketWindow::switchImageBlockedTimeout() {
+    switchImageBlocked = false;
 }
 
 void RocketWindow::undoTriggered() {

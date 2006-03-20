@@ -59,6 +59,8 @@ protected:
     QAction *aUndo, *aRedo;
     QAction *aCheckForUpdates, *aAbout;
     QDockWidget *dPalette, *dFiles;
+    bool switchImageBlocked;
+    QTimer switchImageBlockedTimer;
     QWidget *toolboxContainer;
     RocketToolBox *toolbox;
     QPushButton *fileSettingsButton;
@@ -89,6 +91,7 @@ protected slots:
     void backTriggered();
     void forwardTriggered();
     void lastTriggered();
+    void switchImageBlockedTimeout();
     
     void useLargeThumbnailsToggled(bool);
     
