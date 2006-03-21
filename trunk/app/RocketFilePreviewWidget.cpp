@@ -24,7 +24,7 @@ namespace RocketFilePreviewWidget {
     QMap < int, QPixmap * > trashIcon, trashLitIcon, questionIcon, questionLitIcon;
 }
 
-const int FADING_STEPS = 3;
+const int TBOX_STEPS = 3, SELECT_STEPS = 3;
 
 /*!
    \class RocketFilePreviewWidget
@@ -51,8 +51,8 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
         trashLitIcon[255] = new QPixmap(":/pixmaps/trashLit.png");
         questionIcon[255] = new QPixmap(":/pixmaps/question.png");
         questionLitIcon[255] = new QPixmap(":/pixmaps/questionLit.png");
-        for (int a=1;a<FADING_STEPS;a++) {
-            int alpha = 255/FADING_STEPS*a;
+        for (int a=1;a<TBOX_STEPS;a++) {
+            int alpha = 255/TBOX_STEPS*a;
             trashIcon[alpha] = new QPixmap(QPixmap::fromImage(
                     createAlphaErasedImage(trashIcon[255]->toImage(), alpha)));
             trashLitIcon[alpha] = new QPixmap(QPixmap::fromImage(
@@ -68,6 +68,7 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
     fadeTimer.setInterval(50);
     connect(&fadeTimer, SIGNAL(timeout()), SLOT(fadeEvent()));
     toolboxFading = 0;
+    activeFading = 0;
 }
 
 void RocketFilePreviewWidget::updatePreview() {
@@ -132,20 +133,25 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         p.drawPixmap(floppy.x(), floppy.y(), *floppyIcon);
     }
     
-    if (active) {
+    if (activeFading) {
         QColor border(palette().highlight().color());
-        QColor fill(border.red(), border.green(), border.blue(), 75);
+        QColor fill(border.red(), border.green(), border.blue(), 75/SELECT_STEPS * activeFading);
         p.fillRect(1, 1, width()-2, height()-2, fill);
-        p.setPen(border);
+        if (activeFading == SELECT_STEPS) {
+            p.setPen(border);
+        } else {
+            QColor alphaBorder(border.red(), border.green(), border.blue(), 255/SELECT_STEPS * activeFading);
+            p.setPen(alphaBorder);
+        }
         p.drawRect(0, 0, width()-1, height()-1);
     }
     
     QRect trash(buttonRect(1, LeftToRight, *trashIcon[255]));
     QRect question(buttonRect(2, LeftToRight, *questionIcon[255]));
     if (onWidget || toolboxFading) {
-        int toolboxAlpha = 192/FADING_STEPS * toolboxFading;
-        int buttonAlpha = (toolboxFading != FADING_STEPS)
-                ? (255/FADING_STEPS * toolboxFading) : 255;
+        int toolboxAlpha = 192/TBOX_STEPS * toolboxFading;
+        int buttonAlpha = (toolboxFading != TBOX_STEPS)
+                ? (255/TBOX_STEPS * toolboxFading) : 255;
         p.setPen(QColor(0, 0, 0, 0));
         p.setBrush(QColor(0, 0, 64, toolboxAlpha));
         QRect rct(trash.x()-2, trash.y()-2,
@@ -173,9 +179,14 @@ QImage RocketFilePreviewWidget::createAlphaErasedImage(const QImage &img, int al
 
 void RocketFilePreviewWidget::setActive(bool value) {
     if (active != value) {
+        if (value) {
+            activeFading = SELECT_STEPS;
+        } else {
+            if (!fadeTimer.isActive()) fadeTimer.start();
+        }
         update();
+        active = value;
     }
-    active = value;
 }
 
 void RocketFilePreviewWidget::setOrientation(bool horizontal) {
@@ -191,9 +202,7 @@ void RocketFilePreviewWidget::setOrientation(bool horizontal) {
 }
 
 void RocketFilePreviewWidget::leaveEvent(QEvent *event) {
-    if (toolboxFading == FADING_STEPS) {
-        fadeTimer.start();
-    }
+    if (!fadeTimer.isActive()) fadeTimer.start();
     resetIcons();
 }
 
@@ -215,11 +224,11 @@ void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
         //hack which seems to destroy widget's tooltips
         QToolTip::showText(QPoint(), QString(), this);
     }
-    if (!onWidget) {
+    if (!onWidget && event->buttons() == 0) {
         onWidget = true;
         if (toolboxFading == 0) {
             toolboxFading = 1;
-            fadeTimer.start();
+            if (!fadeTimer.isActive()) fadeTimer.start();
         }
     }
     //possible optimization: this updates on each mousemove. we could update on
@@ -249,11 +258,19 @@ void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void RocketFilePreviewWidget::fadeEvent() {
+    bool done = true;
     if (!onWidget && toolboxFading) {
         --toolboxFading;
-    } else if (onWidget && toolboxFading < FADING_STEPS) {
+        done = false;
+    } else if (onWidget && toolboxFading < TBOX_STEPS) {
         ++toolboxFading;
-    } else {
+        done = false;
+    }
+    if (!active && activeFading) {
+        --activeFading;
+        done = false;
+    }
+    if (done) {
         fadeTimer.stop();
     }
     update();

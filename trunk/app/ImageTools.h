@@ -169,7 +169,7 @@ namespace ImageTools {
         int endY = std::min(dest.height()-1, y+getSideHeight());
         int count = 0, r = 0, g = 0, b = 0;
         for (int my=startY;my<=endY;++my) {
-            uint *line = reinterpret_cast< uint * >(nonPremultipliedSrc.scanLine(y));
+            uint *line = reinterpret_cast< uint * >(nonPremultipliedSrc.scanLine(my));
             for (int mx=startX;mx<=endX;++mx) {
                 int multiplier = get(x-mx+getSideWidth(), y-my+getSideHeight());
                 uint p = line[mx];
@@ -193,7 +193,7 @@ namespace ImageTools {
         int endY = std::min(dest.height()-1, y+getSideHeight());
         int mCount = 0, a = 0, r = 0, g = 0, b = 0;
         for (int my=startY;my<=endY;++my) {
-            uint *line = reinterpret_cast< uint * >(nonPremultipliedSrc.scanLine(y));
+            uint *line = reinterpret_cast< uint * >(nonPremultipliedSrc.scanLine(my));
             for (int mx=startX;mx<=endX;++mx) {
                 int multiplier = get(x-mx+getSideWidth(), y-my+getSideHeight());
                 uint p = line[mx];

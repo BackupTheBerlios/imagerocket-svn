@@ -34,6 +34,7 @@ protected:
     bool onTrash, onQuestion, onWidget;
     int toolboxFading;
     bool active, usingHorizontalLayout;
+    int activeFading;
     QSize oldPrefSize;
     QTimer fadeTimer;
     enum Direction {LeftToRight, RightToLeft};
