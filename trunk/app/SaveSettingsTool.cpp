@@ -49,6 +49,7 @@ QWidget *SaveSettingsTool::getSettingsToolBar(RocketImage *img) {
     connect(widget->chkShowPreview, SIGNAL(toggled(bool)), SLOT(previewToggled(bool)));
     connect(widget->chkShowPreview, SIGNAL(toggled(bool)), &updateTimer, SLOT(start()));
     widget->cmbType->setCurrentIndex(img->getSaveFormat());
+    widget->lblSize->setText(tr("<html><span style=\" font-style:italic;\">Calculating...</span></html>"));
     setSaveFormat(img->getSaveFormat());
     return widget;
 }
@@ -70,9 +71,9 @@ void SaveSettingsTool::updatePreview() {
         int size = buffer.size()/1024;
         int adjusted = int(size * 1.1) + 10;
         widget->lblSize->setText(
-                tr("<html>Image Size: <i>%L1k</i> &#8213; "
-                "Download Time: Dialup <i>%L2 seconds</i>, "
-                "High Speed <i>%L3 seconds</i></html>", "8213 is a long hyphen")
+                tr("<html>Image Size: %L1k -- "
+                "Download Time: Dialup %L2 seconds, "
+                "High Speed %L3 seconds</html>")
                 .arg(size).arg(int(adjusted/6)).arg(int(adjusted/64)));
         UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
         event->pixmap = new QPixmap(QPixmap::fromImage(i));

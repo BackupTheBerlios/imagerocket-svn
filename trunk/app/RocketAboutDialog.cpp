@@ -29,8 +29,8 @@ RocketAboutDialog::RocketAboutDialog(QWidget *parent)
     QString tmp;
     tmp.append(tr("<h2>" PROGRAM_NAME " " VERSION "</h2>"
             "<h4>"
-            "&copy; 2005 Wesley Crossman<br>"
-            "Qt toolkit &copy; 1994-2005 Trolltech AS<br>"
+            "&copy; 2005-2006 Wesley Crossman<br>"
+            "Qt toolkit &copy; 1994-2006 Trolltech AS<br>"
             "Icons are from Red Hat's Bluecurve and The Gimp's default icon theme"
             "</h4></br>"));
     //Credits
