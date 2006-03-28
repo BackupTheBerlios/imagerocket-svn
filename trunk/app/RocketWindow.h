@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2006 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -49,7 +49,7 @@ protected:
     bool previewsHidden;
     QLabel *statusFile, *statusZoom, *statusSize;
     QMenu *mFile, *mEdit, *mView, *mImage, *mHelp;
-    QAction *aOpenFolder, *aSaveFolder, *aExit;
+    QAction *aOpenFolder, *aSaveFolder, *aPrint, *aExit;
     QAction *aFirst, *aBack, *aForward, *aLast;
     QAction *aUseLargeThumbnails;
     QAction *aZoomOut, *aZoom100, *aZoomIn, *aZoomFit;
@@ -85,6 +85,7 @@ protected slots:
     
     void openFolderTriggered();
     void saveFolderTriggered();
+    void printTriggered();
     void exitTriggered();
     
     void firstTriggered();

@@ -1,5 +1,8 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
+<file>pixmaps/open.png</file>
+<file>pixmaps/save-as.png</file>
+<file>pixmaps/print.png</file>
 <file>pixmaps/redo.png</file>
 <file>pixmaps/undo.png</file>
 <file>pixmaps/rocket.png</file>

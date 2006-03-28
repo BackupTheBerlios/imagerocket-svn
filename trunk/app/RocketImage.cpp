@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2006 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -105,6 +105,27 @@ void RocketImage::generateSavedFileInMemory(QBuffer &buffer) {
     } else {
         writer.write(image);
     }
+}
+
+void RocketImage::print(QPrinter *printer, QPainter &p) {
+    printer->newPage();
+    bool active = !getPixmap().isNull();
+    if (!active) setActive(true);
+    QPixmap pix(getPixmap());
+    if (!active) setActive(false);
+    int scaledWidth = pix.width()/85.0*printer->logicalDpiX();
+    int scaledHeight = pix.height()/85.0*printer->logicalDpiY();
+    if (scaledWidth > scaledHeight && scaledWidth > printer->width()) {
+        scaledHeight = printer->width() * (double(pix.height())/pix.width());
+        scaledWidth = printer->width();
+    } else if (scaledHeight > scaledWidth && scaledHeight > printer->height()) {
+        scaledWidth = printer->height() * (double(pix.width())/pix.height());
+        scaledHeight = printer->height();
+    }
+    int startX = printer->width()/2 - scaledWidth/2;
+    int startY = printer->height()/2 - scaledHeight/2;
+    p.setRenderHint(QPainter::SmoothPixmapTransform);
+    p.drawPixmap(startX, startY, scaledWidth, scaledHeight, pix);
 }
 
 void RocketImage::setSaved() {

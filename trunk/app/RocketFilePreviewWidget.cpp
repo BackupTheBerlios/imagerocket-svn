@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2006 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -155,7 +155,7 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         p.setPen(QColor(0, 0, 0, 0));
         p.setBrush(QColor(0, 0, 64, toolboxAlpha));
         QRect rct(trash.x()-2, trash.y()-2,
-                (question.right()-trash.left())+5, question.height()+4);
+                (question.right()-trash.left())+5, question.height()+2);
         QRegion rgn(rct);
         rgn = rgn.subtract(QRect(rct.left(), rct.top(), 1, 1));
         rgn = rgn.subtract(QRect(rct.right(), rct.top(), 1, 1));

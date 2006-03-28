@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2006 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -27,6 +27,7 @@ public:
     enum StatusIcon {TooLarge = 1, Broken, Loading};
     RocketImage(const QString &fileName);
     ~RocketImage();
+    void print(QPrinter *printer, QPainter &p);
     QPixmap getPixmap() {return changes[index];}
     QString getDescription() {return descriptions[index];}
     QString getDescriptionOfNext() {
@@ -69,14 +70,14 @@ protected:
     QString fileName, shortName;
     int statusIcon, savedIndex;
     bool transparency;
-    void setSelected(bool value);
-    friend void RocketImageList::setIndex(int index);
     QVector < QPixmap > changes;
     QVector < QString > descriptions;
     int index;
     int saveFormat, saveQuality;
     bool saveProgressive;
     void updateThumbnail();
+    void setSelected(bool value);
+    friend void RocketImageList::setIndex(int index);
 signals:
     void thumbnailChanged(QPixmap pix);
 };

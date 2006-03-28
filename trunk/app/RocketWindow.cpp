@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2006 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -101,14 +101,24 @@ void RocketWindow::initGUI() {
     mHelp = menuBar()->addMenu(tr("&Help"));
     mainToolBar->setIconSize(QSize(24, 24));
     QAction *a;
-    a = aOpenFolder = new QAction(tr("&Open Folder..."), this);
+    a = aOpenFolder = new QAction(QIcon(":/pixmaps/open.png"), tr("&Open Folder..."), this);
     a->setShortcut(QKeySequence(tr("Ctrl+O", "open folder")));
     connect(a, SIGNAL(triggered()), SLOT(openFolderTriggered()));
+    mainToolBar->addAction(a);
     mFile->addAction(a);
     mFile->addSeparator();
-    a = aSaveFolder = new QAction(tr("&Save Folder..."), this);
+    a = aSaveFolder = new QAction(QIcon(":/pixmaps/save-as.png"), tr("&Save Folder..."), this);
     a->setShortcut(QKeySequence(tr("Ctrl+S", "save folder")));
     connect(a, SIGNAL(triggered()), SLOT(saveFolderTriggered()));
+    mainToolBar->addAction(a);
+    mainToolBar->addSeparator();
+    mFile->addAction(a);
+    mFile->addSeparator();
+    a = aPrint = new QAction(QIcon(":/pixmaps/print.png"), tr("&Print..."), this);
+    a->setShortcut(QKeySequence(tr("Ctrl+P", "print image")));
+    connect(a, SIGNAL(triggered()), SLOT(printTriggered()));
+    mainToolBar->addAction(a);
+    mainToolBar->addSeparator();
     mFile->addAction(a);
     mFile->addSeparator();
     a = aFirst = new QAction(QIcon(":/pixmaps/first.png"),
@@ -476,6 +486,7 @@ void RocketWindow::updateGui() {
     aRedo->setText((img && img->canRedo())
             ? tr("&Redo %1").arg(img->getDescriptionOfNext()) : tr("&Redo"));
     aSaveFolder->setEnabled(images.size());
+    aPrint->setEnabled(images.size());
     toolbox->setEnabled(notNull);
     fileSettingsButton->setEnabled(notNull);
     statusZoom->setText(tr("%L1%", "zoom percentage (%L1 is the number)")
@@ -594,6 +605,36 @@ void RocketWindow::saveFolderTriggered() {
         } else {
             assert(0);
         }
+    }
+}
+
+void RocketWindow::printTriggered() {
+    //TODO This needs to be tested on a real printer, not just print-to-file. -- WJC
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setCreator(tr("%1 %2", "programName version").arg(PROGRAM_NAME).arg(VERSION));
+    QPrintDialog dialog(&printer, this);
+    dialog.setWindowTitle(tr("Print..."));
+    dialog.setEnabledOptions(QAbstractPrintDialog::PrintToFile
+            |QAbstractPrintDialog::PrintSelection
+            |QAbstractPrintDialog::PrintPageRange);
+    dialog.setMinMax(1, images.size());
+    dialog.setPrintRange(QAbstractPrintDialog::Selection);
+    if (dialog.exec() == QDialog::Accepted) {
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        QPainter p(&printer);
+        for (int a=0;a<printer.numCopies();++a) {
+            if (dialog.toPage() == 0) {
+                images.getAsRocketImage(index)->print(&printer, p);
+            } else {
+                bool first = (printer.pageOrder() == QPrinter::FirstPageFirst);
+                int start = first ? dialog.fromPage()-1 : dialog.toPage()-1;
+                int end = first ? dialog.toPage()-1 : dialog.fromPage()-1;
+                for (int b=start; first ? b<=end : b>=end; first ? ++b : --b) {
+                    images.getAsRocketImage(b)->print(&printer, p);
+                }
+            }
+        }
+        QApplication::restoreOverrideCursor();
     }
 }
 
