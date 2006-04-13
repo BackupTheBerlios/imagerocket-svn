@@ -113,13 +113,13 @@ void RocketImage::print(QPrinter *printer, QPainter &p) {
     if (!active) setActive(true);
     QPixmap pix(getPixmap());
     if (!active) setActive(false);
-    int scaledWidth = pix.width()/85.0*printer->logicalDpiX();
-    int scaledHeight = pix.height()/85.0*printer->logicalDpiY();
+    int scaledWidth = int(pix.width()/85.0*printer->logicalDpiX());
+    int scaledHeight = int(pix.height()/85.0*printer->logicalDpiY());
     if (scaledWidth > scaledHeight && scaledWidth > printer->width()) {
-        scaledHeight = printer->width() * (double(pix.height())/pix.width());
+        scaledHeight = int(printer->width() * double(pix.height())/pix.width());
         scaledWidth = printer->width();
     } else if (scaledHeight > scaledWidth && scaledHeight > printer->height()) {
-        scaledWidth = printer->height() * (double(pix.width())/pix.height());
+        scaledWidth = int(printer->height() * double(pix.width())/pix.height());
         scaledHeight = printer->height();
     }
     int startX = printer->width()/2 - scaledWidth/2;

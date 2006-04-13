@@ -77,6 +77,7 @@ protected:
     bool event(QEvent *e);
     void loadPlugins(QString dirPath, QHash < QString, PluginListItemEntry > &entries);
     void setToolSettingsToolBar(QWidget *widget);
+    bool doSaveFolder();
     
 protected slots:
     

@@ -1,6 +1,7 @@
 TEMPLATE = app
 TARGET = imagerocket
 DESTDIR = ..
+PRECOMPILED_HEADER = precompiled.h
 HEADERS =   RocketWindow.h \
             RocketAboutDialog.h \
             RocketUpdateChecker.h \
@@ -37,7 +38,7 @@ MOC_DIR = tmp
 OBJECTS_DIR = tmp
 UI_DIR = tmp
 RCC_DIR = tmp
-CONFIG += warn_on
+CONFIG += warn_on precompile_header
 CONFIG -= debug_and_release
 QT += network
 win32:LIBS += ../pixview.dll

@@ -83,11 +83,14 @@ void RocketWindow::initGUI() {
     
     QStatusBar *status = new QStatusBar(this);
     statusFile = new QLabel(status);
+    statusFile->setMargin(1);
     statusFile->setSizePolicy(
             QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     status->addWidget(statusFile);
     statusZoom = new QLabel(status);
+    statusZoom->setMargin(1);
     statusSize = new QLabel(status);
+    statusSize->setMargin(1);
     status->addWidget(statusZoom);
     status->addWidget(statusSize);
     setStatusBar(status);
@@ -489,11 +492,17 @@ void RocketWindow::updateGui() {
     aPrint->setEnabled(images.size());
     toolbox->setEnabled(notNull);
     fileSettingsButton->setEnabled(notNull);
-    statusZoom->setText(tr("%L1%", "zoom percentage (%L1 is the number)")
-            .arg(view->getZoom()*100.0, 0, 'f', 1));
-    QSize size = view->getImageSize();
-    QString s = tr("%L1 x %L2", "image dimensions").arg(size.width()).arg(size.height());
-    statusSize->setText(s);
+    if (notNull) {
+        statusZoom->setText(tr("%L1%", "zoom percentage (%L1 is the number)")
+                .arg(view->getZoom()*100.0, 0, 'f', 1));
+        QSize size = view->getImageSize();
+        QString s = tr("%L1 x %L2", "image dimensions")
+                .arg(size.width()).arg(size.height());
+        statusSize->setText(s);
+    }
+    statusFile->setVisible(images.size());
+    statusZoom->setVisible(notNull);
+    statusSize->setVisible(notNull);
     if (images.getLocation().isEmpty()) {
         setWindowTitle(tr("%1 %2", "programName version").arg(PROGRAM_NAME).arg(VERSION));
     } else {
@@ -581,6 +590,11 @@ void RocketWindow::openFolderTriggered() {
 }
 
 void RocketWindow::saveFolderTriggered() {
+    doSaveFolder();
+}
+
+//! This shows the save folder dialog and saves the folder if requested.
+bool RocketWindow::doSaveFolder() {
     RocketSaveDialog dialog(this);
     if (dialog.exec() == QDialog::Accepted) {
         RocketSaveDialog::SaveType type = dialog.getSaveType();
@@ -605,6 +619,9 @@ void RocketWindow::saveFolderTriggered() {
         } else {
             assert(0);
         }
+        return true;
+    } else {
+        return false;
     }
 }
 
@@ -639,7 +656,29 @@ void RocketWindow::printTriggered() {
 }
 
 void RocketWindow::closeEvent(QCloseEvent *e) {
-    deleteLater();
+    bool changed = false;
+    foreach (RocketImage *i, *images.getVector()) {
+        if (!i->isSaved()) {
+            changed = true;
+            break;
+        }
+    }
+    if (changed) {
+        int returned = QMessageBox::question(this,
+                tr("Save Images?"),
+                tr("Do you want to save the changed images?"),
+                QMessageBox::Yes|QMessageBox::Default,
+                QMessageBox::No,
+                QMessageBox::Cancel|QMessageBox::Escape);
+        if (returned == QMessageBox::Yes) {
+            bool returned = doSaveFolder();
+            if (returned) e->accept(); else e->ignore();
+        } else if (returned == QMessageBox::No) {
+            e->accept();
+        } else if (returned == QMessageBox::Cancel) {
+            e->ignore();
+        }
+    }
 }
 
 bool RocketWindow::event(QEvent *e) {
@@ -660,7 +699,7 @@ bool RocketWindow::event(QEvent *e) {
         delete event->pixmap;
         return true;
     } else {
-        return false;
+        return QMainWindow::event(e);
     }
 }
 
