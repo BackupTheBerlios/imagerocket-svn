@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2006 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -26,9 +26,9 @@ Q_OBJECT
 protected:
     static QMap < int, QPixmap * > trashIcon, trashLitIcon, questionIcon, questionLitIcon;
     static QPixmap *floppyIcon;
-    static QMenu *popupMenu;
+    static QPointer < QMenu > popupMenu;
     QFont font;
-    RocketImage *img;
+    QPointer < RocketImage > img;
     QPoint lastDrawnPosition;
     int thumbnailSize;
     bool onTrash, onQuestion, onWidget;
@@ -66,9 +66,9 @@ protected slots:
 public slots:
     void updatePreview();
 signals:
-    void deleteMe(QWidget *);
-    void questionClicked(RocketFilePreviewWidget *);
-    void clicked(QWidget *);
+    void deleteMe(RocketImage *);
+    void questionClicked(RocketImage *);
+    void clicked(RocketImage *);
     void updateSize();
 };
 

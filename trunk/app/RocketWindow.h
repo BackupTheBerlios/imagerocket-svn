@@ -45,7 +45,6 @@ protected:
     QSignalMapper pluginShortcutMapper;
     SaveSettingsTool *saveSettingsTool;
     QPointer < RocketUpdateChecker > updateChecker;
-    int index;
     bool previewsHidden;
     QLabel *statusFile, *statusZoom, *statusSize;
     QMenu *mFile, *mEdit, *mView, *mImage, *mHelp;
@@ -69,7 +68,6 @@ protected:
     RocketFilePreviewArea *filePreviewArea;
     
     virtual void setZoom(double zoom);
-    virtual void setIndex(int index);
     virtual void updateShownPixmap();
     
     void closeEvent(QCloseEvent *e);
@@ -81,7 +79,7 @@ protected:
     
 protected slots:
     
-    void initGUI();
+    void initGui();
     void initObject();
     
     void openFolderTriggered();
@@ -94,6 +92,8 @@ protected slots:
     void forwardTriggered();
     void lastTriggered();
     void switchImageBlockedTimeout();
+    
+    void indexChanged(RocketImage *oldSelection);
     
     void useLargeThumbnailsToggled(bool);
     
@@ -127,10 +127,9 @@ public:
     virtual ~RocketWindow();
     void setDirectory(QString dirName);
     
-public slots:
+protected slots:
     
     void toolSettingsToolBarDestroyed();
-    void previewClicked(int index);
 };
 
 #endif

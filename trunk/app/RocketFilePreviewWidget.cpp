@@ -19,7 +19,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketFilePreviewArea.h"
 
 namespace RocketFilePreviewWidget {
-    QMenu *RocketFilePreviewWidget::popupMenu = 0;
+    QPointer < QMenu > RocketFilePreviewWidget::popupMenu;
     QPixmap *floppyIcon = 0;
     QMap < int, QPixmap * > trashIcon, trashLitIcon, questionIcon, questionLitIcon;
 }
@@ -36,7 +36,7 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
             int thumbnailSize) : QWidget(parent) {
     this->thumbnailSize = thumbnailSize;
     this->img = img;
-    connect(img, SIGNAL(thumbnailChanged(QPixmap)), this, SLOT(updatePreview()));
+    connect(img, SIGNAL(changed()), this, SLOT(updatePreview()));
     onTrash = onQuestion = onWidget = active = usingHorizontalLayout = false;
     font.setPointSize(10);
     if (!popupMenu) {
@@ -86,6 +86,7 @@ void RocketFilePreviewWidget::updatePreview() {
 }
 
 void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
+    if (img == NULL) return;
     QColor bg(palette().background().color());
     QPainter p(this);
     p.setFont(font);
@@ -245,11 +246,11 @@ void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
         if (response == QMessageBox::No) {
             return;
         }
-        emit deleteMe(this);
+        QTimer::singleShot(0, img, SLOT(deleteFile()));
     } else if (positionOnButton(event->pos(), 2, LeftToRight, *questionIcon[255]) && leftClick) {
-        emit questionClicked(this);
+        emit questionClicked(img);
     } else if (leftClick) {
-        emit clicked(this);
+        emit clicked(img);
     } else if (event->button() == Qt::RightButton) {
         popupMenu->disconnect();
         connect(popupMenu, SIGNAL(triggered(QAction *)), SLOT(popupTriggered(QAction *)));
@@ -311,9 +312,14 @@ void RocketFilePreviewWidget::popupTriggered(QAction *action) {
         if (response == QMessageBox::No) {
             return;
         }
-        emit deleteMe(this);
+        QTimer::singleShot(0, img, SLOT(deleteFile()));
     } else if (action->objectName() == "info") {
-        emit questionClicked(this);
+        emit questionClicked(img);
+    } else if (action->objectName() == "rename") {
+        bool ok = 0;
+        QString response = QInputDialog::getText(this, tr("Rename"),
+                tr("Enter new filename:"), QLineEdit::Normal, img->getShortFileName(), &ok);
+        if (ok) img->renameFile(response);
     }
 }
 

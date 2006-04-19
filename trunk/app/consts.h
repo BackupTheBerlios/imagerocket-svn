@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2006 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -19,6 +19,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #define CONSTS_H
 
 #define PROGRAM_NAME "ImageRocket"
-#define VERSION "0.3"
+#define VERSION "0.4"
+#define HOMEPAGE "http://developer.berlios.de/projects/imagerocket"
 
 #endif

@@ -47,6 +47,10 @@ RocketImage::RocketImage(const QString &fileName) {
 RocketImage::~RocketImage() {
 }
 
+bool RocketImage::operator<(const RocketImage &img) const {
+    return getShortFileName() < img.getShortFileName();
+}
+
 void RocketImage::addChange(const QPixmap &pix, QString description) {
     ++index;
     changes.insert(index, pix);
@@ -66,20 +70,12 @@ void RocketImage::addChange(const QPixmap &pix, QString description) {
 void RocketImage::undo() {
     assert(canUndo());
     --index;
-    if (!thumbnail.isNull()) {
-        //this is sloppy and should probably be replaced - WJC
-        emit thumbnailChanged(thumbnail);
-    }
     updateThumbnail();
 }
 
 void RocketImage::redo() {
     assert(canRedo());
     ++index;
-    if (!thumbnail.isNull()) {
-        //this is sloppy and should probably be replaced - WJC
-        emit thumbnailChanged(thumbnail);
-    }
     updateThumbnail();
 }
 
@@ -107,6 +103,24 @@ void RocketImage::generateSavedFileInMemory(QBuffer &buffer) {
     }
 }
 
+void RocketImage::renameFile(QString fileName) {
+    QFile f(this->fileName);
+    QFileInfo oldInfo(f);
+    QString newName = oldInfo.dir().filePath(fileName);
+    f.rename(newName);
+    QFileInfo newInfo(newName);
+    this->fileName = newName;
+    this->shortName = newInfo.fileName();
+    emit renamed();
+    emit changed();
+}
+
+void RocketImage::deleteFile() {
+    emit removeMe();
+    QFile::remove(this->fileName);
+    deleteLater();
+}
+
 void RocketImage::print(QPrinter *printer, QPainter &p) {
     printer->newPage();
     bool active = !getPixmap().isNull();
@@ -130,10 +144,7 @@ void RocketImage::print(QPrinter *printer, QPainter &p) {
 
 void RocketImage::setSaved() {
     savedIndex = index;
-    if (!thumbnail.isNull()) {
-        //this is sloppy and should probably be replaced - WJC
-        emit thumbnailChanged(thumbnail);
-    }
+    emit changed();
 }
 
 void RocketImage::setActive(bool value) {
@@ -163,13 +174,7 @@ void RocketImage::updateThumbnail() {
     setThumbnailWithBackground(thumb);
 }
 
-void RocketImage::setThumbnail(const QPixmap &thumb) {
-    thumbnail = thumb;
-    statusIcon = 0;
-    emit thumbnailChanged(thumb);
-}
-
-//! This does the same as setThumbnail(const QPixmap &) but adds a checkered background.
+//! This adds a checkered background before sending it to setThumbnail(const QPixmap &).
 void RocketImage::setThumbnailWithBackground(const QPixmap &thumb) {
     QPixmap tmp(thumb.size());
     QPainter p(&tmp);
@@ -177,6 +182,12 @@ void RocketImage::setThumbnailWithBackground(const QPixmap &thumb) {
     p.drawPixmap(0, 0, thumb);
     p.end();
     setThumbnail(tmp);
+}
+
+void RocketImage::setThumbnail(const QPixmap &thumb) {
+    thumbnail = thumb;
+    statusIcon = 0;
+    emit changed();
 }
 
 void RocketImage::setThumbnail(StatusIcon iconType) {

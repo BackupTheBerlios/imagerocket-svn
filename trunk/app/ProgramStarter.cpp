@@ -1,6 +1,6 @@
 /* ProgramStarter
 This is a class for starting programs, such as web browsers.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2006 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -16,23 +16,21 @@ program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
 #include "ProgramStarter.h"
+#include <QMessageBox>
 
 ProgramStarter *ProgramStarter::m_instance = 0;
 
 ProgramStarter::ProgramStarter() {
-    /*timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), SLOT(timeout()));
-    timer.start(75);*/
 }
 
 ProgramStarter::~ProgramStarter() {
 }
 
+#ifdef Q_WS_WIN
+#include <windows.h>
+#endif
+
 void ProgramStarter::openWebBrowser(QString address) {
-    //XXX This function is broken until Qt bug #90175 is fixed (not visible to the public when
-    //this was written). Briefly, startDetached seems to cause a deadlock if the DNS lookup
-    //thread is running. Trolltech's response: "Indeed, we see this here as well. We'll fix
-    //this for an upcoming release" - WJC
     /*QStringList webBrowserCommands;
     webBrowserCommands << "urlview" << "x-www-browser" << "firefox";
     webBrowserCommands << "mozilla-firefox" << "konqueror";
@@ -41,8 +39,22 @@ void ProgramStarter::openWebBrowser(QString address) {
             break;
         }
     }*/
+    //XXX support mac
+    int ok = false;
+#if defined(Q_WS_WIN)
+    ok = int(ShellExecuteW(NULL, 0, (const WCHAR *)address.utf16(), 0, 0, SW_SHO
+WNORMAL)) > 32;
+#elif defined(Q_WS_X11)
+    ok = true;
     QProcess::startDetached("x-www-browser", QStringList(address));
+#endif
+    if (!ok) {
+        QMessageBox::warning(NULL,
+                tr("Error Opening Browser"),
+                tr("The browser failed to open ") + address);
+    }
 }
+
 
 /*void ProgramStarter::timeout() {
     foreach (InternalJob *a, jobs) {

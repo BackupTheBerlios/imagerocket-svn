@@ -8,73 +8,341 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>598</width>
-    <height>303</height>
+    <width>624</width>
+    <height>407</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string/>
   </property>
-  <layout class="QVBoxLayout" >
+  <layout class="QGridLayout" >
    <property name="margin" >
-    <number>-1</number>
+    <number>9</number>
    </property>
    <property name="spacing" >
     <number>6</number>
    </property>
-   <item>
-    <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
+   <item row="1" column="0" >
+    <widget class="QPushButton" name="homepageButton" >
+     <property name="palette" >
+      <palette>
+       <active>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+        <color>
+         <red>221</red>
+         <green>223</green>
+         <blue>228</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>238</red>
+         <green>239</green>
+         <blue>241</blue>
+        </color>
+        <color>
+         <red>110</red>
+         <green>111</green>
+         <blue>114</blue>
+        </color>
+        <color>
+         <red>147</red>
+         <green>149</green>
+         <blue>152</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>223</red>
+         <green>223</green>
+         <blue>223</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>128</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>238</blue>
+        </color>
+        <color>
+         <red>82</red>
+         <green>24</green>
+         <blue>139</blue>
+        </color>
+        <color>
+         <red>232</red>
+         <green>232</green>
+         <blue>232</blue>
+        </color>
+       </active>
+       <inactive>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+        <color>
+         <red>221</red>
+         <green>223</green>
+         <blue>228</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>110</red>
+         <green>111</green>
+         <blue>114</blue>
+        </color>
+        <color>
+         <red>147</red>
+         <green>149</green>
+         <blue>152</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>223</red>
+         <green>223</green>
+         <blue>223</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>128</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>238</blue>
+        </color>
+        <color>
+         <red>82</red>
+         <green>24</green>
+         <blue>139</blue>
+        </color>
+        <color>
+         <red>232</red>
+         <green>232</green>
+         <blue>232</blue>
+        </color>
+       </inactive>
+       <disabled>
+        <color>
+         <red>128</red>
+         <green>128</green>
+         <blue>128</blue>
+        </color>
+        <color>
+         <red>221</red>
+         <green>223</green>
+         <blue>228</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>110</red>
+         <green>111</green>
+         <blue>114</blue>
+        </color>
+        <color>
+         <red>147</red>
+         <green>149</green>
+         <blue>152</blue>
+        </color>
+        <color>
+         <red>128</red>
+         <green>128</green>
+         <blue>128</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>128</red>
+         <green>128</green>
+         <blue>128</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>223</red>
+         <green>223</green>
+         <blue>223</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>128</blue>
+        </color>
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>238</blue>
+        </color>
+        <color>
+         <red>82</red>
+         <green>24</green>
+         <blue>139</blue>
+        </color>
+        <color>
+         <red>232</red>
+         <green>232</green>
+         <blue>232</blue>
+        </color>
+       </disabled>
+      </palette>
      </property>
-     <property name="spacing" >
-      <number>6</number>
+     <property name="font" >
+      <font>
+       <family>Sans Serif</family>
+       <pointsize>9</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+       <underline>true</underline>
+       <strikeout>false</strikeout>
+      </font>
      </property>
-     <item>
-      <widget class="QLabel" name="logoLabel" >
-       <property name="text" >
-        <string/>
-       </property>
-       <property name="pixmap" >
-        <pixmap resource="pixmaps.qrc" >:/pixmaps/rocket.png</pixmap>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QTextEdit" name="aboutEdit" >
-       <property name="minimumSize" >
-        <size>
-         <width>400</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="readOnly" >
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
+     <property name="text" >
+      <string>Visit Homepage</string>
+     </property>
+    </widget>
    </item>
-   <item>
+   <item row="1" column="1" >
     <widget class="QPushButton" name="closeButton" >
      <property name="text" >
       <string>Close</string>
      </property>
     </widget>
    </item>
+   <item row="0" column="0" >
+    <widget class="QLabel" name="logoLabel" >
+     <property name="text" >
+      <string/>
+     </property>
+     <property name="pixmap" >
+      <pixmap resource="pixmaps.qrc" >:/pixmaps/rocket.png</pixmap>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" >
+    <widget class="QTextEdit" name="aboutEdit" >
+     <property name="minimumSize" >
+      <size>
+       <width>400</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="readOnly" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
   </layout>
-  <widget class="QWidget" name="layoutWidget" >
-   <property name="geometry" >
-    <rect>
-     <x>20</x>
-     <y>250</y>
-     <width>351</width>
-     <height>33</height>
-    </rect>
-   </property>
-  </widget>
  </widget>
  <pixmapfunction></pixmapfunction>
+ <tabstops>
+  <tabstop>aboutEdit</tabstop>
+  <tabstop>closeButton</tabstop>
+  <tabstop>homepageButton</tabstop>
+ </tabstops>
  <resources>
   <include location="pixmaps.qrc" />
  </resources>

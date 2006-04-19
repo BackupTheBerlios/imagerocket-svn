@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2006 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -28,28 +28,25 @@ Q_OBJECT
         QWidget *widget;
         QTimer lazyResizer;
         RocketImageList *images;
-        QVector < RocketFilePreviewWidget * > previews;
-        int index, thumbnailSize;
+        QVector < RocketFilePreviewWidget * > list;
+        int thumbnailSize;
         bool usingHorizontalLayout;
         void resizeEvent(QResizeEvent *event);
     protected slots:
-        void clickedEvent(QWidget *w);
-        void listChanged();
-        void questionClicked(RocketFilePreviewWidget *w);
+        void listChanged(RocketImageList::ListChangeType, int);
+        void questionClickedEvent(RocketImage *w);
         void updateSize();
         void centerOnPosition();
+        void updateSelection();
     public:
         RocketFilePreviewArea(QWidget *parent, int thumbnailSize, RocketImageList *list);
         ~RocketFilePreviewArea();
-        void removeEntry(int index);
         void clearEntries();
-        void setActive(int index);
         int getThumbnailSize() {return thumbnailSize;}
         void setOrientation(bool horizontal);
         QSize RocketFilePreviewArea::sizeHint() const;
     signals:
-        void clicked(int index);
-        void questionClicked(RocketImage *img);
+        void questionClicked(RocketImage *);
 };
 
 #endif

@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2006 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -26,30 +26,35 @@ class RocketImageList : public QObject {
 Q_OBJECT
 protected:
     QString location;
-    int index;
+    RocketImage *selection;
     QVector < RocketImage * > list;
     ThreadedImageLoader *generator;
     void continueThumbnailGeneration();
 protected slots:
     void showMessage();
 public:
+    enum ListChangeType {ListReplaced, EntryCreated, EntryDeleted};
     RocketImageList();
     ~RocketImageList();
     void setLocation(QString location);
     QString getLocation();
     int size() {return list.size();}
     const QVector < RocketImage * > *getVector() {return &list;}
-    QString getAsString(int index);
-    QPixmap getThumbnail(int index);
-    RocketImage *getAsRocketImage(int index);
-    void setIndex(int index);
-    int getIndex();
+    RocketImage *first() {return list.size() ? list.first() : NULL;}
+    RocketImage *previous(RocketImage *index);
+    RocketImage *next(RocketImage *index);
+    RocketImage *last() {return list.size() ? list.last() : NULL;}
+    RocketImage *getSelection();
     void refreshImages();
 public slots:
+    void setSelection(RocketImage *index);
     void updateThumbnail(const QString fileName, const QImage thumbnail);
+protected slots:
+    void removeMeEvent();
+    void renamedEvent();
 signals:
-    void indexChanged(int index);
-    void listChanged();
+    void selectionChanged(RocketImage *oldSelection);
+    void listChanged(RocketImageList::ListChangeType type, int index = 0);
     void thumbnailChanged();
 };
 

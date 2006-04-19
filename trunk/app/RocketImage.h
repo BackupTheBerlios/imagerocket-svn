@@ -28,30 +28,35 @@ public:
     RocketImage(const QString &fileName);
     ~RocketImage();
     void print(QPrinter *printer, QPainter &p);
-    QPixmap getPixmap() {return changes[index];}
-    QString getDescription() {return descriptions[index];}
-    QString getDescriptionOfNext() {
+    QPixmap getPixmap() const {return changes[index];}
+    QString getDescription() const {return descriptions[index];}
+    QString getDescriptionOfNext() const {
         return canRedo() ? descriptions[index+1] : QString();
     }
-    int getIndex() {return index;}
-    bool canUndo() {return index > 0;}
-    bool canRedo() {return index < changes.size()-1;}
-    bool hasTransparency() {return transparency;}
-    QPixmap getThumbnail() {return thumbnail;}
-    QString getFileName() {return fileName;}
-    QString getShortFileName() {return shortName;}
-    int getStatusIconIndex() {return statusIcon;}
-    bool isSaved() {return savedIndex == index;}
-    int getSaveFormat() {return saveFormat;}
-    QString getSaveFormatAsText() {return saveFormat == 0 ? "jpg" : "png";}
-    int getSaveQuality() {return saveQuality;}
-    bool isSaveProgressive() {return saveProgressive;}
+    int getIndex() const {return index;}
+    bool canUndo() const {return index > 0;}
+    bool canRedo() const {return index < changes.size()-1;}
+    bool hasTransparency() const {return transparency;}
+    QPixmap getThumbnail() const {return thumbnail;}
+    QString getFileName() const {return fileName;}
+    QString getShortFileName() const {return shortName;}
+    bool operator<(const RocketImage &img) const;
+    
+    int getStatusIconIndex() const {return statusIcon;}
+    bool isSaved() const {return savedIndex == index;}
+    int getSaveFormat() const {return saveFormat;}
+    QString getSaveFormatAsText() const {return saveFormat == 0 ? "jpg" : "png";}
+    int getSaveQuality() const {return saveQuality;}
+    bool isSaveProgressive() const {return saveProgressive;}
 public slots:
     void undo();
     void redo();
     
     void save(const QString &name);
     void generateSavedFileInMemory(QBuffer &buffer);
+    
+    void renameFile(QString fileName);
+    void deleteFile();
     
     void addChange(const QPixmap &pix, QString description);
     void setActive(bool value);
@@ -77,9 +82,11 @@ protected:
     bool saveProgressive;
     void updateThumbnail();
     void setSelected(bool value);
-    friend void RocketImageList::setIndex(int index);
+    friend void RocketImageList::setSelection(RocketImage *);
 signals:
-    void thumbnailChanged(QPixmap pix);
+    void changed();
+    void removeMe();
+    void renamed();
 };
 
 #endif

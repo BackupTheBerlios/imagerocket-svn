@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2006 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -25,15 +25,16 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 RocketFilePreviewArea::RocketFilePreviewArea(QWidget *parent, int thumbnailSize,
             RocketImageList *list) : QScrollArea(parent) {
-    index = 0;
     images = list;
     setFocusPolicy(Qt::NoFocus);
     RocketFilePreviewArea::thumbnailSize = thumbnailSize;
     widget = new QWidget(this);
     setWidget(widget);
     setOrientation(false);
-    listChanged();
-    connect(list, SIGNAL(listChanged()), SLOT(listChanged()));
+    listChanged(RocketImageList::ListReplaced, 0);
+    connect(list, SIGNAL(listChanged(RocketImageList::ListChangeType, int)),
+            SLOT(listChanged(RocketImageList::ListChangeType, int)));
+    connect(list, SIGNAL(selectionChanged(RocketImage *)), SLOT(updateSelection()));
     connect(&lazyResizer, SIGNAL(timeout()), SLOT(updateSize()));
     lazyResizer.setSingleShot(true);
     QPalette pal;
@@ -42,7 +43,7 @@ RocketFilePreviewArea::RocketFilePreviewArea(QWidget *parent, int thumbnailSize,
 }
 
 RocketFilePreviewArea::~RocketFilePreviewArea() {
-    foreach (RocketFilePreviewWidget *w, previews) {
+    foreach (RocketFilePreviewWidget *w, list) {
         delete w;
     }
 }
@@ -77,7 +78,7 @@ void RocketFilePreviewArea::setOrientation(bool horizontal) {
     }
     widget->setLayout(layout);
     widget->layout()->setMargin(1);
-    foreach (RocketFilePreviewWidget *w, previews) {
+    foreach (RocketFilePreviewWidget *w, list) {
         w->setOrientation(horizontal);
         widget->layout()->addWidget(w);
     }
@@ -94,55 +95,65 @@ void RocketFilePreviewArea::updateSize() {
     widget->layout()->update();
 }
 
-void RocketFilePreviewArea::setActive(int index) {
-    this->index = index;
-    for (int a=0;a<previews.size();++a) {
-        previews[a]->setActive(a == index);
+void RocketFilePreviewArea::updateSelection() {
+    const QVector < RocketImage * > *v = images->getVector();
+    for (int a=0;a<list.size();++a) {
+        list[a]->setActive(a == v->indexOf(images->getSelection()));
     }
     QTimer::singleShot(0, this, SLOT(centerOnPosition()));
 }
 
-void RocketFilePreviewArea::clickedEvent(QWidget *w) {
-    for (int a=0;a<previews.size();++a) {
-        if (previews[a] == w) {
-            emit clicked(a);
-            break;
+void RocketFilePreviewArea::questionClickedEvent(RocketImage *w) {
+    emit questionClicked(w);
+}
+
+void RocketFilePreviewArea::listChanged(RocketImageList::ListChangeType type, int changeIndex) {
+    int index = images->getVector()->indexOf(images->getSelection());
+    if (type == RocketImageList::EntryDeleted) {
+        delete list[changeIndex];
+        list.remove(changeIndex);
+        foreach (RocketImage *i, *images->getVector()) {
+            int a = images->getVector()->indexOf(i);
+            list[a]->setActive(a == index);
         }
+        updateSize();
+    } else {
+        foreach (RocketFilePreviewWidget *w, list) {
+            delete w;
+        }
+        QPoint scrollPos(horizontalScrollBar()->value(), verticalScrollBar()->value());
+        list.clear();
+        foreach (RocketImage *i, *images->getVector()) {
+            RocketFilePreviewWidget *preview =
+                    new RocketFilePreviewWidget(widget, i, thumbnailSize);
+            preview->setActive(list.size() == index);
+            preview->setOrientation(usingHorizontalLayout);
+            list.append(preview);
+            widget->layout()->addWidget(preview);
+            connect(preview, SIGNAL(clicked(RocketImage *)), images, SLOT(setSelection(RocketImage *)));
+            connect(preview, SIGNAL(updateSize()), SLOT(updateSize()));
+            connect(preview, SIGNAL(questionClicked(RocketImage *)),
+                    SLOT(questionClickedEvent(RocketImage *)));
+        }
+        updateSize();
+        horizontalScrollBar()->setValue(scrollPos.x());
+        verticalScrollBar()->setValue(scrollPos.y());
     }
-}
-
-void RocketFilePreviewArea::questionClicked(RocketFilePreviewWidget *w) {
-    emit questionClicked(w->getImage());
-}
-
-void RocketFilePreviewArea::listChanged() {
-    foreach (RocketFilePreviewWidget *w, previews) {
-        delete w;
-    }
-    previews.clear();
-    index = 0;
-    foreach (RocketImage *i, *images->getVector()) {
-        RocketFilePreviewWidget *preview =
-                new RocketFilePreviewWidget(widget, i, thumbnailSize);
-        preview->setOrientation(usingHorizontalLayout);
-        previews.append(preview);
-        widget->layout()->addWidget(preview);
-        //connect(preview, SIGNAL(deleteMe(QWidget *)), this, SLOT(deleteEntry(QWidget *)));
-        connect(preview, SIGNAL(clicked(QWidget *)), SLOT(clickedEvent(QWidget *)));
-        connect(preview, SIGNAL(updateSize()), SLOT(updateSize()));
-        connect(preview, SIGNAL(questionClicked(RocketFilePreviewWidget *)),
-                SLOT(questionClicked(RocketFilePreviewWidget *)));
-    }
-    centerOnPosition();
-    updateSize();
 }
 
 void RocketFilePreviewArea::centerOnPosition() {
-    if (previews.size() == 0) {
+    if (list.size() == 0) {
         verticalScrollBar()->setValue(0);
     } else {
-        int centerX = previews[index]->x() + previews[index]->width()/2 - horizontalScrollBar()->pageStep()/2;
-        int centerY = previews[index]->y() + previews[index]->height()/2 - verticalScrollBar()->pageStep()/2;
+        RocketFilePreviewWidget *widget = NULL;
+        foreach (RocketFilePreviewWidget *w, list) {
+            if (w->getImage() == images->getSelection()) {
+                widget = w;
+                break;
+            }
+        }
+        int centerX = widget->x() + widget->width()/2 - horizontalScrollBar()->pageStep()/2;
+        int centerY = widget->y() + widget->height()/2 - verticalScrollBar()->pageStep()/2;
         if (usingHorizontalLayout) {
             horizontalScrollBar()->setValue(centerX);
         } else {

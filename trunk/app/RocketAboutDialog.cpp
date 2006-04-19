@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2006 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -16,6 +16,7 @@ program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
 #include "RocketAboutDialog.h"
+#include "ProgramStarter.h"
 #include "consts.h"
 #include <QFile>
 #include <QTextStream>
@@ -23,6 +24,8 @@ Suite 330, Boston, MA 02111-1307 USA */
 RocketAboutDialog::RocketAboutDialog(QWidget *parent)
         : QDialog(parent) {
     setupUi(this);
+    connect(homepageButton, SIGNAL(clicked()), SLOT(homepageButtonClicked()));
+    connect(homepageButton, SIGNAL(clicked()), SLOT(close()));
     setWindowTitle(tr("About %1").arg(PROGRAM_NAME));
     
     //Title
@@ -42,10 +45,15 @@ RocketAboutDialog::RocketAboutDialog(QWidget *parent)
     f.open(QFile::ReadOnly);
     QTextStream in(&f);
     QString license(in.readAll());
-    tmp.append(tr("<h3>License</h3><br><tt><small>"
+    tmp.append(tr("<h3>License</h3><br><tt>"
             "<i>This program is distributed under the GPL, version 2 or later.</i>"
-            "<br>%1</small></tt>").arg(license));
+            "<br>%1</tt>").arg(license));
     aboutEdit->setHtml(tmp);
     
     aboutEdit->setReadOnly(true);
+}
+
+void RocketAboutDialog::homepageButtonClicked() {
+    ProgramStarter::instance()->openWebBrowser(
+            QString(HOMEPAGE) + tr("/", "language-specific homepage subdirectory"));
 }

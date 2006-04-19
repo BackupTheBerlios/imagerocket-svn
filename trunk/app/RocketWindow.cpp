@@ -37,16 +37,15 @@ Suite 330, Boston, MA 02111-1307 USA */
 */
 
 RocketWindow::RocketWindow() : QMainWindow() {
-    index = -1;
     dFiles = NULL;
     previewsHidden = false;
-    initGUI();
+    initGui();
     //This improves the perceived speed of the program by delaying some work until
     //after the display of the window.
     QTimer::singleShot(0, this, SLOT(initObject()));
 }
 
-void RocketWindow::initGUI() {
+void RocketWindow::initGui() {
     QIcon icon;
     //icon.addFile(":/pixmaps/rocket-24.xpm");
     icon.addFile(":/pixmaps/rocket-16.xpm");
@@ -62,6 +61,8 @@ void RocketWindow::initGUI() {
         showMaximized(true);
     }
     */
+    
+    connect(&images, SIGNAL(selectionChanged(RocketImage *)), SLOT(indexChanged(RocketImage *)));
     
     //Size and center the window
     //I need to check whether this is useful, since
@@ -239,8 +240,6 @@ void RocketWindow::initGUI() {
     connect(a, SIGNAL(triggered()), SLOT(aboutTriggered()));
     mHelp->addAction(a);
     
-    useLargeThumbnailsToggled(false);
-    
     saveSettingsTool = new SaveSettingsTool(this);
     
     dPalette = new QDockWidget(this);
@@ -298,6 +297,7 @@ void RocketWindow::initGUI() {
     switchImageBlocked = false;
     switchImageBlockedTimer.setSingleShot(true);
     connect(&switchImageBlockedTimer, SIGNAL(timeout()), SLOT(switchImageBlockedTimeout()));
+    useLargeThumbnailsToggled(false);
     
     //This works around the problem with QMainWindow in which the dock widgets get shrunk if the
     //window is resized smaller than their height. I hope this will be fixed upstream. - WJC
@@ -308,10 +308,6 @@ void RocketWindow::initGUI() {
 
 //! This does the delayed setup for the class.
 void RocketWindow::initObject() {
-    if (images.size()) {
-        setIndex(0);
-    }
-    
     connect(&pluginShortcutMapper, SIGNAL(mapped(int)),
             SLOT(toolShortcutPressed(int)));
     QHash < QString, PluginListItemEntry > entries;
@@ -465,29 +461,29 @@ void RocketWindow::setDirectory(QString dirName) {
         dirName = QFileInfo(dirName).dir().absolutePath();
     }
     images.setLocation(dirName);
-    setIndex(0);
+    images.setSelection(images.first());
     setToolSettingsToolBar(NULL);
 }
 
 //! This updates the buttons, the statusbar, etc. for the program's various states.
 void RocketWindow::updateGui() {
-    aFirst->setEnabled(images.size() && index > 0);
-    aBack->setEnabled(images.size() && index > 0);
-    aForward->setEnabled(images.size() && index < images.size() - 1);
-    aLast->setEnabled(images.size() && index < images.size() - 1);
+    RocketImage *selection = images.getSelection();
+    aFirst->setEnabled(images.size() && images.previous(selection));
+    aBack->setEnabled(images.size() && images.previous(selection));
+    aForward->setEnabled(images.size() && images.next(selection));
+    aLast->setEnabled(images.size() && images.next(selection));
     bool notNull = !view->isNullImage();
     aZoomIn->setEnabled(notNull && view->getZoom() * 16 + 0.01 < PIECE_SIZE);
     aZoom100->setEnabled(notNull);
     aZoomOut->setEnabled(notNull && view->getZoom() / 2 > 0.01);
     aZoomFit->setEnabled(notNull);
     rotateGroup->setEnabled(notNull);
-    RocketImage *img = images.size() ? images.getAsRocketImage(index) : NULL;
-    aUndo->setEnabled(img ? img->canUndo() : false);
-    aUndo->setText((img && img->canUndo())
-            ? tr("&Undo %1").arg(img->getDescription()) : tr("&Undo"));
-    aRedo->setEnabled(img ? img->canRedo() : false);
-    aRedo->setText((img && img->canRedo())
-            ? tr("&Redo %1").arg(img->getDescriptionOfNext()) : tr("&Redo"));
+    aUndo->setEnabled(selection ? selection->canUndo() : false);
+    aUndo->setText((selection && selection->canUndo())
+            ? tr("&Undo %1").arg(selection->getDescription()) : tr("&Undo"));
+    aRedo->setEnabled(selection ? selection->canRedo() : false);
+    aRedo->setText((selection && selection->canRedo())
+            ? tr("&Redo %1").arg(selection->getDescriptionOfNext()) : tr("&Redo"));
     aSaveFolder->setEnabled(images.size());
     aPrint->setEnabled(images.size());
     toolbox->setEnabled(notNull);
@@ -499,7 +495,12 @@ void RocketWindow::updateGui() {
         QString s = tr("%L1 x %L2", "image dimensions")
                 .arg(size.width()).arg(size.height());
         statusSize->setText(s);
+        QFileInfo f(selection->getFileName());
+        statusFile->setText(f.fileName());
+    } else {
+        statusFile->setText("");
     }
+    statusBar()->clearMessage();
     statusFile->setVisible(images.size());
     statusZoom->setVisible(notNull);
     statusSize->setVisible(notNull);
@@ -519,13 +520,17 @@ void RocketWindow::setZoom(double zoom) {
     updateGui();
 }
 
-//! This sets the displayed image to the image[index] in RocketImageList.
-/*! This resets the display if there are no images open.
-*/
-void RocketWindow::setIndex(int index) {
+void RocketWindow::indexChanged(RocketImage *oldSelection) {
+    RocketImage *selection = images.getSelection();
+    if (oldSelection) {
+        disconnect(oldSelection, SIGNAL(changed()), this, SLOT(updateGui()));
+    }
+    if (selection) {
+        connect(selection, SIGNAL(changed()), SLOT(updateGui()));
+    }
     setUpdatesEnabled(false);
     bool recheckSettingsButton = false;
-    if (this->index != index) {
+    if (oldSelection != selection) {
         recheckSettingsButton = fileSettingsButton->isChecked();
         delete toolSettingsToolBar;
     }
@@ -536,19 +541,8 @@ void RocketWindow::setIndex(int index) {
         dFiles->show();
         previewsHidden = false;
     }
-    this->index = index;
     if (images.size()) {
         view->resetZoomAndPosition();
-        QFileInfo f(images.getAsString(index));
-        statusFile->setText(f.fileName());
-        if (index < images.size()) {
-            //if old selection index is valid, inform old selection of its loss.
-            images.getAsRocketImage(index)->setActive(false);
-        }
-        filePreviewArea->setActive(index);
-        images.getAsRocketImage(index)->setActive(true);
-    } else {
-        statusFile->setText("");
     }
     updateShownPixmap();
     updateGui();
@@ -562,8 +556,7 @@ void RocketWindow::setIndex(int index) {
 void RocketWindow::updateShownPixmap() {
     if (images.size()) {
         QSize oldSize(view->getPixmap().size());
-        RocketImage *img = images.getAsRocketImage(index);
-        view->load(img->getPixmap(), img->hasTransparency());
+        view->load(images.getSelection()->getPixmap(), images.getSelection()->hasTransparency());
         QSize newSize(view->getPixmap().size());
         if (oldSize != newSize) {
             view->resetZoomAndPosition();
@@ -572,10 +565,6 @@ void RocketWindow::updateShownPixmap() {
         view->resetToBlank();
     }
     updateGui();
-}
-
-void RocketWindow::previewClicked(int index) {
-    setIndex(index);
 }
 
 void RocketWindow::openFolderTriggered() {
@@ -641,13 +630,13 @@ void RocketWindow::printTriggered() {
         QPainter p(&printer);
         for (int a=0;a<printer.numCopies();++a) {
             if (dialog.toPage() == 0) {
-                images.getAsRocketImage(index)->print(&printer, p);
+                images.getSelection()->print(&printer, p);
             } else {
                 bool first = (printer.pageOrder() == QPrinter::FirstPageFirst);
                 int start = first ? dialog.fromPage()-1 : dialog.toPage()-1;
                 int end = first ? dialog.toPage()-1 : dialog.fromPage()-1;
                 for (int b=start; first ? b<=end : b>=end; first ? ++b : --b) {
-                    images.getAsRocketImage(b)->print(&printer, p);
+                    (*images.getVector())[b]->print(&printer, p);
                 }
             }
         }
@@ -693,8 +682,7 @@ bool RocketWindow::event(QEvent *e) {
         return true;
     } else if (e->type() == 1001) {
         AddChangeToolEvent *event = static_cast < AddChangeToolEvent * >(e);
-        RocketImage *image = images.getAsRocketImage(index);
-        image->addChange(*event->pixmap, event->changeDesc);
+        images.getSelection()->addChange(*event->pixmap, event->changeDesc);
         updateShownPixmap();
         delete event->pixmap;
         return true;
@@ -744,28 +732,28 @@ void RocketWindow::exitTriggered() {
 void RocketWindow::firstTriggered() {
     if (!switchImageBlocked) {
         switchImageBlocked = true;
-        setIndex(0);
+        images.setSelection(images.first());
     }
 }
 
 void RocketWindow::backTriggered() {
     if (!switchImageBlocked) {
         switchImageBlocked = true;
-        setIndex(index - 1);
+        images.setSelection(images.previous(images.getSelection()));
     }
 }
 
 void RocketWindow::forwardTriggered() {
     if (!switchImageBlocked) {
         switchImageBlocked = true;
-        setIndex(index + 1);
+        images.setSelection(images.next(images.getSelection()));
     }
 }
 
 void RocketWindow::lastTriggered() {
     if (!switchImageBlocked) {
         switchImageBlocked = true;
-        setIndex(images.size() - 1);
+        images.setSelection(images.last());
     }
 }
 
@@ -775,15 +763,13 @@ void RocketWindow::switchImageBlockedTimeout() {
 
 void RocketWindow::undoTriggered() {
     setToolSettingsToolBar(NULL);
-    RocketImage *image = images.getAsRocketImage(index);
-    image->undo();
+    images.getSelection()->undo();
     updateShownPixmap();
 }
 
 void RocketWindow::redoTriggered() {
     setToolSettingsToolBar(NULL);
-    RocketImage *image = images.getAsRocketImage(index);
-    image->redo();
+    images.getSelection()->redo();
     updateShownPixmap();
 }
 
@@ -822,9 +808,9 @@ void RocketWindow::zoomFitToggled(bool value) {
 void RocketWindow::rotateTriggered(int degrees) {
     delete toolSettingsToolBar;
     toolSettingsToolBar = NULL;
-    RocketImage *image = images.getAsRocketImage(index);
-    image->addChange(
-            QPixmap::fromImage(ImageTools::rotate(degrees, image->getPixmap().toImage())),
+    RocketImage *selection = images.getSelection();
+    selection->addChange(
+            QPixmap::fromImage(ImageTools::rotate(degrees, selection->getPixmap().toImage())),
             tr("Rotate %1\260").arg(degrees));
     updateShownPixmap();
 }
@@ -832,8 +818,8 @@ void RocketWindow::rotateTriggered(int degrees) {
 void RocketWindow::flipTriggered() {
     delete toolSettingsToolBar;
     toolSettingsToolBar = NULL;
-    RocketImage *image = images.getAsRocketImage(index);
-    image->addChange(QPixmap::fromImage(image->getPixmap().toImage().mirrored(false, true)),
+    RocketImage *selection = images.getSelection();
+    selection->addChange(QPixmap::fromImage(selection->getPixmap().toImage().mirrored(false, true)),
             tr("Vertical Flip"));
     updateShownPixmap();
 }
@@ -841,8 +827,8 @@ void RocketWindow::flipTriggered() {
 void RocketWindow::mirrorTriggered() {
     delete toolSettingsToolBar;
     toolSettingsToolBar = NULL;
-    RocketImage *image = images.getAsRocketImage(index);
-    image->addChange(QPixmap::fromImage(image->getPixmap().toImage().mirrored(true, false)),
+    RocketImage *selection = images.getSelection();
+    selection->addChange(QPixmap::fromImage(selection->getPixmap().toImage().mirrored(true, false)),
             tr("Mirror"));
     updateShownPixmap();
 }
@@ -859,12 +845,7 @@ void RocketWindow::useLargeThumbnailsToggled(bool value) {
     settings.setValue("thumbnail/size", thumbnailSize);
     images.refreshImages();
     filePreviewArea = new RocketFilePreviewArea(dFiles, thumbnailSize, &images);
-    if (images.size()) {
-        //set the selected image again so thumbnail area reflects it
-        setIndex(index);
-    }
     dFiles->setMinimumSize(64, 0);
-    connect(filePreviewArea, SIGNAL(clicked(int)), SLOT(previewClicked(int)));
     connect(filePreviewArea, SIGNAL(questionClicked(RocketImage *)),
             SLOT(questionClicked(RocketImage *)));
     dFiles->setAllowedAreas(Qt::TopDockWidgetArea|Qt::BottomDockWidgetArea);
@@ -878,18 +859,20 @@ void RocketWindow::questionClicked(RocketImage *img) {
 }
 
 void RocketWindow::toolClicked(QListWidgetItem *item) {
-    if (item && !item->text().isEmpty() && item->backgroundColor() != palette().highlight().color()) {
+    if (item && !item->text().isEmpty()
+            && item->backgroundColor() != palette().highlight().color()) {
         int pluginIndex = item->data(Qt::UserRole).toInt();
-        RocketImage *image = images.getAsRocketImage(index);
         QObject *plugin = plugins[pluginIndex];
         ToolInterface *tool = qobject_cast < ToolInterface * >(plugin);
         assert(tool);
-        setToolSettingsToolBar(tool->getSettingsToolBar(new QPixmap(image->getPixmap())));
+        QPixmap *pix = new QPixmap(images.getSelection()->getPixmap());
+        setToolSettingsToolBar(tool->getSettingsToolBar(pix));
         item->setBackgroundColor(palette().highlight().color());
         item->setTextColor(palette().highlightedText().color());
         PixmapViewTool *t = tool->getViewTool();
         view->setTool(t);
-    } else if (item && !item->text().isEmpty() && item->backgroundColor() == palette().highlight().color()) {
+    } else if (item && !item->text().isEmpty()
+            && item->backgroundColor() == palette().highlight().color()) {
         delete toolSettingsToolBar;
     }
 }
@@ -914,8 +897,7 @@ void RocketWindow::imageSaveSettingsToggled(bool value) {
     delete toolSettingsToolBar;
     toolSettingsToolBar = NULL;
     if (value) {
-        RocketImage *image = images.getAsRocketImage(index);
-        setToolSettingsToolBar(saveSettingsTool->getSettingsToolBar(image));
+        setToolSettingsToolBar(saveSettingsTool->getSettingsToolBar(images.getSelection()));
     }
 }
 
@@ -951,7 +933,7 @@ void RocketWindow::updateCheckerDone(bool error) {
             d->exec();
             if (d->getSelected() == 1) {
                 ProgramStarter::instance()->openWebBrowser(
-                        tr("http://developer.berlios.de/projects/imagerocket"));
+                        QString(HOMEPAGE) + tr("/", "language-specific homepage subdirectory"));
             }
         } else {
             QMessageBox::information(this, tr("Check for Updates"),
