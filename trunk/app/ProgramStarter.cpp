@@ -42,8 +42,7 @@ void ProgramStarter::openWebBrowser(QString address) {
     //XXX support mac
     int ok = false;
 #if defined(Q_WS_WIN)
-    ok = int(ShellExecuteW(NULL, 0, (const WCHAR *)address.utf16(), 0, 0, SW_SHO
-WNORMAL)) > 32;
+    ok = int(ShellExecuteW(NULL, 0, (const WCHAR *)address.utf16(), 0, 0, SW_SHOWNORMAL)) > 32;
 #elif defined(Q_WS_X11)
     ok = true;
     QProcess::startDetached("x-www-browser", QStringList(address));
