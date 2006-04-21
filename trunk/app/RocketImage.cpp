@@ -103,22 +103,69 @@ void RocketImage::generateSavedFileInMemory(QBuffer &buffer) {
     }
 }
 
-void RocketImage::renameFile(QString fileName) {
+bool RocketImage::renameFile(QString fileName) {
     QFile f(this->fileName);
     QFileInfo oldInfo(f);
     QString newName = oldInfo.dir().filePath(fileName);
-    f.rename(newName);
-    QFileInfo newInfo(newName);
-    this->fileName = newName;
-    this->shortName = newInfo.fileName();
-    emit renamed();
-    emit changed();
+    bool ok = false;
+    //I loop just in case the rename failed since its thumbnail was being generated.
+    for (int a=0;a<3;++a) {
+        ok = f.rename(newName);
+        if (ok) break;
+        QThread::currentThread()->wait(400);
+    }
+    if (ok) {
+        QFileInfo newInfo(newName);
+        this->fileName = newName;
+        this->shortName = newInfo.fileName();
+        emit renamed();
+        emit changed();
+    }
+    return ok;
 }
 
-void RocketImage::deleteFile() {
-    emit removeMe();
-    QFile::remove(this->fileName);
-    deleteLater();
+bool RocketImage::deleteFile() {
+    bool ok = false;
+    //I loop just in case the delete failed since its thumbnail was being generated.
+    for (int a=0;a<3;++a) {
+        ok = QFile::remove(this->fileName);
+        if (ok) break;
+        QThread::currentThread()->wait(400);
+    }
+    if (ok) {
+        emit removeMe();
+        deleteLater();
+    }
+    return ok;
+}
+
+bool RocketImage::guiRenameFile(QString fileName) {
+    bool ok = false;
+    QFile f(this->fileName);
+    QFileInfo oldInfo(f);
+    QString newName = oldInfo.dir().filePath(fileName);
+    QFile newFile(newName);
+    if (newName != this->fileName) {
+        if (newFile.exists()) {
+            QMessageBox::warning(NULL, tr("Rename Failed"),
+                    tr("%1 already exists.").arg(newName));
+        } else {
+            ok = RocketImage::renameFile(fileName);
+            if (!ok) {
+                QMessageBox::warning(NULL, tr("File Rename Failed"),
+                        tr("%1 could not be renamed.").arg(getFileName()));
+            }
+        }
+    }
+    return ok;
+}
+
+bool RocketImage::guiDeleteFile() {
+    bool ok = RocketImage::deleteFile();
+    if (!ok) {
+        QMessageBox::warning(NULL, tr("Deletion Failed"), tr("%1 could not be deleted.").arg(getFileName()));
+    }
+    return ok;
 }
 
 void RocketImage::print(QPrinter *printer, QPainter &p) {

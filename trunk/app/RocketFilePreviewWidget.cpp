@@ -246,7 +246,7 @@ void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
         if (response == QMessageBox::No) {
             return;
         }
-        QTimer::singleShot(0, img, SLOT(deleteFile()));
+        QTimer::singleShot(0, img, SLOT(guiDeleteFile()));
     } else if (positionOnButton(event->pos(), 2, LeftToRight, *questionIcon[255]) && leftClick) {
         emit questionClicked(img);
     } else if (leftClick) {
@@ -312,14 +312,14 @@ void RocketFilePreviewWidget::popupTriggered(QAction *action) {
         if (response == QMessageBox::No) {
             return;
         }
-        QTimer::singleShot(0, img, SLOT(deleteFile()));
+        QTimer::singleShot(0, img, SLOT(guiDeleteFile()));
     } else if (action->objectName() == "info") {
         emit questionClicked(img);
     } else if (action->objectName() == "rename") {
-        bool ok = 0;
+        bool ok = false;
         QString response = QInputDialog::getText(this, tr("Rename"),
                 tr("Enter new filename:"), QLineEdit::Normal, img->getShortFileName(), &ok);
-        if (ok) img->renameFile(response);
+        if (ok) img->guiRenameFile(response);
     }
 }
 

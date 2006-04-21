@@ -55,8 +55,10 @@ public slots:
     void save(const QString &name);
     void generateSavedFileInMemory(QBuffer &buffer);
     
-    void renameFile(QString fileName);
-    void deleteFile();
+    bool renameFile(QString fileName);
+    bool deleteFile();
+    bool guiRenameFile(QString fileName);
+    bool guiDeleteFile();
     
     void addChange(const QPixmap &pix, QString description);
     void setActive(bool value);
