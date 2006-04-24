@@ -47,15 +47,16 @@ void RocketImageList::refreshImages() {
 }
 
 void RocketImageList::setLocation(QString location) {
-    RocketImageList::location = location;
     QStringList imageNameFilters;
-    //TODO share this list with RocketWindow
-    imageNameFilters << "*.png" << "*.jpg" << "*.gif" << "*.xpm" << "*.bmp";
+    foreach (QByteArray format, QImageReader::supportedImageFormats()) {
+        imageNameFilters.append(QString("*.") + QString(format).toLower());
+    }
     QDir dir(location);
     if (!dir.exists()) {
-        QTimer::singleShot(0, this, SLOT(showMessage()));
+        RocketImageList::location = QString();
         return;
     }
+    RocketImageList::location = location;
     QStringList files = dir.entryList(
             imageNameFilters, QDir::Files|QDir::Readable, QDir::Name);
     foreach (RocketImage *i, list) {
@@ -69,18 +70,34 @@ void RocketImageList::setLocation(QString location) {
         connect(i, SIGNAL(renamed()), SLOT(renamedEvent()));
         list.append(i);
     }
-    selection = NULL;
-    setSelection(first());
+    selection = first(); //the /selected/ can't be emited until after /listChanged/
+    if (selection) selection->setActive(true);
     emit listChanged(ListReplaced);
+    if (selection) emit selectionChanged(NULL); //now the signal can be emited
+    
     continueThumbnailGeneration();
-    if (!list.size()) {
-        QTimer::singleShot(0, this, SLOT(showMessage()));
-    }
 }
 
-void RocketImageList::showMessage() {
-    QMessageBox::warning(NULL, tr("Open Folder..."),
-                         tr("No images were found in the folder."));
+void RocketImageList::addImages(const QStringList &files) {
+    bool wasEmpty = list.isEmpty();
+    foreach (QString s, files) {
+        QString newFile = QDir(location).filePath(QFileInfo(s).fileName());
+        QFile(s).copy(newFile);
+        RocketImage *i = new RocketImage(newFile);
+        connect(i, SIGNAL(removeMe()), SLOT(removeMeEvent()));
+        connect(i, SIGNAL(renamed()), SLOT(renamedEvent()));
+        list.append(i);
+    }
+    qSort(list.begin(), list.end(), &rocketImageLessThan);
+    if (wasEmpty) {
+        selection = first();
+        selection->setActive(true);
+    }
+    emit listChanged(EntryCreated);
+    if (wasEmpty) {
+        emit selectionChanged(NULL);
+    }
+    continueThumbnailGeneration();
 }
 
 //! This loops through current images and checks if they need a thumbnail.
@@ -156,9 +173,7 @@ void RocketImageList::removeMeEvent() {
     emit listChanged(EntryDeleted, index);
 }
 
-bool rocketImageLessThan(RocketImage *one, RocketImage *two);
-
-bool rocketImageLessThan(RocketImage *one, RocketImage *two) {
+bool RocketImageList::rocketImageLessThan(RocketImage *one, RocketImage *two) {
     return *one < *two;
 }
 

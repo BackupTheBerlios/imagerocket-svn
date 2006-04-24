@@ -45,10 +45,9 @@ protected:
     QSignalMapper pluginShortcutMapper;
     SaveSettingsTool *saveSettingsTool;
     QPointer < RocketUpdateChecker > updateChecker;
-    bool previewsHidden;
     QLabel *statusFile, *statusZoom, *statusSize;
     QMenu *mFile, *mEdit, *mView, *mImage, *mHelp;
-    QAction *aOpenFolder, *aSaveFolder, *aPrint, *aExit;
+    QAction *aOpenFolder, *aSaveFolder, *aAddImages, *aPrint, *aExit;
     QAction *aFirst, *aBack, *aForward, *aLast;
     QAction *aUseLargeThumbnails;
     QAction *aZoomOut, *aZoom100, *aZoomIn, *aZoomFit;
@@ -63,7 +62,6 @@ protected:
     QWidget *toolboxContainer;
     RocketToolBox *toolbox;
     QPushButton *fileSettingsButton;
-    QString lastDir;
     
     RocketFilePreviewArea *filePreviewArea;
     
@@ -84,6 +82,7 @@ protected slots:
     
     void openFolderTriggered();
     void saveFolderTriggered();
+    void addImagesTriggered();
     void printTriggered();
     void exitTriggered();
     

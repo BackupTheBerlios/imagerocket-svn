@@ -100,7 +100,7 @@ void RocketFilePreviewArea::updateSelection() {
     for (int a=0;a<list.size();++a) {
         list[a]->setActive(a == v->indexOf(images->getSelection()));
     }
-    QTimer::singleShot(0, this, SLOT(centerOnPosition()));
+    centerOnPosition();
 }
 
 void RocketFilePreviewArea::questionClickedEvent(RocketImage *w) {
@@ -152,6 +152,7 @@ void RocketFilePreviewArea::centerOnPosition() {
                 break;
             }
         }
+        if (!widget) return;
         int centerX = widget->x() + widget->width()/2 - horizontalScrollBar()->pageStep()/2;
         int centerY = widget->y() + widget->height()/2 - verticalScrollBar()->pageStep()/2;
         if (usingHorizontalLayout) {

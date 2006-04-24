@@ -38,7 +38,6 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 RocketWindow::RocketWindow() : QMainWindow() {
     dFiles = NULL;
-    previewsHidden = false;
     initGui();
     //This improves the perceived speed of the program by delaying some work until
     //after the display of the window.
@@ -116,6 +115,11 @@ void RocketWindow::initGui() {
     connect(a, SIGNAL(triggered()), SLOT(saveFolderTriggered()));
     mainToolBar->addAction(a);
     mainToolBar->addSeparator();
+    mFile->addAction(a);
+    mFile->addSeparator();
+    a = aAddImages = new QAction(tr("&Add Images..."), this);
+    a->setShortcut(QKeySequence(tr("Ctrl+A", "add images")));
+    connect(a, SIGNAL(triggered()), SLOT(addImagesTriggered()));
     mFile->addAction(a);
     mFile->addSeparator();
     a = aPrint = new QAction(QIcon(":/pixmaps/print.png"), tr("&Print..."), this);
@@ -485,6 +489,7 @@ void RocketWindow::updateGui() {
     aRedo->setText((selection && selection->canRedo())
             ? tr("&Redo %1").arg(selection->getDescriptionOfNext()) : tr("&Redo"));
     aSaveFolder->setEnabled(images.size());
+    aAddImages->setEnabled(!images.getLocation().isNull());
     aPrint->setEnabled(images.size());
     toolbox->setEnabled(notNull);
     fileSettingsButton->setEnabled(notNull);
@@ -534,13 +539,6 @@ void RocketWindow::indexChanged(RocketImage *oldSelection) {
         recheckSettingsButton = fileSettingsButton->isChecked();
         delete toolSettingsToolBar;
     }
-    if (images.size() <= 1 && dFiles->isVisible()) {
-        dFiles->hide();
-        previewsHidden = true;
-    } else if (images.size() > 1 && previewsHidden) {
-        dFiles->show();
-        previewsHidden = false;
-    }
     if (images.size()) {
         view->resetZoomAndPosition();
     }
@@ -568,14 +566,29 @@ void RocketWindow::updateShownPixmap() {
 }
 
 void RocketWindow::openFolderTriggered() {
-    QString s = QFileDialog::getExistingDirectory(this, tr("Open Folder..."), lastDir);
+    static QString location = QString(QDir::homePath());
+    QString s = QFileDialog::getExistingDirectory(this, tr("Open Folder"), location);
     if (s.isEmpty()) {
         return;
     }
     QDir d(s);
     d.cdUp();
-    lastDir = d.path();
+    location = d.absolutePath();
     setDirectory(s);
+}
+
+void RocketWindow::addImagesTriggered() {
+    static QString location = QString(QDir::homePath());
+    QStringList imageNameFilters;
+    foreach (QByteArray format, QImageReader::supportedImageFormats()) {
+        imageNameFilters.append(QString("*.") + QString(format).toLower());
+    }
+    QString filter = tr("Images (%1)").arg(imageNameFilters.join(" "));
+    QStringList list = QFileDialog::getOpenFileNames(this, tr("Add Images"), location, filter);
+    if (list.size()) {
+        location = QFileInfo(list[0]).dir().absolutePath();
+        images.addImages(list);
+    }
 }
 
 void RocketWindow::saveFolderTriggered() {

@@ -30,14 +30,14 @@ protected:
     QVector < RocketImage * > list;
     ThreadedImageLoader *generator;
     void continueThumbnailGeneration();
-protected slots:
-    void showMessage();
+    static bool rocketImageLessThan(RocketImage *one, RocketImage *two);
 public:
     enum ListChangeType {ListReplaced, EntryCreated, EntryDeleted};
     RocketImageList();
     ~RocketImageList();
     void setLocation(QString location);
     QString getLocation();
+    void addImages(const QStringList &files);
     int size() {return list.size();}
     const QVector < RocketImage * > *getVector() {return &list;}
     RocketImage *first() {return list.size() ? list.first() : NULL;}
