@@ -29,6 +29,7 @@
 <file>pixmaps/rotate270.png</file>
 <file>pixmaps/flipv.png</file>
 <file>pixmaps/mirror.png</file>
+<file>pixmaps/preview.jpg</file>
 </qresource>
 </RCC>
 

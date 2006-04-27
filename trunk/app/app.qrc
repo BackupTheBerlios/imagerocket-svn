@@ -2,6 +2,7 @@
 <qresource>
 <file>license.htm</file>
 <file>toolbox.txt</file>
+<file>defaults.ini</file>
 </qresource>
 </RCC>
 

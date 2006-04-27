@@ -183,7 +183,11 @@ void RocketFilePreviewWidget::setActive(bool value) {
         if (value) {
             activeFading = SELECT_STEPS;
         } else {
-            if (!fadeTimer.isActive()) fadeTimer.start();
+            if (QSettings().value("ui/useFading").toBool()) {
+                if (!fadeTimer.isActive()) fadeTimer.start();
+            } else {
+                activeFading = 0;
+            }
         }
         update();
         active = value;
@@ -203,16 +207,21 @@ void RocketFilePreviewWidget::setOrientation(bool horizontal) {
 }
 
 void RocketFilePreviewWidget::leaveEvent(QEvent *event) {
-    if (!fadeTimer.isActive()) fadeTimer.start();
+    if (QSettings().value("ui/useFading").toBool()) {
+        if (!fadeTimer.isActive()) fadeTimer.start();
+    } else {
+        toolboxFading = 0;
+    }
     resetIcons();
 }
 
 void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
-    onTrash = positionOnButton(event->pos(), 1, LeftToRight, *trashIcon[255]);
+    bool showRollover = QSettings().value("ui/showRollover").toBool();
+    onTrash = showRollover && positionOnButton(event->pos(), 1, LeftToRight, *trashIcon[255]);
     if (onTrash) {
         setToolTip(tr("Delete"));
     }
-    onQuestion = positionOnButton(event->pos(), 2, LeftToRight, *questionIcon[255]);
+    onQuestion = showRollover && positionOnButton(event->pos(), 2, LeftToRight, *questionIcon[255]);
     if (onQuestion) {
         setToolTip(tr("Info"));
     }
@@ -226,10 +235,14 @@ void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
         QToolTip::showText(QPoint(), QString(), this);
     }
     if (!onWidget && event->buttons() == 0) {
-        onWidget = true;
-        if (toolboxFading == 0) {
-            toolboxFading = 1;
-            if (!fadeTimer.isActive()) fadeTimer.start();
+        onWidget = showRollover;
+        if (showRollover && QSettings().value("ui/useFading").toBool()) {
+            if (toolboxFading == 0) {
+                toolboxFading = 1;
+                if (!fadeTimer.isActive()) fadeTimer.start();
+            }
+        } else if (showRollover) {
+            toolboxFading = TBOX_STEPS;
         }
     }
     //possible optimization: this updates on each mousemove. we could update on
@@ -238,18 +251,25 @@ void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
+    bool showRollover = QSettings().value("ui/showRollover").toBool();
     bool leftClick = event->button() == Qt::LeftButton;
-    if (positionOnButton(event->pos(), 1, LeftToRight, *trashIcon[255]) && leftClick) {
-        int response = QMessageBox::question(this, img->getFileName(),
-                tr("Are you sure you want to delete %1?").arg(img->getFileName()),
-                QMessageBox::Yes, QMessageBox::No);
+    if (showRollover && positionOnButton(event->pos(), 1, LeftToRight, *trashIcon[255])
+                && leftClick) {
+        int response = QMessageBox::Yes;
+        QSettings settings;
+        if (settings.value("ui/askBeforeDeleting").toBool()) {
+            response = QMessageBox::question(this, img->getFileName(),
+                    tr("Are you sure you want to delete %1?").arg(img->getFileName()),
+                    QMessageBox::Yes, QMessageBox::No);
+        }
         if (response == QMessageBox::No) {
             return;
         }
         QTimer::singleShot(0, img, SLOT(guiDeleteFile()));
-    } else if (positionOnButton(event->pos(), 2, LeftToRight, *questionIcon[255]) && leftClick) {
+    } else if (showRollover && positionOnButton(event->pos(), 2, LeftToRight, *questionIcon[255])
+                && leftClick) {
         emit questionClicked(img);
-    } else if (leftClick) {
+    } else if (leftClick && !active) {
         emit clicked(img);
     } else if (event->button() == Qt::RightButton) {
         popupMenu->disconnect();
@@ -306,9 +326,13 @@ QRect RocketFilePreviewWidget::buttonRect(int num, Direction d, const QPixmap &p
 
 void RocketFilePreviewWidget::popupTriggered(QAction *action) {
     if (action->objectName() == "delete") {
-        int response = QMessageBox::question(this, img->getFileName(),
-                tr("Are you sure you want to delete %1?").arg(img->getFileName()),
-                QMessageBox::Yes, QMessageBox::No);
+        int response = QMessageBox::Yes;
+        QSettings settings;
+        if (settings.value("ui/askBeforeDeleting").toBool()) {
+            response = QMessageBox::question(this, img->getFileName(),
+                    tr("Are you sure you want to delete %1?").arg(img->getFileName()),
+                    QMessageBox::Yes, QMessageBox::No);
+        }
         if (response == QMessageBox::No) {
             return;
         }

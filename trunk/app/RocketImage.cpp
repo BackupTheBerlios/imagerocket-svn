@@ -51,6 +51,42 @@ bool RocketImage::operator<(const RocketImage &img) const {
     return getShortFileName() < img.getShortFileName();
 }
 
+void RocketImage::renderWatermark(QImage *image, const QString &text, const QFont &font,
+            const QColor &color, int margin, int position) {
+    int flags = 0;
+    switch (position) {
+    case 1: flags = Qt::AlignLeft|Qt::AlignTop; break;
+    case 2: flags = Qt::AlignHCenter|Qt::AlignTop; break;
+    case 3: flags = Qt::AlignRight|Qt::AlignTop; break;
+    case 4: flags = Qt::AlignLeft|Qt::AlignVCenter; break;
+    case 5: flags = Qt::AlignCenter; break;
+    case 6: flags = Qt::AlignRight|Qt::AlignVCenter; break;
+    case 7: flags = Qt::AlignLeft|Qt::AlignBottom; break;
+    case 8: flags = Qt::AlignHCenter|Qt::AlignBottom; break;
+    case 9: flags = Qt::AlignRight|Qt::AlignBottom; break;
+    default: assert(0); break;
+    }
+    QPainter painter(image);
+    painter.setFont(font);
+    painter.setPen(color);
+    painter.drawText(margin, margin, image->width()-margin*2, image->height()-margin*2,
+            flags, text);
+    painter.end();
+}
+
+void RocketImage::renderWatermark(QImage *image) {
+    QSettings settings;
+    settings.beginGroup("watermark");
+    if (settings.value("on").toBool()) {
+        RocketImage::renderWatermark(image,
+                settings.value("text").toString(),
+                settings.value("font").value< QFont >(),
+                settings.value("color").value< QColor >(),
+                settings.value("margin").toInt(),
+                settings.value("position").toInt());
+    }
+}
+
 void RocketImage::addChange(const QPixmap &pix, QString description) {
     ++index;
     changes.insert(index, pix);
@@ -83,10 +119,12 @@ void RocketImage::save(const QString &name) {
     QFileInfo info(name);
     QString ext(getSaveFormatAsText());
     QString fileName(QDir(info.path()).filePath(info.baseName()+"."+ext));
+    QImage image(getPixmap().toImage());
+    renderWatermark(&image);
     if (getSaveFormatAsText() == "png") {
-        getPixmap().toImage().convertToFormat(QImage::Format_ARGB32).save(fileName, ext.toAscii(), saveQuality);
+        image.convertToFormat(QImage::Format_ARGB32).save(fileName, ext.toAscii(), saveQuality);
     } else {
-        getPixmap().save(fileName, ext.toAscii(), saveQuality);
+        image.save(fileName, ext.toAscii(), saveQuality);
     }
     setSaved();
 }
@@ -96,6 +134,7 @@ void RocketImage::generateSavedFileInMemory(QBuffer &buffer) {
     QImageWriter writer(&buffer, getSaveFormatAsText().toAscii());
     writer.setQuality(saveQuality);
     QImage image(getPixmap().toImage());
+    renderWatermark(&image);
     if (getSaveFormatAsText() == "png") {
         writer.write(image.convertToFormat(QImage::Format_ARGB32));
     } else {

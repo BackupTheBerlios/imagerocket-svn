@@ -18,6 +18,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketWindow.h"
 #include "RocketImage.h"
 #include "RocketAboutDialog.h"
+#include "RocketOptionsDialog.h"
 #include "RocketSaveDialog.h"
 #include "RocketFilePreviewWidget.h"
 #include "ProgramStarter.h"
@@ -38,6 +39,18 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 RocketWindow::RocketWindow() : QMainWindow() {
     dFiles = NULL;
+    
+    QSettings defaults(":/defaults.ini", QSettings::IniFormat);
+    QSettings settings;
+    foreach (QString key, defaults.allKeys()) {
+        if (settings.value(key).isNull()) {
+            settings.setValue(key, defaults.value(key));
+        }
+    }
+    if (settings.value("watermark/font").isNull()) {
+        settings.setValue("watermark/font", QFont("Sans", 14));
+    }
+    
     initGui();
     //This improves the perceived speed of the program by delaying some work until
     //after the display of the window.
@@ -190,10 +203,15 @@ void RocketWindow::initGui() {
     a = aRedo = new QAction(QIcon(":/pixmaps/redo.png"),
             tr("&Redo"), this);
     a->setShortcut(QKeySequence(tr("Ctrl+Y", "redo")));
-    connect(aRedo, SIGNAL(triggered()), SLOT(redoTriggered()));
+    connect(a, SIGNAL(triggered()), SLOT(redoTriggered()));
     imageToolBar->addAction(a);
     mEdit->addAction(a);
     imageToolBar->addSeparator();
+    mEdit->addSeparator();
+    a = aOptions = new QAction(tr("&Options..."), this);
+    a->setShortcut(QKeySequence(tr("Ctrl+T", "options")));
+    connect(a, SIGNAL(triggered()), SLOT(optionsTriggered()));
+    mEdit->addAction(a);
     a = aUseLargeThumbnails = new QAction(tr("Use &Large Thumbnails"), this);
     a->setShortcut(QKeySequence(tr("Ctrl+L", "use large thumbnails")));
     connect(a, SIGNAL(toggled(bool)), SLOT(useLargeThumbnailsToggled(bool)));
@@ -930,6 +948,11 @@ void RocketWindow::toolSettingsToolBarDestroyed() {
 void RocketWindow::aboutTriggered() {
     RocketAboutDialog about(this);
     about.exec();
+}
+
+void RocketWindow::optionsTriggered() {
+    RocketOptionsDialog options(this);
+    options.exec();
 }
 
 void RocketWindow::checkForUpdatesTriggered() {

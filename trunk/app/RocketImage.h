@@ -25,6 +25,10 @@ class RocketImage : public QObject {
 Q_OBJECT
 public:
     enum StatusIcon {TooLarge = 1, Broken, Loading};
+    static void renderWatermark(QImage *image,  const QString &text, const QFont &font,
+            const QColor &color, int margin, int position);
+    void renderWatermark(QImage *image);
+    
     RocketImage(const QString &fileName);
     ~RocketImage();
     void print(QPrinter *printer, QPainter &p);
@@ -84,7 +88,6 @@ protected:
     bool saveProgressive;
     void updateThumbnail();
     void setSelected(bool value);
-    friend void RocketImageList::setSelection(RocketImage *);
 signals:
     void changed();
     void removeMe();

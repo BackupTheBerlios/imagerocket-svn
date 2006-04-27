@@ -106,10 +106,11 @@ void RocketImageList::continueThumbnailGeneration() {
     QSettings settings;
     int maxFileSize = settings.value("thumbnail/maxFileSize", 3000000).toInt();
     int thumbnailSize = settings.value("thumbnail/size", 64).toInt();
+    bool alwaysMakeThumbnails = settings.value("thumbnail/alwaysMakeThumbnails").toBool();
     foreach (RocketImage *i, list) {
         if (!block && i->getStatusIconIndex() == RocketImage::Loading) {
             QFileInfo info(i->getFileName());
-            if (info.size() > maxFileSize) {
+            if (info.size() > maxFileSize && !alwaysMakeThumbnails) {
                 i->setThumbnail(RocketImage::TooLarge);
             } else {
                 generator->loadImage(i->getFileName(), QSize(thumbnailSize, thumbnailSize),

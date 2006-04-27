@@ -54,7 +54,7 @@ protected:
     QSignalMapper rotateMapper;
     QActionGroup *rotateGroup;
     QAction *aRotate90, *aRotate180, *aRotate270, *aFlipVertical, *aMirror;
-    QAction *aUndo, *aRedo;
+    QAction *aUndo, *aRedo, *aOptions;
     QAction *aCheckForUpdates, *aAbout;
     QDockWidget *dPalette, *dFiles;
     bool switchImageBlocked;
@@ -109,6 +109,7 @@ protected slots:
     void mirrorTriggered();
     
     void aboutTriggered();
+    void optionsTriggered();
     void checkForUpdatesTriggered();
     
     void toolClicked(QListWidgetItem *item);

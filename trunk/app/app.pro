@@ -4,6 +4,7 @@ DESTDIR = ..
 PRECOMPILED_HEADER = precompiled.h
 HEADERS =   RocketWindow.h \
             RocketAboutDialog.h \
+            RocketOptionsDialog.h \
             RocketUpdateChecker.h \
             RocketSaveDialog.h \
             RocketFilePreviewArea.h \
@@ -20,6 +21,7 @@ HEADERS =   RocketWindow.h \
 SOURCES =   main.cpp \
             RocketWindow.cpp \
             RocketAboutDialog.cpp \
+            RocketOptionsDialog.cpp \
             RocketUpdateChecker.cpp \
             RocketSaveDialog.cpp \
             RocketFilePreviewArea.cpp \
@@ -31,7 +33,7 @@ SOURCES =   main.cpp \
             ProgramStarter.cpp \
             ThreadedImageLoader.cpp
 
-FORMS =     aboutdialog.ui savedialog.ui updatedialog.ui savesettingstool.ui
+FORMS =     aboutdialog.ui optionsdialog.ui savedialog.ui updatedialog.ui savesettingstool.ui
 RESOURCES = pixmaps.qrc app.qrc
 INCLUDEPATH += ../lua ../pixmapview .
 MOC_DIR = tmp

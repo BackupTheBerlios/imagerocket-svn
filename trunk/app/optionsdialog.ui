@@ -1,0 +1,477 @@
+<ui version="4.0" >
+ <author></author>
+ <comment></comment>
+ <exportmacro></exportmacro>
+ <class>RocketOptionsDialog</class>
+ <widget class="QDialog" name="RocketOptionsDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>380</width>
+    <height>411</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Options</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="margin" >
+    <number>9</number>
+   </property>
+   <property name="spacing" >
+    <number>6</number>
+   </property>
+   <item>
+    <widget class="QTabWidget" name="tabWidget" >
+     <widget class="QWidget" name="tab" >
+      <attribute name="title" >
+       <string>&amp;Interface</string>
+      </attribute>
+      <layout class="QVBoxLayout" >
+       <property name="margin" >
+        <number>9</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QCheckBox" name="chkAlwaysMakeThumbnails" >
+         <property name="text" >
+          <string>Make Thumbnails for Large Images</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="chkAskBeforeDeleting" >
+         <property name="text" >
+          <string>Ask before Deleting Images</string>
+         </property>
+         <property name="checked" >
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="chkUseFading" >
+         <property name="text" >
+          <string>Use Subtle Fading Effects</string>
+         </property>
+         <property name="checked" >
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="chkShowRollover" >
+         <property name="text" >
+          <string>Show Rollover Menus on Thumbnails</string>
+         </property>
+         <property name="checked" >
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>20</width>
+           <height>21</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2" >
+      <attribute name="title" >
+       <string>&amp;Watermark</string>
+      </attribute>
+      <layout class="QGridLayout" >
+       <property name="margin" >
+        <number>9</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item row="3" column="0" colspan="2" >
+        <widget class="QPushButton" name="btnPreview" >
+         <property name="text" >
+          <string>P&amp;review</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2" >
+        <widget class="QGroupBox" name="groupBox_3" >
+         <property name="title" >
+          <string>&amp;Style</string>
+         </property>
+         <layout class="QVBoxLayout" >
+          <property name="margin" >
+           <number>9</number>
+          </property>
+          <property name="spacing" >
+           <number>6</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" >
+            <property name="margin" >
+             <number>0</number>
+            </property>
+            <property name="spacing" >
+             <number>6</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="btnColor" >
+              <property name="text" >
+               <string>&amp;Color</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnFont" >
+              <property name="text" >
+               <string>&amp;Font</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" >
+            <property name="margin" >
+             <number>0</number>
+            </property>
+            <property name="spacing" >
+             <number>6</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_2" >
+              <property name="text" >
+               <string>&amp;Opacity</string>
+              </property>
+              <property name="buddy" >
+               <cstring>sldOpacity</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSlider" name="sldOpacity" >
+              <property name="maximum" >
+               <number>255</number>
+              </property>
+              <property name="pageStep" >
+               <number>5</number>
+              </property>
+              <property name="value" >
+               <number>255</number>
+              </property>
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="tickPosition" >
+               <enum>QSlider::TicksBelow</enum>
+              </property>
+              <property name="tickInterval" >
+               <number>51</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0" >
+        <widget class="QGroupBox" name="groupBox" >
+         <property name="title" >
+          <string>&amp;Position</string>
+         </property>
+         <layout class="QGridLayout" >
+          <property name="margin" >
+           <number>9</number>
+          </property>
+          <property name="spacing" >
+           <number>6</number>
+          </property>
+          <item row="5" column="0" colspan="3" >
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>81</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="2" >
+           <widget class="QRadioButton" name="radPosition3" >
+            <property name="sizePolicy" >
+             <sizepolicy>
+              <hsizetype>0</hsizetype>
+              <vsizetype>0</vsizetype>
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" >
+           <widget class="QRadioButton" name="radPosition1" >
+            <property name="sizePolicy" >
+             <sizepolicy>
+              <hsizetype>0</hsizetype>
+              <vsizetype>0</vsizetype>
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" >
+           <widget class="QRadioButton" name="radPosition2" >
+            <property name="sizePolicy" >
+             <sizepolicy>
+              <hsizetype>0</hsizetype>
+              <vsizetype>0</vsizetype>
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" >
+           <widget class="QRadioButton" name="radPosition4" >
+            <property name="sizePolicy" >
+             <sizepolicy>
+              <hsizetype>0</hsizetype>
+              <vsizetype>0</vsizetype>
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2" >
+           <widget class="QRadioButton" name="radPosition6" >
+            <property name="sizePolicy" >
+             <sizepolicy>
+              <hsizetype>0</hsizetype>
+              <vsizetype>0</vsizetype>
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" >
+           <widget class="QRadioButton" name="radPosition5" >
+            <property name="sizePolicy" >
+             <sizepolicy>
+              <hsizetype>0</hsizetype>
+              <vsizetype>0</vsizetype>
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" >
+           <widget class="QRadioButton" name="radPosition8" >
+            <property name="sizePolicy" >
+             <sizepolicy>
+              <hsizetype>0</hsizetype>
+              <vsizetype>0</vsizetype>
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2" >
+           <widget class="QRadioButton" name="radPosition9" >
+            <property name="sizePolicy" >
+             <sizepolicy>
+              <hsizetype>0</hsizetype>
+              <vsizetype>0</vsizetype>
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text" >
+             <string/>
+            </property>
+            <property name="checked" >
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" >
+           <widget class="QRadioButton" name="radPosition7" >
+            <property name="sizePolicy" >
+             <sizepolicy>
+              <hsizetype>0</hsizetype>
+              <vsizetype>0</vsizetype>
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="3" >
+           <widget class="QLabel" name="label" >
+            <property name="text" >
+             <string>&amp;Margin</string>
+            </property>
+            <property name="buddy" >
+             <cstring>spnMargin</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="3" >
+           <widget class="QSpinBox" name="spnMargin" >
+            <property name="toolTip" >
+             <string>Distance from the edge of the image to the text</string>
+            </property>
+            <property name="maximum" >
+             <number>1024</number>
+            </property>
+            <property name="value" >
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="1" >
+        <widget class="QGroupBox" name="groupBox_2" >
+         <property name="title" >
+          <string>&amp;Text</string>
+         </property>
+         <layout class="QVBoxLayout" >
+          <property name="margin" >
+           <number>9</number>
+          </property>
+          <property name="spacing" >
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QTextEdit" name="txtWatermarkText" />
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="2" >
+        <widget class="QCheckBox" name="chkAddWatermark" >
+         <property name="text" >
+          <string>&amp;Add Watermark to Images</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>131</width>
+         <height>31</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnOk" >
+       <property name="text" >
+        <string>OK</string>
+       </property>
+       <property name="default" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnCancel" >
+       <property name="text" >
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <pixmapfunction></pixmapfunction>
+ <tabstops>
+  <tabstop>chkAlwaysMakeThumbnails</tabstop>
+  <tabstop>chkAskBeforeDeleting</tabstop>
+  <tabstop>chkUseFading</tabstop>
+  <tabstop>chkShowRollover</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>btnOk</tabstop>
+  <tabstop>btnCancel</tabstop>
+  <tabstop>chkAddWatermark</tabstop>
+  <tabstop>txtWatermarkText</tabstop>
+  <tabstop>radPosition1</tabstop>
+  <tabstop>radPosition2</tabstop>
+  <tabstop>radPosition3</tabstop>
+  <tabstop>radPosition4</tabstop>
+  <tabstop>radPosition5</tabstop>
+  <tabstop>radPosition6</tabstop>
+  <tabstop>radPosition7</tabstop>
+  <tabstop>radPosition8</tabstop>
+  <tabstop>radPosition9</tabstop>
+  <tabstop>spnMargin</tabstop>
+  <tabstop>btnColor</tabstop>
+  <tabstop>btnFont</tabstop>
+  <tabstop>sldOpacity</tabstop>
+  <tabstop>btnPreview</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
