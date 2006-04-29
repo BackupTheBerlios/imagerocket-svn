@@ -41,6 +41,7 @@ RocketOptionsDialog::RocketOptionsDialog(QWidget *parent) : QDialog(parent) {
     chkAskBeforeDeleting->setChecked(settings.value("askBeforeDeleting").toBool());
     chkUseFading->setChecked(settings.value("useFading").toBool());
     chkShowRollover->setChecked(settings.value("showRollover").toBool());
+    chkCenterOnSelection->setChecked(settings.value("centerOnSelection").toBool());
     settings.endGroup();
     settings.beginGroup("watermark");
     //I don't know why changing the radio buttons requires a single-shot timer. - WJC
@@ -85,6 +86,7 @@ void RocketOptionsDialog::okClicked() {
     settings.setValue("askBeforeDeleting", chkAskBeforeDeleting->isChecked());
     settings.setValue("useFading", chkUseFading->isChecked());
     settings.setValue("showRollover", chkShowRollover->isChecked());
+    settings.setValue("centerOnSelection", chkCenterOnSelection->isChecked());
     settings.endGroup();
     settings.beginGroup("watermark");
     settings.setValue("on", chkAddWatermark->isChecked());

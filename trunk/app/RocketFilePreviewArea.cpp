@@ -142,7 +142,10 @@ void RocketFilePreviewArea::listChanged(RocketImageList::ListChangeType type, in
 }
 
 void RocketFilePreviewArea::centerOnPosition() {
-    if (list.size() == 0) {
+    QSettings settings;
+    if (!settings.value("ui/centerOnSelection").toBool()) {
+        //pass
+    } else if (list.size() == 0) {
         verticalScrollBar()->setValue(0);
     } else {
         RocketFilePreviewWidget *widget = NULL;
