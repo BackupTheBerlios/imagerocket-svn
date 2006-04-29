@@ -43,6 +43,15 @@ RocketOptionsDialog::RocketOptionsDialog(QWidget *parent) : QDialog(parent) {
     chkShowRollover->setChecked(settings.value("showRollover").toBool());
     settings.endGroup();
     settings.beginGroup("watermark");
+    //I don't know why changing the radio buttons requires a single-shot timer. - WJC
+    if (settings.value("selected").toString() == "text") {
+        QTimer::singleShot(0, radWatermarkText, SLOT(click()));
+    } else {
+        QTimer::singleShot(0, radImage, SLOT(click()));
+    }
+    if (QFile(settings.value("image").toString()).exists()) {
+        linImage->setText(settings.value("image").toString());
+    }
     chkAddWatermark->setChecked(settings.value("on").toBool());
     positionGroup.button(settings.value("position").toInt())->setChecked(true);
     watermarkColor = settings.value("color").value< QColor >();
@@ -63,6 +72,7 @@ RocketOptionsDialog::RocketOptionsDialog(QWidget *parent) : QDialog(parent) {
     connect(btnColor, SIGNAL(clicked()), SLOT(colorClicked()));
     connect(sldOpacity, SIGNAL(valueChanged(int)), SLOT(opacityChanged()));
     connect(btnFont, SIGNAL(clicked()), SLOT(fontClicked()));
+    connect(btnImageSelect, SIGNAL(clicked()), SLOT(imageSelectClicked()));
     connect(btnPreview, SIGNAL(clicked()), SLOT(previewClicked()));
 }
 
@@ -83,6 +93,12 @@ void RocketOptionsDialog::okClicked() {
     settings.setValue("font", watermarkFont);
     settings.setValue("margin", spnMargin->value());
     settings.setValue("text", txtWatermarkText->toPlainText());
+    if (radWatermarkText->isChecked()) {
+        settings.setValue("selected", "text");
+    } else {
+        settings.setValue("selected", "image");
+    }
+    settings.setValue("image", linImage->text());
     settings.endGroup();
     accept();
 }
@@ -103,6 +119,7 @@ void RocketOptionsDialog::colorClicked() {
         setColorButtonColor(color);
         color.setAlpha(sldOpacity->value());
         watermarkColor = color;
+        radWatermarkText->setChecked(true);
     }
 }
 
@@ -111,11 +128,13 @@ void RocketOptionsDialog::opacityChanged() {
 }
 
 void RocketOptionsDialog::setColorButtonColor(QColor color) {
-    QPalette palette(btnColor->palette());
-    QColor hsv = color.convertTo(QColor::Hsv);
-    palette.setColor(QPalette::Normal, QPalette::Button, color);
-    palette.setColor(QPalette::Normal, QPalette::ButtonText, (color.value() < 128) ? Qt::white : Qt::black);
-    btnColor->setPalette(palette);
+    QImage image(16, 16, QImage::Format_ARGB32_Premultiplied);
+    image.fill(qRgb(color.red(), color.green(), color.blue()));
+    QPainter p(&image);
+    p.setPen(Qt::black);
+    p.drawRect(0, 0, image.width()-1, image.height()-1);
+    p.end();
+    btnColor->setIcon(QPixmap::fromImage(image));
 }
 
 void RocketOptionsDialog::fontClicked() {
@@ -125,12 +144,30 @@ void RocketOptionsDialog::fontClicked() {
         watermarkFont = font;
         font.setPointSize(txtWatermarkText->font().pointSize());
         txtWatermarkText->setFont(font);
+        radWatermarkText->setChecked(true);
+    }
+}
+
+void RocketOptionsDialog::imageSelectClicked() {
+    static QString location = QString(QDir::homePath());
+    QStringList imageNameFilters;
+    foreach (QByteArray format, QImageReader::supportedImageFormats()) {
+        imageNameFilters.append(QString("*.") + QString(format).toLower());
+    }
+    QString filter = tr("Images (%1)").arg(imageNameFilters.join(" "));
+    QString file = QFileDialog::getOpenFileName(this, tr("Select Image"), location, filter);
+    if (!file.isNull()) {
+        location = QFileInfo(file).dir().absolutePath();
+        linImage->setText(file);
+        radImage->setChecked(true);
     }
 }
 
 void RocketOptionsDialog::previewClicked() {
     QImage image(":/pixmaps/preview.jpg");
-    RocketImage::renderWatermark(&image, txtWatermarkText->toPlainText(), watermarkFont,
+    QVariant contents = radWatermarkText->isChecked()
+            ? QVariant(txtWatermarkText->toPlainText()) : QVariant(QImage(linImage->text()));
+    RocketImage::renderWatermark(&image, contents, watermarkFont,
             watermarkColor, spnMargin->value(), positionGroup.checkedId());
     QDialog *dialog = new QDialog(this);
     dialog->setWindowTitle(tr("Watermark Preview"));

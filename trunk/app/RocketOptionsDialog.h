@@ -37,6 +37,7 @@ protected slots:
     void colorClicked();
     void opacityChanged();
     void fontClicked();
+    void imageSelectClicked();
     void previewClicked();
 };
 

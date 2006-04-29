@@ -25,7 +25,7 @@ class RocketImage : public QObject {
 Q_OBJECT
 public:
     enum StatusIcon {TooLarge = 1, Broken, Loading};
-    static void renderWatermark(QImage *image,  const QString &text, const QFont &font,
+    static void renderWatermark(QImage *image, const QVariant &contents, const QFont &font,
             const QColor &color, int margin, int position);
     void renderWatermark(QImage *image);
     

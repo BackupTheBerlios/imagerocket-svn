@@ -51,35 +51,103 @@ bool RocketImage::operator<(const RocketImage &img) const {
     return getShortFileName() < img.getShortFileName();
 }
 
-void RocketImage::renderWatermark(QImage *image, const QString &text, const QFont &font,
-            const QColor &color, int margin, int position) {
-    int flags = 0;
-    switch (position) {
-    case 1: flags = Qt::AlignLeft|Qt::AlignTop; break;
-    case 2: flags = Qt::AlignHCenter|Qt::AlignTop; break;
-    case 3: flags = Qt::AlignRight|Qt::AlignTop; break;
-    case 4: flags = Qt::AlignLeft|Qt::AlignVCenter; break;
-    case 5: flags = Qt::AlignCenter; break;
-    case 6: flags = Qt::AlignRight|Qt::AlignVCenter; break;
-    case 7: flags = Qt::AlignLeft|Qt::AlignBottom; break;
-    case 8: flags = Qt::AlignHCenter|Qt::AlignBottom; break;
-    case 9: flags = Qt::AlignRight|Qt::AlignBottom; break;
-    default: assert(0); break;
+//This is a nasty hack, but it seems to be more accurate than the QFontMetrics functions
+QImage getRenderedText(const QString &text, const QFont &font,
+        const QColor &color, int flags, QSize size);
+QImage getRenderedText(const QString &text, const QFont &font,
+        const QColor &color, int flags, QSize size) {
+    size = QFontMetrics(font).boundingRect(0, 0, size.width(), size.height(), flags, text).size();
+    QImage image(size, QImage::Format_ARGB32_Premultiplied);
+    image.fill(qRgba(0, 0, 0, 0));
+    QPainter p(&image);
+    p.setFont(font);
+    p.setPen(color);
+    p.drawText(0, 0, size.width(), size.height(), flags, text);
+    QRect rect(0, 0, size.width(), size.height());
+    for (int a=0;a<image.width();++a) {
+        bool empty = true;
+        for (int b=0;b<size.height();++b)
+            if (qAlpha(image.pixel(a, b)) > 128) {empty = false; break;}
+        if (empty) rect.setLeft(a); else break;
     }
+    for (int a=image.width()-1;a>=0;--a) {
+        bool empty = true;
+        for (int b=0;b<size.height();++b)
+            if (qAlpha(image.pixel(a, b)) > 128) {empty = false; break;}
+        if (empty) rect.setRight(a); else break;
+    }
+    for (int a=0;a<image.height();++a) {
+        bool empty = true;
+        for (int b=0;b<size.width();++b)
+            if (qAlpha(image.pixel(b, a)) > 128) {empty = false; break;}
+        if (empty) rect.setTop(a); else break;
+    }
+    for (int a=image.height()-1;a>=0;--a) {
+        bool empty = true;
+        for (int b=0;b<size.width();++b)
+            if (qAlpha(image.pixel(b, a)) > 128) {empty = false; break;}
+        if (empty) rect.setBottom(a); else break;
+    }
+    return image.copy(rect);
+}
+
+void RocketImage::renderWatermark(QImage *image, const QVariant &contents, const QFont &font,
+            const QColor &color, int margin, int position) {
+    QImage imgWatermark;
+    if (contents.type() == QVariant::String) {
+        QColor opaqueColor(color.red(), color.green(), color.blue());
+        imgWatermark = getRenderedText(contents.toString(), font, opaqueColor,
+                Qt::AlignLeft|Qt::AlignTop, image->size());
+    } else if (contents.type() == QVariant::Image) {
+        imgWatermark = contents.value< QImage >();
+    } else {
+        assert(0);
+    }
+    QSize size = imgWatermark.size();
+    QPoint point;
+    if (position == 1 || position == 4 || position == 7) {
+        point.setX(margin);
+    } else if (position == 2 || position == 5 || position == 8) {
+        point.setX(image->width()/2 - size.width()/2);
+    } else if (position == 3 || position == 6 || position == 9) {
+        point.setX(image->width() - margin - size.width());
+    } else {
+        assert(0);
+    }
+    if (position == 1 || position == 2 || position == 3) {
+        point.setY(margin);
+    } else if (position == 4 || position == 5 || position == 6) {
+        point.setY(image->height()/2 - size.height()/2);
+    } else if (position == 7 || position == 8 || position == 9) {
+        point.setY(image->height() - margin - size.height());
+    } else {
+        assert(0);
+    }
+    
+    //apply alpha to image and draw it
+    QImage alphaWatermark(imgWatermark.convertToFormat(QImage::Format_ARGB32_Premultiplied));
+    QImage eraser(alphaWatermark.copy());
+    eraser.fill(qRgba(0, 0, 0, color.alpha()));
+    QPainter p(&alphaWatermark);
+    p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+    p.drawImage(0, 0, eraser);
+    p.end();
     QPainter painter(image);
-    painter.setFont(font);
-    painter.setPen(color);
-    painter.drawText(margin, margin, image->width()-margin*2, image->height()-margin*2,
-            flags, text);
-    painter.end();
+    painter.drawImage(point, alphaWatermark);
 }
 
 void RocketImage::renderWatermark(QImage *image) {
     QSettings settings;
     settings.beginGroup("watermark");
     if (settings.value("on").toBool()) {
+        QVariant contents;
+        if (settings.value("selected").toString() == "text") {
+            contents = settings.value("text").toString();
+        } else {
+            contents = QImage(settings.value("image").toString());
+        }
         RocketImage::renderWatermark(image,
-                settings.value("text").toString(),
+                contents,
                 settings.value("font").value< QFont >(),
                 settings.value("color").value< QColor >(),
                 settings.value("margin").toInt(),
