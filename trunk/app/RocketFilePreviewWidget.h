@@ -21,6 +21,8 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketImage.h"
 #include <QtGui>
 
+class RocketFileRenameEdit;
+
 class RocketFilePreviewWidget : public QWidget {
 Q_OBJECT
 protected:
@@ -29,6 +31,7 @@ protected:
     static QPointer < QMenu > popupMenu;
     QFont font;
     QPointer < RocketImage > img;
+    QPointer < RocketFileRenameEdit > renameWidget;
     QPoint lastDrawnPosition;
     int thumbnailSize;
     bool onTrash, onQuestion, onWidget;
@@ -63,6 +66,8 @@ public:
 protected slots:
     void popupTriggered(QAction *);
     void fadeEvent();
+    void renameFinishedEvent();
+    void renameCanceledEvent();
 public slots:
     void updatePreview();
 signals:
@@ -70,6 +75,18 @@ signals:
     void questionClicked(RocketImage *);
     void clicked(RocketImage *);
     void updateSize();
+};
+
+class RocketFileRenameEdit : public QLineEdit {
+Q_OBJECT
+public:
+    RocketFileRenameEdit(QWidget *parent = NULL);
+protected:
+    void keyPressEvent(QKeyEvent *event);
+    void focusOutEvent(QFocusEvent *event);
+signals:
+    void canceled();
+    void focusLost();
 };
 
 #endif

@@ -121,13 +121,11 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
                    QColor(bg.red(), bg.green(), bg.blue(), 192));
     }
     //trying to be smart about the user's palette here
-    p.setPen(palette().color(QPalette::Text));
-    p.drawText(0, textPosition, width(), textHeight,
-               Qt::AlignHCenter|Qt::AlignTop, img->getShortFileName());
-    //DEBUG - shows fontmetrics return versus the actual appearance
-    //p.drawText(5, 5, fileNameRect.width()+5, fileNameRect.height()+5,
-    //           Qt::AlignLeft|Qt::AlignTop, img->getShortFileName());
-    //p.drawRect(5, 5, fileNameRect.width(), fileNameRect.height());
+    if (!renameWidget) {
+        p.setPen(palette().color(QPalette::Text));
+        p.drawText(0, textPosition, width(), textHeight,
+                   Qt::AlignHCenter|Qt::AlignTop, img->getShortFileName());
+    }
     
     if (!img->isSaved()) {
         QRect floppy(buttonRect(1, RightToLeft, *floppyIcon));
@@ -191,6 +189,7 @@ void RocketFilePreviewWidget::setActive(bool value) {
         }
         update();
         active = value;
+        if (renameWidget) renameFinishedEvent();
     }
 }
 
@@ -340,11 +339,39 @@ void RocketFilePreviewWidget::popupTriggered(QAction *action) {
     } else if (action->objectName() == "info") {
         emit questionClicked(img);
     } else if (action->objectName() == "rename") {
-        bool ok = false;
-        QString response = QInputDialog::getText(this, tr("Rename"),
-                tr("Enter new filename:"), QLineEdit::Normal, img->getShortFileName(), &ok);
-        if (ok) img->guiRenameFile(response);
+        renameWidget = new RocketFileRenameEdit(this);
+        connect(renameWidget, SIGNAL(focusLost()), SLOT(renameFinishedEvent()),
+                Qt::QueuedConnection);
+        connect(renameWidget, SIGNAL(returnPressed()), SLOT(renameFinishedEvent()),
+                Qt::QueuedConnection);
+        connect(renameWidget, SIGNAL(canceled()), SLOT(renameCanceledEvent()));
+        renameWidget->setText(img->getShortFileName());
+        int index = img->getShortFileName().indexOf(".");
+        if (index > 0) {
+            renameWidget->setSelection(0, index);
+        } else {
+            renameWidget->selectAll();
+        }
+        QSize hint = renameWidget->sizeHint();
+        renameWidget->setGeometry(0, height()-hint.height(), width(), hint.height());
+        renameWidget->show();
+        renameWidget->setFocus(Qt::OtherFocusReason);
+        update();
     }
+}
+
+void RocketFilePreviewWidget::renameFinishedEvent() {
+    renameWidget->deleteLater();
+    QTimer::singleShot(10, this, SLOT(update()));
+    
+    if (renameWidget->text() != img->getShortFileName()) {
+        img->guiRenameFile(renameWidget->text());
+    }
+}
+
+void RocketFilePreviewWidget::renameCanceledEvent() {
+    renameWidget->deleteLater();
+    QTimer::singleShot(10, this, SLOT(update()));
 }
 
 QSize RocketFilePreviewWidget::sizeHint() {
@@ -357,4 +384,19 @@ QSize RocketFilePreviewWidget::sizeHint() {
         return QSize(std::max(img->getThumbnail().width()+4, thumbnailSize),
                      std::max(img->getThumbnail().height()+thumbnailSize/2, thumbnailSize));
     }
+}
+
+RocketFileRenameEdit::RocketFileRenameEdit(QWidget *parent) : QLineEdit(parent) {
+}
+
+void RocketFileRenameEdit::keyPressEvent(QKeyEvent *event) {
+    if (event->key() == Qt::Key_Escape) {
+        emit canceled();
+    }
+    QLineEdit::keyPressEvent(event);
+}
+
+void RocketFileRenameEdit::focusOutEvent(QFocusEvent *event) {
+    QLineEdit::focusOutEvent(event);
+    emit focusLost();
 }
