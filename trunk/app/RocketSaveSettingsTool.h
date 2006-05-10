@@ -28,10 +28,10 @@ public:
     SaveSettingsWidget();
 };
 
-class SaveSettingsTool : public QObject {
+class RocketSaveSettingsTool : public QObject {
 Q_OBJECT
 public:
-    SaveSettingsTool(QObject *parent = NULL);
+    RocketSaveSettingsTool(QObject *parent = NULL);
     QWidget *getSettingsToolBar(RocketImage *img);
 protected:
     RocketImage *img;

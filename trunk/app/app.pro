@@ -13,7 +13,7 @@ HEADERS =   RocketWindow.h \
             RocketImage.h \
             RocketToolBox.h \
             RocketInfoTool.h \
-            SaveSettingsTool.h \
+            RocketSaveSettingsTool.h \
             ProgramStarter.h \
             ThreadedImageLoader.h \
             interfaces.h \
@@ -31,7 +31,7 @@ SOURCES =   main.cpp \
             RocketToolBox.cpp \
             RocketImage.cpp \
             RocketInfoTool.cpp \
-            SaveSettingsTool.cpp \
+            RocketSaveSettingsTool.cpp \
             ProgramStarter.cpp \
             ThreadedImageLoader.cpp
 

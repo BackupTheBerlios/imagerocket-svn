@@ -55,7 +55,6 @@ bool RocketImage::operator<(const RocketImage &img) const {
 qint64 RocketImage::getSizeOfFileWhenSaved() {
     if (sizeOfSavedFile == -1) {
         QBuffer buffer;
-        
         generateSavedFileInMemory(buffer);
         sizeOfSavedFile = buffer.size();
     }

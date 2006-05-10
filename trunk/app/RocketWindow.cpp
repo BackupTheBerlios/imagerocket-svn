@@ -262,7 +262,7 @@ void RocketWindow::initGui() {
     connect(a, SIGNAL(triggered()), SLOT(aboutTriggered()));
     mHelp->addAction(a);
     
-    saveSettingsTool = new SaveSettingsTool(this);
+    saveSettingsTool = new RocketSaveSettingsTool(this);
     infoTool = new RocketInfoTool(this);
     
     dPalette = new QDockWidget(this);

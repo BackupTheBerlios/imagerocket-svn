@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
-#include "SaveSettingsTool.h"
+#include "RocketSaveSettingsTool.h"
 #include "RocketInfoTool.h"
 #include "interfaces.h"
 
@@ -23,14 +23,14 @@ SaveSettingsWidget::SaveSettingsWidget() {
     setupUi(this);
 }
 
-bool SaveSettingsTool::previewCheckedByDefault = true;
+bool RocketSaveSettingsTool::previewCheckedByDefault = true;
 
-SaveSettingsTool::SaveSettingsTool(QObject *parent) : QObject(parent) {
+RocketSaveSettingsTool::RocketSaveSettingsTool(QObject *parent) : QObject(parent) {
     updateTimer.setSingleShot(true);
     connect(&updateTimer, SIGNAL(timeout()), SLOT(updatePreview()));
 }
 
-QWidget *SaveSettingsTool::getSettingsToolBar(RocketImage *img) {
+QWidget *RocketSaveSettingsTool::getSettingsToolBar(RocketImage *img) {
     this->img = img;
     widget = new SaveSettingsWidget();
     connect(new QShortcut(QKeySequence("Esc"), widget),
@@ -55,7 +55,7 @@ QWidget *SaveSettingsTool::getSettingsToolBar(RocketImage *img) {
     return widget;
 }
 
-void SaveSettingsTool::setSaveFormat(int format) {
+void RocketSaveSettingsTool::setSaveFormat(int format) {
     widget->sldQuality->setEnabled(format == 0);
     widget->chkProgressiveLoading->setEnabled(format == 0);
     widget->lblQuality->setEnabled(format == 0);
@@ -64,7 +64,7 @@ void SaveSettingsTool::setSaveFormat(int format) {
     updateTimer.start(250);
 }
 
-void SaveSettingsTool::updatePreview() {
+void RocketSaveSettingsTool::updatePreview() {
     if (widget && previewCheckedByDefault) {
         QBuffer buffer;
         img->generateSavedFileInMemory(buffer);
@@ -83,12 +83,12 @@ void SaveSettingsTool::updatePreview() {
     updateTimer.setInterval(750);
 }
 
-void SaveSettingsTool::sendPreviewOff() {
+void RocketSaveSettingsTool::sendPreviewOff() {
     UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
     QCoreApplication::sendEvent(parent(), event);
 }
 
-void SaveSettingsTool::previewToggled(bool value) {
+void RocketSaveSettingsTool::previewToggled(bool value) {
     previewCheckedByDefault = value;
     updatePreview();
 }
