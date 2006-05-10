@@ -24,17 +24,18 @@ Suite 330, Boston, MA 02111-1307 USA */
 */
 
 RocketImage::RocketImage(const QString &fileName) {
-    changes.append(QPixmap());
+    changes.append(InternalImage());
+    changes[0].setLocation(fileName, false);
     descriptions.append(QString());
     index = 0;
     savedIndex = 0;
     saveFormat = 0;
     saveQuality = 85;
     saveProgressive = true;
+    sizeOfSavedFile = -1;
     this->fileName = fileName;
     QFileInfo f(fileName);
     shortName = f.fileName();
-    transparency = false; //variable is only accurate if image is loaded
     QString fileTile(":/pixmaps/smallTransparentTile.png");
     if (!QPixmapCache::find(fileTile, backgroundTile)) {
         backgroundTile = QPixmap(fileTile);
@@ -49,6 +50,16 @@ RocketImage::~RocketImage() {
 
 bool RocketImage::operator<(const RocketImage &img) const {
     return getShortFileName() < img.getShortFileName();
+}
+
+qint64 RocketImage::getSizeOfFileWhenSaved() {
+    if (sizeOfSavedFile == -1) {
+        QBuffer buffer;
+        
+        generateSavedFileInMemory(buffer);
+        sizeOfSavedFile = buffer.size();
+    }
+    return sizeOfSavedFile;
 }
 
 //This is a nasty hack, but it seems to be more accurate than the QFontMetrics functions
@@ -157,7 +168,7 @@ void RocketImage::renderWatermark(QImage *image) {
 
 void RocketImage::addChange(const QPixmap &pix, QString description) {
     ++index;
-    changes.insert(index, pix);
+    changes.insert(index, InternalImage(pix));
     descriptions.insert(index, description);
     if (index < changes.size()-1) {
         changes.remove(index+1, changes.size()-index-1);
@@ -168,19 +179,22 @@ void RocketImage::addChange(const QPixmap &pix, QString description) {
         //since the saved pixmap is lost.
         savedIndex = -1;
     }
-    updateThumbnail();
+    emit changed();
+    sizeOfSavedFile = -1;
 }
 
 void RocketImage::undo() {
     assert(canUndo());
     --index;
-    updateThumbnail();
+    emit changed();
+    sizeOfSavedFile = -1;
 }
 
 void RocketImage::redo() {
     assert(canRedo());
     ++index;
-    updateThumbnail();
+    emit changed();
+    sizeOfSavedFile = -1;
 }
 
 void RocketImage::save(const QString &name) {
@@ -208,6 +222,7 @@ void RocketImage::generateSavedFileInMemory(QBuffer &buffer) {
     } else {
         writer.write(image);
     }
+    sizeOfSavedFile = buffer.size();
 }
 
 bool RocketImage::renameFile(QString fileName) {
@@ -305,27 +320,34 @@ void RocketImage::setActive(bool value) {
     QSettings settings;
     int thumbnailSize = settings.value("thumbnail/size", 64).toInt();
     if (value) {
-        QImage img(fileName);
-        transparency = img.hasAlphaChannel();
-        if (!img.isNull()) {
-            changes[0] = QPixmap::fromImage(img);
-            if (getStatusIconIndex() != 0) {
-                QPixmap thumb(getPixmap().scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio));
+        if (getStatusIconIndex() != 0) {
+            QPixmap pix(getPixmap());
+            if (!pix.isNull()) {
+                QPixmap thumb(pix.scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio));
                 setThumbnailWithBackground(thumb);
+            } else {
+                setThumbnail(Broken);
             }
-        } else {
-            setThumbnail(Broken);
         }
-    } else {
-        changes[0] = QPixmap();
     }
 }
 
+QPixmap RocketImage::getThumbnail() {
+    QPixmap pix(changes[index].getThumbnail());
+    if (pix.isNull()) {
+        updateThumbnail();
+    }
+    return pix;
+}
+
 void RocketImage::updateThumbnail() {
-    QSettings settings;
-    int thumbnailSize = settings.value("thumbnail/size", 64).toInt();
-    QPixmap thumb(getPixmap().scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio));
-    setThumbnailWithBackground(thumb);
+    QPixmap pix(changes[index].getThumbnail());
+    if (pix.isNull()) {
+        QSettings settings;
+        int thumbnailSize = settings.value("thumbnail/size", 64).toInt();
+        QPixmap thumb(getPixmap().scaled(thumbnailSize, thumbnailSize, Qt::KeepAspectRatio));
+        setThumbnailWithBackground(thumb);
+    }
 }
 
 //! This adds a checkered background before sending it to setThumbnail(const QPixmap &).
@@ -339,7 +361,7 @@ void RocketImage::setThumbnailWithBackground(const QPixmap &thumb) {
 }
 
 void RocketImage::setThumbnail(const QPixmap &thumb) {
-    thumbnail = thumb;
+    changes[index].setThumbnail(thumb);
     statusIcon = 0;
     emit changed();
 }
@@ -403,4 +425,104 @@ void RocketImage::setThumbnail(StatusIcon iconType) {
         break;
     }
     statusIcon = iconType;
+}
+
+
+
+QList < InternalImage::SharedImage * > InternalImage::SharedImage::sharedEntries;
+
+InternalImage::InternalImage(const QPixmap &pix) {
+    shared = NULL;
+    attach(new SharedImage());
+    shared->pix = new QPixmap(pix);
+    shared->alpha = shared->pix->hasAlphaChannel();
+    shared->lastAccessed = QDateTime::currentDateTime();
+}
+
+InternalImage::InternalImage(QString location) {
+    shared = NULL;
+    attach(new SharedImage());
+    shared->location = location;
+}
+
+InternalImage::InternalImage() {
+    shared = NULL;
+    attach(new SharedImage());
+}
+InternalImage::InternalImage(const InternalImage &original) {
+    shared = NULL;
+    operator=(original);
+}
+
+InternalImage::InternalImage(SharedImage *original) {
+    shared = NULL;
+    attach(original);
+}
+
+InternalImage &InternalImage::operator=(const InternalImage &original) {
+    attach(original.shared);
+    return *this;
+}
+
+InternalImage::~InternalImage() {
+    detach();
+}
+
+void InternalImage::attach(SharedImage *newData) {
+    detach();
+    shared = newData;
+    if (shared) shared->useCount++;
+}
+
+void InternalImage::detach() {
+    if (shared) {
+        shared->useCount--;
+        if (!shared->useCount) {
+            if (shared->temporaryFile) QFile(shared->location).remove();
+            delete shared;
+        }
+        shared = NULL;
+    }
+}
+
+QPixmap InternalImage::getPixmap(bool &loaded) const {
+    if (!shared->pix) {
+        loaded = true;
+        QImage image(shared->location);
+        shared->alpha = image.hasAlphaChannel();
+        if (!image.isNull()) {
+            shared->pix = new QPixmap(QPixmap::fromImage(image));
+        }
+    } else {
+        loaded = false;
+    }
+    shared->lastAccessed = QDateTime::currentDateTime();
+    return shared->pix ? *shared->pix : QPixmap();
+}
+
+bool InternalImage::freePixmap() {
+    if (shared->pix) {
+        if (!QFile(shared->location).exists()) {
+            shared->pix->toImage().convertToFormat(QImage::Format_ARGB32)
+                    .save(shared->location, "png", 100);
+        }
+        delete shared->pix;
+        shared->pix = NULL;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void InternalImage::setLocation(QString location, bool temporary) {
+    shared->location = location;
+    shared->temporaryFile = temporary;
+}
+
+InternalImage::SharedImage::SharedImage() {
+    sharedEntries.append(this);
+    pix = NULL;
+    useCount = 0;
+    temporaryFile = false;
+    alpha = true;
 }

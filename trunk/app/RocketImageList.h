@@ -29,14 +29,19 @@ protected:
     RocketImage *selection;
     QVector < RocketImage * > list;
     ThreadedImageLoader *generator;
+    QTimer saveToDiskTimer;
+    QDir tempDir, collectionTempDir;
     void continueThumbnailGeneration();
     static bool rocketImageLessThan(RocketImage *one, RocketImage *two);
+    QString generateRandomString(int length = 8);
 public:
     enum ListChangeType {ListReplaced, EntryCreated, EntryDeleted};
+    enum SaveType {ReplaceFiles, NewLocation};
     RocketImageList();
     ~RocketImageList();
     void setLocation(QString location);
     QString getLocation();
+    void saveFiles(SaveType type, QString location);
     void addImages(const QStringList &files);
     int size() {return list.size();}
     const QVector < RocketImage * > *getVector() {return &list;}
@@ -52,6 +57,7 @@ public slots:
 protected slots:
     void removeMeEvent();
     void renamedEvent();
+    void saveToDiskTimeout();
 signals:
     void selectionChanged(RocketImage *oldSelection);
     void listChanged(RocketImageList::ListChangeType type, int index = 0);

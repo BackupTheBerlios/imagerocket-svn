@@ -19,22 +19,23 @@ Suite 330, Boston, MA 02111-1307 USA */
 #define ROCKET_SAVE_DIALOG
 
 #include <QDialog>
+#include "RocketImageList.h"
 #include "ui_savedialog.h"
 
 class RocketSaveDialog : public QDialog, private Ui::RocketSaveDialog {
 Q_OBJECT
 public:
-    
-    enum SaveType {ReplaceFiles, NewLocation};
-    
     RocketSaveDialog(QWidget *parent);
-    SaveType getSaveType() {return replaceFilesRadio->isChecked() ? ReplaceFiles : NewLocation;}
+    RocketImageList::SaveType getSaveType() {
+        if (replaceFilesRadio->isChecked()) {
+            return RocketImageList::ReplaceFiles;
+        } else {
+            return RocketImageList::NewLocation;
+        }
+    }
     QString getSaveLocation() {return directoryEdit->text();}
-    
 protected slots:
-    
     void selectDirButtonClicked();
-    
 };
 
 #endif

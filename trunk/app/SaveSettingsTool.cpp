@@ -16,6 +16,7 @@ program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
 #include "SaveSettingsTool.h"
+#include "RocketInfoTool.h"
 #include "interfaces.h"
 
 SaveSettingsWidget::SaveSettingsWidget() {
@@ -67,14 +68,10 @@ void SaveSettingsTool::updatePreview() {
     if (widget && previewCheckedByDefault) {
         QBuffer buffer;
         img->generateSavedFileInMemory(buffer);
-        QImage i(QImage::fromData(buffer.data()));
-        int size = buffer.size()/1024;
-        int adjusted = int(size * 1.1) + 10;
+        QImage i(QImage::fromData(buffer.data())); 
         widget->lblSize->setText(
-                tr("<html>Image Size: %L1k -- "
-                "Download Time: Dialup %L2 seconds, "
-                "High Speed %L3 seconds</html>")
-                .arg(size).arg(int(adjusted/6)).arg(int(adjusted/64)));
+                tr("<html>Image Size: %1</html>")
+                .arg(RocketInfoTool::getSizeFormattedForDisplay(img->getSizeOfFileWhenSaved())));
         UpdatePreviewToolEvent *event = new UpdatePreviewToolEvent;
         event->pixmap = new QPixmap(QPixmap::fromImage(i));
         QCoreApplication::sendEvent(parent(), event);

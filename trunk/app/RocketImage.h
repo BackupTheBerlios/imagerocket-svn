@@ -21,6 +21,49 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketImageList.h"
 #include <QtGui>
 
+class InternalImage {
+public:
+    static int getImagesInMemoryCount() {return imagesInMemory;}
+    InternalImage();
+    InternalImage(const QPixmap &pix);
+    InternalImage(QString location);
+    InternalImage(const InternalImage &original);
+    class SharedImage;
+    InternalImage(SharedImage *shared);
+    InternalImage &operator=(const InternalImage &original);
+    ~InternalImage();
+    QPixmap getPixmap(bool &loaded) const;
+    QPixmap getPixmap() const {bool loaded = false; return getPixmap(loaded);}
+    void setThumbnail(const QPixmap &pix) {shared->thumbnail = pix;}
+    QPixmap getThumbnail() const {return shared->thumbnail;}
+    bool hasTransparency() const {getPixmap(); return shared->alpha;}
+    bool freePixmap();
+    void setLocation(QString location, bool temporary);
+    QString getLocation() {return shared->location;}
+    bool isTemporary() {return shared->temporaryFile;}
+    void setTemporary(bool temporary) {shared->temporaryFile = temporary;}
+    bool isInMemory() {return bool(shared->pix);}
+    
+    class SharedImage {
+    protected:
+        static QList < SharedImage * > sharedEntries;
+    public:
+        static const QList < SharedImage * > getSharedEntries() {return sharedEntries;}
+        SharedImage();
+        ~SharedImage() {sharedEntries.removeAll(this); delete pix;}
+        QPixmap *pix, thumbnail;
+        bool alpha, temporaryFile;
+        QString location;
+        int useCount;
+        QDateTime lastAccessed;
+    };
+protected:
+    void attach(SharedImage *);
+    void detach();
+    SharedImage *shared;
+    static int imagesInMemory;
+};
+
 class RocketImage : public QObject {
 Q_OBJECT
 public:
@@ -32,7 +75,7 @@ public:
     RocketImage(const QString &fileName);
     ~RocketImage();
     void print(QPrinter *printer, QPainter &p);
-    QPixmap getPixmap() const {return changes[index];}
+    QPixmap getPixmap() const {return changes[index].getPixmap();}
     QString getDescription() const {return descriptions[index];}
     QString getDescriptionOfNext() const {
         return canRedo() ? descriptions[index+1] : QString();
@@ -40,8 +83,8 @@ public:
     int getIndex() const {return index;}
     bool canUndo() const {return index > 0;}
     bool canRedo() const {return index < changes.size()-1;}
-    bool hasTransparency() const {return transparency;}
-    QPixmap getThumbnail() const {return thumbnail;}
+    bool hasTransparency() const {return changes[index].hasTransparency();}
+    QPixmap getThumbnail();
     QString getFileName() const {return fileName;}
     QString getShortFileName() const {return shortName;}
     bool operator<(const RocketImage &img) const;
@@ -52,6 +95,7 @@ public:
     QString getSaveFormatAsText() const {return saveFormat == 0 ? "jpg" : "png";}
     int getSaveQuality() const {return saveQuality;}
     bool isSaveProgressive() const {return saveProgressive;}
+    qint64 getSizeOfFileWhenSaved();
 public slots:
     void undo();
     void redo();
@@ -76,12 +120,11 @@ public slots:
     void setSaveQuality(int value) {saveQuality = value;}
     void setSaveProgressive(bool value) {saveProgressive = value;}
 protected:
-    QPixmap thumbnail;
     QPixmap xIcon, clickToShowIcon, loadingIcon, backgroundTile;
     QString fileName, shortName;
     int statusIcon, savedIndex;
-    bool transparency;
-    QVector < QPixmap > changes;
+    qint64 sizeOfSavedFile;
+    QVector < InternalImage > changes;
     QVector < QString > descriptions;
     int index;
     int saveFormat, saveQuality;

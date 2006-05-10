@@ -20,6 +20,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 #include "PixmapView.h"
 #include "SaveSettingsTool.h"
+#include "RocketInfoTool.h"
 #include "RocketFilePreviewArea.h"
 #include "RocketImageList.h"
 #include "RocketToolBox.h"
@@ -44,6 +45,7 @@ protected:
     QList < QObject * > plugins;
     QSignalMapper pluginShortcutMapper;
     SaveSettingsTool *saveSettingsTool;
+    RocketInfoTool *infoTool;
     QPointer < RocketUpdateChecker > updateChecker;
     QLabel *statusFile, *statusZoom, *statusSize;
     QMenu *mFile, *mEdit, *mView, *mImage, *mHelp;

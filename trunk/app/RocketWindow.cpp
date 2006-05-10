@@ -263,6 +263,7 @@ void RocketWindow::initGui() {
     mHelp->addAction(a);
     
     saveSettingsTool = new SaveSettingsTool(this);
+    infoTool = new RocketInfoTool(this);
     
     dPalette = new QDockWidget(this);
     dPalette->setWindowTitle(tr("Tools"));
@@ -553,7 +554,9 @@ void RocketWindow::indexChanged(RocketImage *oldSelection) {
     }
     setUpdatesEnabled(false);
     bool recheckSettingsButton = false;
-    if (oldSelection != selection) {
+    //RocketInfoWidget is independent of the current selection
+    bool isInfoWidget = toolSettingsToolBar && toolSettingsToolBar->inherits("RocketInfoWidget");
+    if (oldSelection != selection && !isInfoWidget) {
         recheckSettingsButton = fileSettingsButton->isChecked();
         delete toolSettingsToolBar;
     }
@@ -617,28 +620,8 @@ void RocketWindow::saveFolderTriggered() {
 bool RocketWindow::doSaveFolder() {
     RocketSaveDialog dialog(this);
     if (dialog.exec() == QDialog::Accepted) {
-        RocketSaveDialog::SaveType type = dialog.getSaveType();
-        if (type == RocketSaveDialog::ReplaceFiles) {
-            foreach (RocketImage *i, *images.getVector()) {
-                QFileInfo f(i->getShortFileName());
-                if (!i->isSaved()) {
-                    i->save(i->getFileName());
-                }
-            }
-            filePreviewArea->update();
-        } else if (type == RocketSaveDialog::NewLocation) {
-            QString location(dialog.getSaveLocation());
-            QDir location2(location);
-            foreach (RocketImage *i, *images.getVector()) {
-                QFileInfo f(i->getShortFileName());
-                if (!i->isSaved()) {
-                    i->save(location2.filePath(i->getShortFileName()));
-                }
-            }
-            filePreviewArea->update();
-        } else {
-            assert(0);
-        }
+        images.saveFiles(dialog.getSaveType(), dialog.getSaveLocation());
+        filePreviewArea->update();
         return true;
     } else {
         return false;
@@ -699,6 +682,7 @@ void RocketWindow::closeEvent(QCloseEvent *e) {
             e->ignore();
         }
     }
+    deleteLater();
 }
 
 bool RocketWindow::event(QEvent *e) {
@@ -887,6 +871,7 @@ void RocketWindow::useLargeThumbnailsToggled(bool value) {
 
 void RocketWindow::questionClicked(RocketImage *img) {
     statusBar()->showMessage(img->getFileName(), 5000);
+    setToolSettingsToolBar(infoTool->getInfoToolBar(img));
 }
 
 void RocketWindow::toolClicked(QListWidgetItem *item) {
@@ -946,13 +931,11 @@ void RocketWindow::toolSettingsToolBarDestroyed() {
 }
 
 void RocketWindow::aboutTriggered() {
-    RocketAboutDialog about(this);
-    about.exec();
+    RocketAboutDialog(this).exec();
 }
 
 void RocketWindow::optionsTriggered() {
-    RocketOptionsDialog options(this);
-    options.exec();
+    RocketOptionsDialog(this).exec();
 }
 
 void RocketWindow::checkForUpdatesTriggered() {

@@ -20,6 +20,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 #define PROGRAM_NAME "ImageRocket"
 #define VERSION "0.4"
+#define TEMP_DIR "imagerocket"
 #define HOMEPAGE "http://developer.berlios.de/projects/imagerocket"
 
 #endif

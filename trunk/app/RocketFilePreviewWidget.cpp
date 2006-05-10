@@ -21,7 +21,8 @@ Suite 330, Boston, MA 02111-1307 USA */
 namespace RocketFilePreviewWidget {
     QPointer < QMenu > RocketFilePreviewWidget::popupMenu;
     QPixmap *floppyIcon = 0;
-    QMap < int, QPixmap * > trashIcon, trashLitIcon, questionIcon, questionLitIcon;
+    QMap < int, QPixmap * > trashIcon, trashLitIcon,
+            renameIcon, renameLitIcon, questionIcon, questionLitIcon;
 }
 
 const int TBOX_STEPS = 3, SELECT_STEPS = 3;
@@ -42,13 +43,15 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
     if (!popupMenu) {
         //create shared popup menu
         popupMenu = new QMenu(parent);
-        popupMenu->addAction(tr("&Delete"))->setObjectName("delete");
         popupMenu->addAction(tr("&Info"))->setObjectName("info");
+        popupMenu->addAction(tr("&Delete"))->setObjectName("delete");
         popupMenu->addAction(tr("&Rename"))->setObjectName("rename");
         //load images and create shared pixmaps of various opacities for fading
         floppyIcon = new QPixmap(":/pixmaps/floppy.png");
         trashIcon[255] = new QPixmap(":/pixmaps/trash.png");
         trashLitIcon[255] = new QPixmap(":/pixmaps/trashLit.png");
+        renameIcon[255] = new QPixmap(":/pixmaps/rename.png");
+        renameLitIcon[255] = new QPixmap(":/pixmaps/renameLit.png");
         questionIcon[255] = new QPixmap(":/pixmaps/question.png");
         questionLitIcon[255] = new QPixmap(":/pixmaps/questionLit.png");
         for (int a=1;a<TBOX_STEPS;a++) {
@@ -57,6 +60,10 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
                     createAlphaErasedImage(trashIcon[255]->toImage(), alpha)));
             trashLitIcon[alpha] = new QPixmap(QPixmap::fromImage(
                     createAlphaErasedImage(trashLitIcon[255]->toImage(), alpha)));
+            renameIcon[alpha] = new QPixmap(QPixmap::fromImage(
+                    createAlphaErasedImage(renameIcon[255]->toImage(), alpha)));
+            renameLitIcon[alpha] = new QPixmap(QPixmap::fromImage(
+                    createAlphaErasedImage(renameLitIcon[255]->toImage(), alpha)));
             questionIcon[alpha] = new QPixmap(QPixmap::fromImage(
                     createAlphaErasedImage(questionIcon[255]->toImage(), alpha)));
             questionLitIcon[alpha] = new QPixmap(QPixmap::fromImage(
@@ -146,7 +153,8 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
     }
     
     QRect trash(buttonRect(1, LeftToRight, *trashIcon[255]));
-    QRect question(buttonRect(2, LeftToRight, *questionIcon[255]));
+    QRect rename(buttonRect(2, LeftToRight, *renameIcon[255]));
+    QRect question(buttonRect(3, LeftToRight, *questionIcon[255]));
     if (onWidget || toolboxFading) {
         int toolboxAlpha = 192/TBOX_STEPS * toolboxFading;
         int buttonAlpha = (toolboxFading != TBOX_STEPS)
@@ -161,6 +169,8 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         foreach (QRect r, rgn.rects()) p.drawRect(r);
         p.drawPixmap(trash.x(), trash.y(),
                 onTrash ? *trashLitIcon[buttonAlpha] : *trashIcon[buttonAlpha]);
+        p.drawPixmap(rename.x(), rename.y(),
+                onRename ? *renameLitIcon[buttonAlpha] : *renameIcon[buttonAlpha]);
         p.drawPixmap(question.x(), question.y(),
                 onQuestion ? *questionLitIcon[buttonAlpha] : *questionIcon[buttonAlpha]);
     }
@@ -220,7 +230,11 @@ void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
     if (onTrash) {
         setToolTip(tr("Delete"));
     }
-    onQuestion = showRollover && positionOnButton(event->pos(), 2, LeftToRight, *questionIcon[255]);
+    onRename = showRollover && positionOnButton(event->pos(), 2, LeftToRight, *renameIcon[255]);
+    if (onRename) {
+        setToolTip(tr("Rename"));
+    }
+    onQuestion = showRollover && positionOnButton(event->pos(), 3, LeftToRight, *questionIcon[255]);
     if (onQuestion) {
         setToolTip(tr("Info"));
     }
@@ -228,7 +242,7 @@ void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
     if (onChanged && !img->isSaved()) {
         setToolTip(tr("Changes Made"));
     }
-    if (!onQuestion && !onTrash && !onChanged && !toolTip().isEmpty()) {
+    if (!onQuestion && !onRename && !onTrash && !onChanged && !toolTip().isEmpty()) {
         setToolTip(QString());
         //hack which seems to destroy widget's tooltips
         QToolTip::showText(QPoint(), QString(), this);
@@ -249,11 +263,8 @@ void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
     update();
 }
 
-void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
-    bool showRollover = QSettings().value("ui/showRollover").toBool();
-    bool leftClick = event->button() == Qt::LeftButton;
-    if (showRollover && positionOnButton(event->pos(), 1, LeftToRight, *trashIcon[255])
-                && leftClick) {
+void RocketFilePreviewWidget::doAction(int action) {
+    if (action == 1) {
         int response = QMessageBox::Yes;
         QSettings settings;
         if (settings.value("ui/askBeforeDeleting").toBool()) {
@@ -265,9 +276,43 @@ void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
             return;
         }
         QTimer::singleShot(0, img, SLOT(guiDeleteFile()));
-    } else if (showRollover && positionOnButton(event->pos(), 2, LeftToRight, *questionIcon[255])
-                && leftClick) {
+    } else if (action == 2) {
+        renameWidget = new RocketFileRenameEdit(this);
+        connect(renameWidget, SIGNAL(destroyed()), SLOT(mouseLeft()));
+        connect(renameWidget, SIGNAL(focusLost()), SLOT(renameFinishedEvent()),
+                Qt::QueuedConnection);
+        connect(renameWidget, SIGNAL(returnPressed()), SLOT(renameFinishedEvent()),
+                Qt::QueuedConnection);
+        connect(renameWidget, SIGNAL(canceled()), SLOT(renameCanceledEvent()));
+        renameWidget->setText(img->getShortFileName());
+        int index = img->getShortFileName().indexOf(".");
+        if (index > 0) {
+            renameWidget->setSelection(0, index);
+        } else {
+            renameWidget->selectAll();
+        }
+        QSize hint = renameWidget->sizeHint();
+        renameWidget->setGeometry(0, height()-hint.height(), width(), hint.height());
+        renameWidget->show();
+        renameWidget->setFocus(Qt::OtherFocusReason);
+        update();
+    } else if (action == 3) {
         emit questionClicked(img);
+    }
+}
+
+void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
+    bool showRollover = QSettings().value("ui/showRollover").toBool();
+    bool leftClick = event->button() == Qt::LeftButton;
+    if (showRollover && positionOnButton(event->pos(), 1, LeftToRight, *trashIcon[255])
+                && leftClick) {
+        doAction(1);
+    } else if (showRollover && positionOnButton(event->pos(), 2, LeftToRight, *renameIcon[255])
+                && leftClick) {
+        doAction(2);
+    } else if (showRollover && positionOnButton(event->pos(), 3, LeftToRight, *questionIcon[255])
+                && leftClick) {
+        doAction(3);
     } else if (leftClick && !active) {
         emit clicked(img);
     } else if (event->button() == Qt::RightButton) {
@@ -325,38 +370,11 @@ QRect RocketFilePreviewWidget::buttonRect(int num, Direction d, const QPixmap &p
 
 void RocketFilePreviewWidget::popupTriggered(QAction *action) {
     if (action->objectName() == "delete") {
-        int response = QMessageBox::Yes;
-        QSettings settings;
-        if (settings.value("ui/askBeforeDeleting").toBool()) {
-            response = QMessageBox::question(this, img->getFileName(),
-                    tr("Are you sure you want to delete %1?").arg(img->getFileName()),
-                    QMessageBox::Yes, QMessageBox::No);
-        }
-        if (response == QMessageBox::No) {
-            return;
-        }
-        QTimer::singleShot(0, img, SLOT(guiDeleteFile()));
-    } else if (action->objectName() == "info") {
-        emit questionClicked(img);
+        doAction(1);
     } else if (action->objectName() == "rename") {
-        renameWidget = new RocketFileRenameEdit(this);
-        connect(renameWidget, SIGNAL(focusLost()), SLOT(renameFinishedEvent()),
-                Qt::QueuedConnection);
-        connect(renameWidget, SIGNAL(returnPressed()), SLOT(renameFinishedEvent()),
-                Qt::QueuedConnection);
-        connect(renameWidget, SIGNAL(canceled()), SLOT(renameCanceledEvent()));
-        renameWidget->setText(img->getShortFileName());
-        int index = img->getShortFileName().indexOf(".");
-        if (index > 0) {
-            renameWidget->setSelection(0, index);
-        } else {
-            renameWidget->selectAll();
-        }
-        QSize hint = renameWidget->sizeHint();
-        renameWidget->setGeometry(0, height()-hint.height(), width(), hint.height());
-        renameWidget->show();
-        renameWidget->setFocus(Qt::OtherFocusReason);
-        update();
+        doAction(2);
+    } else if (action->objectName() == "info") {
+        doAction(3);
     }
 }
 
@@ -387,6 +405,32 @@ QSize RocketFilePreviewWidget::sizeHint() {
 }
 
 RocketFileRenameEdit::RocketFileRenameEdit(QWidget *parent) : QLineEdit(parent) {
+}
+
+void RocketFileRenameEdit::focusInEvent(QFocusEvent *event) {
+    grabMouse();
+    QLineEdit::focusInEvent(event);
+}
+
+void RocketFileRenameEdit::mousePressEvent(QMouseEvent *event) {
+    int x = event->x(), y = event->y();
+    if (x >= 0 && x < width() && y >= 0 && y < height()) {
+        QLineEdit::mousePressEvent(event);
+    } else {
+        releaseMouse();
+        deleteLater();
+    }
+}
+
+void RocketFileRenameEdit::mouseMoveEvent(QMouseEvent *event) {
+    static QCursor oldCursor = cursor();
+    int x = event->x(), y = event->y();
+    if (x >= 0 && x < width() && y >= 0 && y < height()) {
+        QLineEdit::mouseMoveEvent(event);
+        setCursor(oldCursor);
+    } else {
+        setCursor(Qt::ArrowCursor);
+    }
 }
 
 void RocketFileRenameEdit::keyPressEvent(QKeyEvent *event) {

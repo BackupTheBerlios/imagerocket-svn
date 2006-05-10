@@ -26,7 +26,8 @@ class RocketFileRenameEdit;
 class RocketFilePreviewWidget : public QWidget {
 Q_OBJECT
 protected:
-    static QMap < int, QPixmap * > trashIcon, trashLitIcon, questionIcon, questionLitIcon;
+    static QMap < int, QPixmap * > trashIcon, trashLitIcon,
+            renameIcon, renameLitIcon, questionIcon, questionLitIcon;
     static QPixmap *floppyIcon;
     static QPointer < QMenu > popupMenu;
     QFont font;
@@ -34,7 +35,7 @@ protected:
     QPointer < RocketFileRenameEdit > renameWidget;
     QPoint lastDrawnPosition;
     int thumbnailSize;
-    bool onTrash, onQuestion, onWidget;
+    bool onTrash, onRename, onQuestion, onWidget;
     int toolboxFading;
     bool active, usingHorizontalLayout;
     int activeFading;
@@ -45,6 +46,7 @@ protected:
     void leaveEvent(QEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
+    void doAction(int action);
     bool positionOnButton(QPoint p, int num, Direction d, const QPixmap &pixmap);
     QRect buttonRect(int num, Direction d, const QPixmap &pixmap);
     QImage createAlphaErasedImage(const QImage &img, int alpha);
@@ -68,6 +70,7 @@ protected slots:
     void fadeEvent();
     void renameFinishedEvent();
     void renameCanceledEvent();
+    void mouseLeft() {leaveEvent(NULL);}
 public slots:
     void updatePreview();
 signals:
@@ -82,8 +85,11 @@ Q_OBJECT
 public:
     RocketFileRenameEdit(QWidget *parent = NULL);
 protected:
+    void focusInEvent(QFocusEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void focusOutEvent(QFocusEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
 signals:
     void canceled();
     void focusLost();

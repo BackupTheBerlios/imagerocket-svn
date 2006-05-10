@@ -17,6 +17,9 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 #include "RocketImageList.h"
 #include "RocketImage.h"
+#include "consts.h"
+#include <cstdlib>
+#include <ctime>
 
 /*!
   \class RocketImageList
@@ -27,9 +30,22 @@ Suite 330, Boston, MA 02111-1307 USA */
 RocketImageList::RocketImageList() {
     selection = NULL;
     generator = new ThreadedImageLoader();
+    srand(unsigned(time(NULL)));
     qRegisterMetaType<QImage>("QImage");
+    connect(&saveToDiskTimer, SIGNAL(timeout()), SLOT(saveToDiskTimeout()));
+    saveToDiskTimer.start(5000);
     connect(generator, SIGNAL(imageLoaded(const QString, const QImage)),
             this, SLOT(updateThumbnail(const QString, const QImage)));
+    QDir temp = QDir::temp();
+    if (!temp.exists(TEMP_DIR)) {
+        bool tempDirCreated = temp.mkdir(TEMP_DIR);
+        if (!tempDirCreated) {
+            QMessageBox::warning(NULL, tr("ImageRocket"),
+                    tr("Temporary folder \"%1\" could not be created.\nThis may cause problems.")
+                    .arg(temp.filePath(TEMP_DIR)));
+        }
+    }
+    if (QDir(temp.filePath(TEMP_DIR)).exists()) tempDir = temp.filePath(TEMP_DIR);
 }
 
 RocketImageList::~RocketImageList() {
@@ -37,6 +53,8 @@ RocketImageList::~RocketImageList() {
     foreach (RocketImage *i, list) {
         delete i;
     }
+    if (collectionTempDir.exists()) tempDir.rmdir(collectionTempDir.dirName());
+    if (tempDir.exists()) QDir::temp().rmdir(TEMP_DIR);
 }
 
 void RocketImageList::refreshImages() {
@@ -47,22 +65,28 @@ void RocketImageList::refreshImages() {
 }
 
 void RocketImageList::setLocation(QString location) {
-    QStringList imageNameFilters;
-    foreach (QByteArray format, QImageReader::supportedImageFormats()) {
-        imageNameFilters.append(QString("*.") + QString(format).toLower());
-    }
     QDir dir(location);
+    if (collectionTempDir.exists()) tempDir.rmdir(collectionTempDir.dirName());
     if (!dir.exists()) {
         RocketImageList::location = QString();
         return;
     }
     RocketImageList::location = location;
-    QStringList files = dir.entryList(
-            imageNameFilters, QDir::Files|QDir::Readable, QDir::Name);
+    QString dirName = generateRandomString();
+    tempDir.mkdir(dirName);
+    collectionTempDir = tempDir.filePath(dirName);
+    
     foreach (RocketImage *i, list) {
         delete i;
     }
     list.clear();
+    
+    QStringList imageNameFilters;
+    foreach (QByteArray format, QImageReader::supportedImageFormats()) {
+        imageNameFilters.append(QString("*.") + QString(format).toLower());
+    }
+    QStringList files = dir.entryList(
+            imageNameFilters, QDir::Files|QDir::Readable, QDir::Name);
     QVector < RocketImage * > tmp;
     foreach (QString s, files) {
         RocketImage *i = new RocketImage(dir.filePath(s));
@@ -76,6 +100,27 @@ void RocketImageList::setLocation(QString location) {
     if (selection) emit selectionChanged(NULL); //now the signal can be emited
     
     continueThumbnailGeneration();
+}
+
+void RocketImageList::saveFiles(SaveType type, QString location) {
+    if (type == ReplaceFiles) {
+        foreach (RocketImage *i, *getVector()) {
+            QFileInfo f(i->getShortFileName());
+            if (!i->isSaved()) {
+                i->save(i->getFileName());
+            }
+        }
+    } else if (type == NewLocation) {
+        QDir locationDir(location);
+        foreach (RocketImage *i, *getVector()) {
+            QFileInfo f(i->getShortFileName());
+            if (!i->isSaved()) {
+                i->save(locationDir.filePath(i->getShortFileName()));
+            }
+        }
+    } else {
+        assert(0);
+    }
 }
 
 void RocketImageList::addImages(const QStringList &files) {
@@ -182,4 +227,45 @@ void RocketImageList::renamedEvent() {
     RocketImage *img = dynamic_cast < RocketImage * >(sender());
     qSort(list.begin(), list.end(), &rocketImageLessThan);
     emit listChanged(ListReplaced);
+}
+
+void RocketImageList::saveToDiskTimeout() {
+    QMap < QDateTime, InternalImage::SharedImage * > map;
+    foreach (InternalImage::SharedImage *s, InternalImage::SharedImage::getSharedEntries()) {
+        if (s->location.isNull()) {
+            InternalImage internal(s);
+            QString fileName = generateRandomString();
+            internal.setLocation(collectionTempDir.filePath(fileName + ".png"), true);
+            qDebug(s->location.toAscii());
+        }
+        if (!s->lastAccessed.isNull() && s->pix) map[s->lastAccessed] = s;
+    }
+    QList < QDateTime > keys(map.keys()), inverse;
+    foreach (QDateTime dt, keys) {
+        inverse.prepend(dt);
+    }
+    if (inverse.size() > 6) {
+        for (int a=6;a<inverse.size();++a) {
+            if (!map[inverse[a]]->location.isNull()) {
+                InternalImage internal(map[inverse[a]]);
+                internal.freePixmap();
+                qDebug((QString("Freed ")+internal.getLocation()).toAscii());
+            }
+        }
+    }
+}
+
+//This generates an alphanumeric random string.
+QString RocketImageList::generateRandomString(int length) {
+    QString str;
+    for (int a=0;a<length;++a) {
+        int r = rand() % 36;
+        if (r < 10) {
+            r += 48;
+        } else {
+            r += 87;
+        }
+        str += QChar(char(r));
+    }
+    return str;
 }
