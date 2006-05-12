@@ -49,7 +49,7 @@ protected:
     QPointer < RocketUpdateChecker > updateChecker;
     QLabel *statusFile, *statusZoom, *statusSize;
     QMenu *mFile, *mEdit, *mView, *mImage, *mHelp;
-    QAction *aOpenFolder, *aSaveFolder, *aAddImages, *aPrint, *aExit;
+    QAction *aOpenFolder, *aSaveFolder, *aAddImages, *aUploadToServer, *aPrint, *aExit;
     QAction *aFirst, *aBack, *aForward, *aLast;
     QAction *aUseLargeThumbnails;
     QAction *aZoomOut, *aZoom100, *aZoomIn, *aZoomFit;
@@ -86,6 +86,7 @@ protected slots:
     void saveFolderTriggered();
     void addImagesTriggered();
     void printTriggered();
+    void uploadToServerTriggered();
     void exitTriggered();
     
     void firstTriggered();

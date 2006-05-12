@@ -123,6 +123,13 @@ void RocketImageList::saveFiles(SaveType type, QString location) {
     }
 }
 
+bool RocketImageList::isModified() {
+    foreach (RocketImage *i, list) {
+        if (!i->isSaved()) return true;
+    }
+    return false;
+}
+
 void RocketImageList::addImages(const QStringList &files) {
     bool wasEmpty = list.isEmpty();
     foreach (QString s, files) {

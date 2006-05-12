@@ -19,6 +19,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketImage.h"
 #include "RocketAboutDialog.h"
 #include "RocketOptionsDialog.h"
+#include "RocketFtpDialog.h"
 #include "RocketSaveDialog.h"
 #include "RocketFilePreviewWidget.h"
 #include "ProgramStarter.h"
@@ -133,6 +134,11 @@ void RocketWindow::initGui() {
     a = aAddImages = new QAction(tr("&Add Images..."), this);
     a->setShortcut(QKeySequence(tr("Ctrl+A", "add images")));
     connect(a, SIGNAL(triggered()), SLOT(addImagesTriggered()));
+    mFile->addAction(a);
+    mFile->addSeparator();
+    a = aUploadToServer = new QAction(tr("&Upload to Server..."), this);
+    a->setShortcut(QKeySequence(tr("Ctrl+U", "upload to server")));
+    connect(a, SIGNAL(triggered()), SLOT(uploadToServerTriggered()));
     mFile->addAction(a);
     mFile->addSeparator();
     a = aPrint = new QAction(QIcon(":/pixmaps/print.png"), tr("&Print..."), this);
@@ -510,6 +516,7 @@ void RocketWindow::updateGui() {
     aSaveFolder->setEnabled(images.size());
     aAddImages->setEnabled(!images.getLocation().isNull());
     aPrint->setEnabled(images.size());
+    aUploadToServer->setEnabled(images.size());
     toolbox->setEnabled(notNull);
     fileSettingsButton->setEnabled(notNull);
     if (notNull) {
@@ -628,12 +635,28 @@ bool RocketWindow::doSaveFolder() {
     }
 }
 
+void RocketWindow::uploadToServerTriggered() {
+    if (images.isModified()) {
+        int returned = QMessageBox::question(this,
+                tr("Save Images?"),
+                tr("Do you want to save the changed images before continuing?"),
+                QMessageBox::Yes|QMessageBox::Default,
+                QMessageBox::No|QMessageBox::Escape);
+        if (returned == QMessageBox::Yes) {
+            bool returned = doSaveFolder();
+            if (!returned) return;
+        }
+    }
+    RocketFtpDialog dialog(&images, this);
+    dialog.exec();
+}
+
 void RocketWindow::printTriggered() {
     //TODO This needs to be tested on a real printer, not just print-to-file. -- WJC
     QPrinter printer(QPrinter::HighResolution);
     printer.setCreator(tr("%1 %2", "programName version").arg(PROGRAM_NAME).arg(VERSION));
     QPrintDialog dialog(&printer, this);
-    dialog.setWindowTitle(tr("Print..."));
+    dialog.setWindowTitle(tr("Print"));
     dialog.setEnabledOptions(QAbstractPrintDialog::PrintToFile
             |QAbstractPrintDialog::PrintSelection
             |QAbstractPrintDialog::PrintPageRange);
@@ -659,14 +682,7 @@ void RocketWindow::printTriggered() {
 }
 
 void RocketWindow::closeEvent(QCloseEvent *e) {
-    bool changed = false;
-    foreach (RocketImage *i, *images.getVector()) {
-        if (!i->isSaved()) {
-            changed = true;
-            break;
-        }
-    }
-    if (changed) {
+    if (images.isModified()) {
         int returned = QMessageBox::question(this,
                 tr("Save Images?"),
                 tr("Do you want to save the changed images?"),
@@ -870,7 +886,6 @@ void RocketWindow::useLargeThumbnailsToggled(bool value) {
 }
 
 void RocketWindow::questionClicked(RocketImage *img) {
-    statusBar()->showMessage(img->getFileName(), 5000);
     setToolSettingsToolBar(infoTool->getInfoToolBar(img));
 }
 

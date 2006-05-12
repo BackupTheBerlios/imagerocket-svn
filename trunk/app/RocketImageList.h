@@ -44,6 +44,7 @@ public:
     void saveFiles(SaveType type, QString location);
     void addImages(const QStringList &files);
     int size() {return list.size();}
+    bool isModified();
     const QVector < RocketImage * > *getVector() {return &list;}
     RocketImage *first() {return list.size() ? list.first() : NULL;}
     RocketImage *previous(RocketImage *index);
