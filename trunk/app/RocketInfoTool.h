@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005-2006 Wesley Crossman
+Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -15,35 +15,28 @@ You should have received a copy of the GNU General Public License along with thi
 program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
-#ifndef ROCKET_FTP_DIALOG
-#define ROCKET_FTP_DIALOG
+#ifndef ROCKET_INFO_TOOL_H
+#define ROCKET_INFO_TOOL_H
 
-#include <QDialog>
-#include "ui_ftpdialog.h"
-#include <QFtp>
+#include <QWidget>
+#include "RocketImage.h"
+#include "ui_infotool.h"
 
-class RocketImageList;
-
-class RocketFtpDialog : public QDialog, private Ui::FtpDialog {
+class RocketInfoWidget : public QWidget, public Ui::RocketInfoTool {
 Q_OBJECT
-protected:
-    RocketImageList *images;
-    QStatusBar *statusBar;
-    QProgressBar *progressBar;
-    QLabel *statusLabel;
-    QPointer < QFtp > ftp;
-    QMap < int, QString > ftpCommands;
-    void deleteFtp();
-protected slots:
-    void uploadClicked();
-    void browseClicked();
-    void closeClicked();
-    void stateChanged(int);
-    void commandStarted(int);
-    void commandFinished(int, bool);
 public:
-    RocketFtpDialog(RocketImageList *list, QWidget *parent);
-    ~RocketFtpDialog();
+    RocketInfoWidget();
+};
+
+class RocketInfoTool : public QObject {
+Q_OBJECT
+public:
+    static QString getSizeFormattedForDisplay(int bits);
+    RocketInfoTool(QObject *parent = NULL);
+    QWidget *getInfoToolBar(RocketImage *img);
+protected:
+    RocketImage *img;
+    QPointer < RocketInfoWidget > widget;
 };
 
 #endif

@@ -1,4 +1,5 @@
 #include "RocketFtpDialog.h"
+#include "RocketFtpBrowserDialog.h"
 #include "RocketImageList.h"
 #include "RocketImage.h"
 
@@ -20,12 +21,13 @@ RocketFtpDialog::RocketFtpDialog(RocketImageList *list, QWidget *parent) : QDial
     layout()->addWidget(statusBar);
     connect(btnUpload, SIGNAL(clicked()), SLOT(uploadClicked()));
     connect(btnClose, SIGNAL(clicked()), SLOT(closeClicked()));
+    connect(btnBrowse, SIGNAL(clicked()), SLOT(browseClicked()));
     linPort->setValidator(new QIntValidator(0, 65535, linPort));
     
     QSettings settings;
     settings.beginGroup("ftp");
     linAddress->setText(settings.value("address", "").toString());
-    linPort->setText(settings.value("port", "22").toString());
+    linPort->setText(settings.value("port", "21").toString());
     linUsername->setText(settings.value("username", "").toString());
     linPassword->setText(settings.value("password", "").toString());
     linLocation->setText(settings.value("location", "").toString());
@@ -59,7 +61,7 @@ void RocketFtpDialog::uploadClicked() {
         connect(ftp, SIGNAL(commandFinished(int, bool)),
                 SLOT(commandFinished(int, bool)));
     }
-    ftp->connectToHost(linAddress->text());
+    ftp->connectToHost(linAddress->text(), linPort->text().toInt());
     ftp->login(linUsername->text(), linPassword->text());
     if (!linLocation->text().isEmpty()) ftp->cd(linLocation->text());
     foreach (RocketImage *i, *images->getVector()) {
@@ -68,6 +70,12 @@ void RocketFtpDialog::uploadClicked() {
     }
     progressBar->setMaximum(images->getVector()->size());
     ftp->close();
+}
+
+void RocketFtpDialog::browseClicked() {
+    RocketFtpBrowserDialog dialog(linAddress->text(), linPort->text().toInt(),
+            linUsername->text(), linPassword->text(), linLocation->text(), images, this);
+    dialog.exec();
 }
 
 void RocketFtpDialog::closeClicked() {

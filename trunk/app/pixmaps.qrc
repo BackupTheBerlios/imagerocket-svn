@@ -16,6 +16,13 @@
 <file>pixmaps/last.png</file>
 <file>pixmaps/back.png</file>
 <file>pixmaps/forward.png</file>
+<file>pixmaps/up.png</file>
+<file>pixmaps/remove.png</file>
+<file>pixmaps/refresh.png</file>
+<file>pixmaps/statusStopped.png</file>
+<file>pixmaps/statusSpinning.mng</file>
+<file>pixmaps/folder-16.png</file>
+<file>pixmaps/file-16.png</file>
 <file>pixmaps/trash.png</file>
 <file>pixmaps/trashLit.png</file>
 <file>pixmaps/rename.png</file>

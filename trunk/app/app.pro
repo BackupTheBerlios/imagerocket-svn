@@ -15,8 +15,10 @@ HEADERS =   RocketWindow.h \
             RocketInfoTool.h \
             RocketSaveSettingsTool.h \
             RocketFtpDialog.h \
+            RocketFtpBrowserDialog.h \
             ProgramStarter.h \
             ThreadedImageLoader.h \
+            FtpBrowserModel.h \
             interfaces.h \
             consts.h \
             ImageTools.h
@@ -34,8 +36,10 @@ SOURCES =   main.cpp \
             RocketInfoTool.cpp \
             RocketSaveSettingsTool.cpp \
             RocketFtpDialog.cpp \
+            RocketFtpBrowserDialog.cpp \
             ProgramStarter.cpp \
-            ThreadedImageLoader.cpp
+            ThreadedImageLoader.cpp \
+            FtpBrowserModel.cpp
 
 FORMS =     aboutdialog.ui \
             optionsdialog.ui \
@@ -43,7 +47,8 @@ FORMS =     aboutdialog.ui \
             updatedialog.ui \
             infotool.ui \
             savesettingstool.ui \
-            ftpdialog.ui
+            ftpdialog.ui \
+            ftpbrowserdialog.ui
 RESOURCES = pixmaps.qrc app.qrc
 INCLUDEPATH += ../lua ../pixmapview .
 MOC_DIR = tmp
