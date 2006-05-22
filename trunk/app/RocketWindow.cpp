@@ -96,17 +96,18 @@ void RocketWindow::initGui() {
          rect.height()/2 - frameGeometry().height()/2);
     
     QStatusBar *status = new QStatusBar(this);
+    statusIndex = new QLabel(status);
+    statusIndex->setMargin(1);
+    status->addWidget(statusIndex, 10);
     statusFile = new QLabel(status);
     statusFile->setMargin(1);
-    statusFile->setSizePolicy(
-            QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-    status->addWidget(statusFile);
+    status->addWidget(statusFile, 100);
     statusZoom = new QLabel(status);
     statusZoom->setMargin(1);
+    status->addWidget(statusZoom, 9);
     statusSize = new QLabel(status);
     statusSize->setMargin(1);
-    status->addWidget(statusZoom);
-    status->addWidget(statusSize);
+    status->addWidget(statusSize, 14);
     setStatusBar(status);
     
     QToolBar *mainToolBar = addToolBar(tr("Main Toolbar"));
@@ -519,6 +520,14 @@ void RocketWindow::updateGui() {
     aUploadToServer->setEnabled(images.size());
     toolbox->setEnabled(notNull);
     fileSettingsButton->setEnabled(notNull);
+    if (images.size()) {
+        QString s = tr("%1 of %2", "index in images")
+                .arg(images.getVector()->indexOf(selection)+1)
+                .arg(images.size());
+        statusIndex->setText(s);
+        QFileInfo f(selection->getFileName());
+        statusFile->setText(f.fileName());
+    }
     if (notNull) {
         statusZoom->setText(tr("%L1%", "zoom percentage (%L1 is the number)")
                 .arg(view->getZoom()*100.0, 0, 'f', 1));
@@ -526,12 +535,9 @@ void RocketWindow::updateGui() {
         QString s = tr("%L1 x %L2", "image dimensions")
                 .arg(size.width()).arg(size.height());
         statusSize->setText(s);
-        QFileInfo f(selection->getFileName());
-        statusFile->setText(f.fileName());
-    } else {
-        statusFile->setText("");
     }
     statusBar()->clearMessage();
+    statusIndex->setVisible(images.size());
     statusFile->setVisible(images.size());
     statusZoom->setVisible(notNull);
     statusSize->setVisible(notNull);

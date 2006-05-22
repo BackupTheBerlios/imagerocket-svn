@@ -47,7 +47,7 @@ protected:
     RocketSaveSettingsTool *saveSettingsTool;
     RocketInfoTool *infoTool;
     QPointer < RocketUpdateChecker > updateChecker;
-    QLabel *statusFile, *statusZoom, *statusSize;
+    QLabel *statusFile, *statusIndex, *statusZoom, *statusSize;
     QMenu *mFile, *mEdit, *mView, *mImage, *mHelp;
     QAction *aOpenFolder, *aSaveFolder, *aAddImages, *aUploadToServer, *aPrint, *aExit;
     QAction *aFirst, *aBack, *aForward, *aLast;

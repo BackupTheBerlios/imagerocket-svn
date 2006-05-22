@@ -243,7 +243,7 @@ void RocketImageList::saveToDiskTimeout() {
             InternalImage internal(s);
             QString fileName = generateRandomString();
             internal.setLocation(collectionTempDir.filePath(fileName + ".png"), true);
-            qDebug(s->location.toAscii());
+            qDebug() << s->location;
         }
         if (!s->lastAccessed.isNull() && s->pix) map[s->lastAccessed] = s;
     }
@@ -251,13 +251,17 @@ void RocketImageList::saveToDiskTimeout() {
     foreach (QDateTime dt, keys) {
         inverse.prepend(dt);
     }
-    if (inverse.size() > 6) {
-        for (int a=6;a<inverse.size();++a) {
-            if (!map[inverse[a]]->location.isNull()) {
-                InternalImage internal(map[inverse[a]]);
-                internal.freePixmap();
-                qDebug((QString("Freed ")+internal.getLocation()).toAscii());
-            }
+    QSettings settings;
+    int ramForImages = settings.value("image/ramForImages").toInt()*1024;
+    int ramUsed = 0;
+    for (int a=0;a<inverse.size();++a) {
+        QSize s = map[inverse[a]]->pix->size();
+        //This program is for editing photos, so 4 bytes per pixel should be close enough. - WJC
+        ramUsed += s.width()*s.height()*4/1024;
+        if (a > 0 && ramUsed > ramForImages) {
+            InternalImage internal(map[inverse[a]]);
+            internal.freePixmap();
+            qDebug() << "Freed " << internal.getLocation();
         }
     }
 }

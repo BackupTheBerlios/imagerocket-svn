@@ -43,6 +43,7 @@ RocketOptionsDialog::RocketOptionsDialog(QWidget *parent) : QDialog(parent) {
     chkShowRollover->setChecked(settings.value("showRollover").toBool());
     chkCenterOnSelection->setChecked(settings.value("centerOnSelection").toBool());
     settings.endGroup();
+    spnRamForImages->setValue(settings.value("image/ramForImages").toInt());
     settings.beginGroup("watermark");
     //I don't know why changing the radio buttons requires a single-shot timer. - WJC
     if (settings.value("selected").toString() == "text") {
@@ -88,6 +89,7 @@ void RocketOptionsDialog::okClicked() {
     settings.setValue("showRollover", chkShowRollover->isChecked());
     settings.setValue("centerOnSelection", chkCenterOnSelection->isChecked());
     settings.endGroup();
+    settings.setValue("image/ramForImages", spnRamForImages->value());
     settings.beginGroup("watermark");
     settings.setValue("on", chkAddWatermark->isChecked());
     settings.setValue("position", positionGroup.id(positionGroup.checkedButton()));

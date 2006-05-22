@@ -17,7 +17,7 @@ RocketFtpDialog::RocketFtpDialog(RocketImageList *list, QWidget *parent) : QDial
     statusLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
     progressBar->layout()->addItem(new QSpacerItem(5, 5));
     progressBar->layout()->addWidget(statusLabel);
-    statusBar->addWidget(progressBar, 32767);
+    statusBar->addWidget(progressBar, 1);
     layout()->addWidget(statusBar);
     connect(btnUpload, SIGNAL(clicked()), SLOT(uploadClicked()));
     connect(btnClose, SIGNAL(clicked()), SLOT(closeClicked()));
