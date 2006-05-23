@@ -704,6 +704,7 @@ void RocketWindow::closeEvent(QCloseEvent *e) {
             e->ignore();
         }
     }
+    if (e->isAccepted()) deleteLater();
 }
 
 bool RocketWindow::event(QEvent *e) {
