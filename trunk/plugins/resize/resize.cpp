@@ -31,7 +31,8 @@ void Resize::init(QString &fileName, QObject *parent) {
 QImage *Resize::activate(QPixmap *pix) {
     ResizeWidget *w = settingsToolBar;
     QPixmap tmp(pix->scaled(settingsToolBar->spnPixWidth->value(),
-            settingsToolBar->spnPixHeight->value()));
+            settingsToolBar->spnPixHeight->value(), Qt::IgnoreAspectRatio,
+            Qt::SmoothTransformation));
     return new QImage(tmp.toImage());
 }
 
