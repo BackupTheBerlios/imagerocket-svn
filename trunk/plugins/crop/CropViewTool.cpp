@@ -161,7 +161,7 @@ void CropViewTool::mouseMoveEvent(QMouseEvent *e) {
         //} else if (s.contains(e->pos())) {
         //    parentView->viewport()->setCursor(QCursor(Qt::SizeAllCursor));
         } else {
-            parentView->viewport()->setCursor(QCursor());
+            parentView->viewport()->unsetCursor();
         }
     }
 }

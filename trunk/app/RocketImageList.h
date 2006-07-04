@@ -54,6 +54,7 @@ public:
     void refreshImages();
 public slots:
     void setSelection(RocketImage *index);
+    void addScannedFile(const QPixmap &pixmap);
     void updateThumbnail(const QString fileName, const QImage thumbnail);
 protected slots:
     void removeMeEvent();

@@ -51,6 +51,9 @@ FORMS =     aboutdialog.ui \
             ftpbrowserdialog.ui
 RESOURCES = pixmaps.qrc app.qrc
 INCLUDEPATH += ../lua ../pixmapview .
+unix {
+    INCLUDEPATH += ../kscan
+}
 MOC_DIR = tmp
 OBJECTS_DIR = tmp
 UI_DIR = tmp
@@ -59,5 +62,5 @@ CONFIG += warn_on precompile_header
 CONFIG -= debug_and_release
 QT += network
 win32:LIBS += ../pixview.dll
-unix:LIBS += ../libpixview.so
+unix:LIBS += ../libpixview.so ../libkscan.so -lsane
 

@@ -130,11 +130,21 @@ bool RocketImageList::isModified() {
     return false;
 }
 
+void RocketImageList::addScannedFile(const QPixmap &pixmap) {
+    QString fileName;
+    for (int a=0;a<10000;++a) {
+        fileName = QDir(location).filePath(tr("%1scanned.png").arg(a, 4, 10, QLatin1Char('0')));
+        if (!QFile(fileName).exists()) break;
+     }
+     pixmap.save(fileName, "PNG");
+     addImages(QStringList() << fileName);
+}
+
 void RocketImageList::addImages(const QStringList &files) {
     bool wasEmpty = list.isEmpty();
     foreach (QString s, files) {
         QString newFile = QDir(location).filePath(QFileInfo(s).fileName());
-        QFile(s).copy(newFile);
+        if (newFile != s) QFile(s).copy(newFile);
         RocketImage *i = new RocketImage(newFile);
         connect(i, SIGNAL(removeMe()), SLOT(removeMeEvent()));
         connect(i, SIGNAL(renamed()), SLOT(renamedEvent()));

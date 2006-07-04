@@ -1,0 +1,3 @@
+Wesley Crossman <wesley@crossmans.net> -- removed the library's dependence on KDE, made classes more compatible with Qt 4, and added a basic scanning dialog
+Ivan Shvedunov <ivan_iv@rf-hp.npi.msu.su>
+Klaas Freitag <freitag@suse.de>

@@ -25,11 +25,6 @@ class CropViewTool : public QObject, public PixmapViewTool {
 Q_OBJECT
 public:
     CropViewTool();
-    virtual void paintEvent(QPainter &p, QPaintEvent *e);
-    virtual void mousePressEvent(QMouseEvent *e);
-    virtual void mouseDoubleClickEvent(QMouseEvent *e);
-    virtual void mouseMoveEvent(QMouseEvent *e);
-    virtual void setParent(PixmapView *parent);
 public slots:
     void setSelection(ImageRect ir);
 protected:
@@ -48,6 +43,11 @@ protected:
     bool isOnSe(const QRect &r, const QPoint p);
     bool isOnNeSw(const QRect &r, const QPoint p);
     bool isOnNwSe(const QRect &r, const QPoint p);
+    virtual void paintEvent(QPainter &p, QPaintEvent *e);
+    virtual void mousePressEvent(QMouseEvent *e);
+    virtual void mouseDoubleClickEvent(QMouseEvent *e);
+    virtual void mouseMoveEvent(QMouseEvent *e);
+    virtual void setParent(PixmapView *parent);
 signals:
     void selectionChanged(ImageRect);
     void selected();

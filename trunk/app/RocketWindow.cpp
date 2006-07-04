@@ -23,6 +23,10 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketSaveDialog.h"
 #include "RocketFilePreviewWidget.h"
 #include "ProgramStarter.h"
+#ifdef Q_OS_LINUX
+#include "scannerdialog.h"
+#endif
+
 #include "ImageTools.h"
 
 #include "interfaces.h"
@@ -76,6 +80,7 @@ void RocketWindow::initGui() {
     */
     
     connect(&images, SIGNAL(selectionChanged(RocketImage *)), SLOT(indexChanged(RocketImage *)));
+    connect(&images, SIGNAL(listChanged(RocketImageList::ListChangeType, int)), SLOT(updateGui()));
     
     //Size and center the window
     //I need to check whether this is useful, since
@@ -136,6 +141,14 @@ void RocketWindow::initGui() {
     a->setShortcut(QKeySequence(tr("Ctrl+A", "add images")));
     connect(a, SIGNAL(triggered()), SLOT(addImagesTriggered()));
     mFile->addAction(a);
+#ifdef Q_OS_LINUX
+    a = aScanImages = new QAction(tr("&Scan Images..."), this);
+    a->setShortcut(QKeySequence(tr("Ctrl+Shift+S", "scan images")));
+    connect(a, SIGNAL(triggered()), SLOT(scanImagesTriggered()));
+    mFile->addAction(a);
+#else
+    a = aScanImages = NULL;
+#endif
     mFile->addSeparator();
     a = aUploadToServer = new QAction(tr("&Upload to Server..."), this);
     a->setShortcut(QKeySequence(tr("Ctrl+U", "upload to server")));
@@ -623,6 +636,17 @@ void RocketWindow::addImagesTriggered() {
         location = QFileInfo(list[0]).dir().absolutePath();
         images.addImages(list);
     }
+}
+
+void RocketWindow::scanImagesTriggered() {
+#ifdef Q_OS_LINUX
+    ScannerDialog *dialog = new ScannerDialog(this);
+    connect(dialog, SIGNAL(imageScanned(const QPixmap &)), &images, SLOT(addScannedFile(const QPixmap &)));
+    dialog->setWindowTitle(tr("Scan Images"));
+    if (dialog->isValid()) {
+        dialog->exec();
+    }
+#endif
 }
 
 void RocketWindow::saveFolderTriggered() {

@@ -1,3 +1,6 @@
 TEMPLATE = subdirs
-SUBDIRS = pixmapview app plugins
+unix {
+	SUBDIRS = kscan
+}
+SUBDIRS += pixmapview app plugins
 

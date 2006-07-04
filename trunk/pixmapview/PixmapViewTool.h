@@ -39,7 +39,7 @@ public:
 
 protected:
     
-    PixmapView *parentView;
+    QPointer < PixmapView > parentView;
     
 };
 
