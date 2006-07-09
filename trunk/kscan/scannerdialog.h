@@ -30,18 +30,23 @@ public:
     ScannerDialog(QWidget *parent = NULL);
     ~ScannerDialog();
     bool connectDevice(KScanDevice *);
-    bool isValid() {return true;}
+    bool isValid() {return scannerConnected;}
 signals:
     void imageScanned(const QPixmap &pix);
 protected:
-    KScanDevice *sane_device, *m_device;
+    KScanDevice *device;
     QGridLayout *layout;
     QPushButton *btnScan, *btnClose, *btnPreview, *btnSelectAll;
     LightPreviewWidget *previewPicture;
     QProgressBar *prgStatus;
+    QRect oldRect;
+    bool scannerConnected;
+    QRect getRealScanRect();
 protected slots:
     void imageReceived(QImage *, ImgScanInfo *);
     void previewReceived(QImage *, ImgScanInfo *);
     void scanClicked();
     void previewClicked();
+    void setScanRect(QRect sel);
+    void setRealScanRect(QRect sel);
 };

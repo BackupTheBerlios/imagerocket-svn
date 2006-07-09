@@ -72,6 +72,7 @@ public:
     
     QPixmap getPixmap();
     
+    QRect getSelection();
     void setSelection(QRect rect);
     
 public slots:

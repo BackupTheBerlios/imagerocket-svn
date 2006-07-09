@@ -32,7 +32,7 @@ LightPreviewWidget::LightPreviewWidget(QWidget *parent) : QWidget(parent) {
 
 void LightPreviewWidget::setPixmap(const QPixmap &pix) {
     QPixmap oldPixmap = pixmap;
-    pixmap = pix;
+    pixmap = pix.scaled(pix.size()/2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     setMinimumSize(sizeHint());
     updateGeometry();
     if (oldPixmap.size() != pix.size()) selectAll();
@@ -99,6 +99,11 @@ bool LightPreviewWidget::isOnNeSw(const QRect &r, const QPoint p) {
 
 bool LightPreviewWidget::isOnNwSe(const QRect &r, const QPoint p) {
     return isOnNw(r, p) || isOnSe(r, p);
+}
+
+QRect LightPreviewWidget::getSelection() {
+    double scaleX = 1000.0 / pixmap.width(), scaleY = 1000.0 / pixmap.height();
+    return QRect(selection.x()*scaleX, selection.y()*scaleY, selection.width()*scaleX, selection.height()*scaleY);
 }
 
 void LightPreviewWidget::setSelection(QRect rect) {
@@ -171,8 +176,8 @@ void LightPreviewWidget::mouseMoveEvent(QMouseEvent *e) {
             change = true;
         }
         if (change) {
-            emit selectionChanged(selection);
-            QRect r(oldSelection.unite(selection));
+            emit selectionChanged(getSelection());
+            //QRect r(oldSelection.unite(selection));
             update();
         }
     } else {
@@ -245,7 +250,7 @@ void LightPreviewWidget::mousePressEvent(QMouseEvent *e) {
         dragStart = iClick;
         preDragSelection = selection;
         right = bottom = true;
-        emit selectionChanged(selection);
+        emit selectionChanged(getSelection());
         update();
     }
 }

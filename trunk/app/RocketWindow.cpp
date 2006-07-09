@@ -645,6 +645,8 @@ void RocketWindow::scanImagesTriggered() {
     dialog->setWindowTitle(tr("Scan Images"));
     if (dialog->isValid()) {
         dialog->exec();
+    } else {
+        delete dialog;
     }
 #endif
 }
