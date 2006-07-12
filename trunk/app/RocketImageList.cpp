@@ -66,7 +66,7 @@ void RocketImageList::refreshImages() {
 
 void RocketImageList::setLocation(QString location) {
     QDir dir(location);
-    if (collectionTempDir.exists()) tempDir.rmdir(collectionTempDir.dirName());
+    if (collectionTempDir != QDir() && collectionTempDir.exists()) tempDir.rmdir(collectionTempDir.dirName());
     if (!dir.exists()) {
         RocketImageList::location = QString();
         return;
