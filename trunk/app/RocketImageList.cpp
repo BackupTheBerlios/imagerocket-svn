@@ -53,8 +53,8 @@ RocketImageList::~RocketImageList() {
     foreach (RocketImage *i, list) {
         delete i;
     }
-    if (collectionTempDir.exists()) tempDir.rmdir(collectionTempDir.dirName());
-    if (tempDir.exists()) QDir::temp().rmdir(TEMP_DIR);
+    if (collectionTempDir.exists()) assert(tempDir.rmdir(collectionTempDir.dirName()));
+    if (tempDir.exists()) assert(QDir::temp().rmdir(TEMP_DIR));
 }
 
 void RocketImageList::refreshImages() {
@@ -66,21 +66,33 @@ void RocketImageList::refreshImages() {
 
 void RocketImageList::setLocation(QString location) {
     QDir dir(location);
-    if (collectionTempDir != QDir() && collectionTempDir.exists()) tempDir.rmdir(collectionTempDir.dirName());
-    if (!dir.exists()) {
-        RocketImageList::location = QString();
-        return;
-    }
     RocketImageList::location = location;
-    QString dirName = generateRandomString();
-    tempDir.mkdir(dirName);
-    collectionTempDir = tempDir.filePath(dirName);
     
+    //delete current entries (this deletes any swapped-out undo steps as well)
     foreach (RocketImage *i, list) {
         delete i;
     }
     list.clear();
     
+    //delete the old collection directory if one existed
+    if (collectionTempDir != QDir() && collectionTempDir.exists()) {
+        assert(collectionTempDir.exists());
+        assert(tempDir.rmdir(collectionTempDir.dirName()));
+    }
+    
+    //if location does not exist, return now.
+    if (!dir.exists()) {
+        RocketImageList::location = QString();
+        emit listChanged(ListReplaced);
+        return;
+    }
+    
+    //create new collection directory
+    QString dirName = generateRandomString();
+    assert(tempDir.mkdir(dirName));
+    collectionTempDir = tempDir.filePath(dirName);
+    
+    //add valid images to imagelist
     QStringList imageNameFilters;
     foreach (QByteArray format, QImageReader::supportedImageFormats()) {
         imageNameFilters.append(QString("*.") + QString(format).toLower());
@@ -94,6 +106,8 @@ void RocketImageList::setLocation(QString location) {
         connect(i, SIGNAL(renamed()), SLOT(renamedEvent()));
         list.append(i);
     }
+    
+    //select first image and notify listeners
     selection = first(); //the /selected/ can't be emited until after /listChanged/
     if (selection) selection->setActive(true);
     emit listChanged(ListReplaced);
