@@ -65,7 +65,7 @@ RocketWindow::RocketWindow() : QMainWindow() {
 void RocketWindow::initGui() {
     QIcon icon;
     //icon.addFile(":/pixmaps/rocket-24.xpm");
-    icon.addFile(":/pixmaps/rocket-16.xpm");
+    icon.addFile(":/pixmaps/rocket.ico");
     setWindowIcon(icon);
     
     /* Saving/restoring of window position disabled due to difficulty on X11 and

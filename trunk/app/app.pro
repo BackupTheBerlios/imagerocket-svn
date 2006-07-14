@@ -54,6 +54,9 @@ INCLUDEPATH += ../lua ../pixmapview .
 unix {
     INCLUDEPATH += ../kscan
 }
+win32 {
+    RC_FILE = windows.rc
+}
 MOC_DIR = tmp
 OBJECTS_DIR = tmp
 UI_DIR = tmp
