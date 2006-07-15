@@ -53,7 +53,9 @@ RocketImageList::~RocketImageList() {
     foreach (RocketImage *i, list) {
         delete i;
     }
-    if (collectionTempDir.exists()) assert(tempDir.rmdir(collectionTempDir.dirName()));
+    if (collectionTempDir != QDir() && collectionTempDir.exists()) {
+        assert(tempDir.rmdir(collectionTempDir.dirName()));
+    }
     if (tempDir.exists()) assert(QDir::temp().rmdir(TEMP_DIR));
 }
 
@@ -84,6 +86,7 @@ void RocketImageList::setLocation(QString location) {
     if (!dir.exists()) {
         RocketImageList::location = QString();
         emit listChanged(ListReplaced);
+        selection = NULL;
         return;
     }
     

@@ -6,8 +6,9 @@
 <file>pixmaps/redo.png</file>
 <file>pixmaps/undo.png</file>
 <file>pixmaps/rocket.png</file>
-<file>pixmaps/rocket-24.xpm</file>
-<file>pixmaps/rocket-16.xpm</file>
+<file>pixmaps/rocket-16.png</file>
+<file>pixmaps/rocket-24.png</file>
+<file>pixmaps/rocket-32-32bit.png</file>
 <file>pixmaps/zoom-100.png</file>
 <file>pixmaps/zoom-fit.png</file>
 <file>pixmaps/zoom-in.png</file>

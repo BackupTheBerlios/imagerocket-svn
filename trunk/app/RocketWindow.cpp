@@ -63,10 +63,10 @@ RocketWindow::RocketWindow() : QMainWindow() {
 }
 
 void RocketWindow::initGui() {
-    QIcon icon;
-    //icon.addFile(":/pixmaps/rocket-24.xpm");
-    icon.addFile(":/pixmaps/rocket.ico");
-    setWindowIcon(icon);
+//Windows will take the multi-sized icon from the EXE.
+#ifndef Q_OS_WIN32
+    setWindowIcon(QIcon(QPixmap(":/pixmaps/rocket-32-32bit.png")));
+#endif
     
     /* Saving/restoring of window position disabled due to difficulty on X11 and
     // questionable usefulness. I think Windows may do this as well also, so I
