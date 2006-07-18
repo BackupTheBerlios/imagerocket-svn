@@ -45,7 +45,7 @@ RocketImageList::RocketImageList() {
                     .arg(temp.filePath(TEMP_DIR)));
         }
     }
-    if (QDir(temp.filePath(TEMP_DIR)).exists()) tempDir = temp.filePath(TEMP_DIR);
+    if (temp.exists(TEMP_DIR)) tempDir = temp.filePath(TEMP_DIR);
 }
 
 RocketImageList::~RocketImageList() {
@@ -56,7 +56,7 @@ RocketImageList::~RocketImageList() {
     if (collectionTempDir != QDir() && collectionTempDir.exists()) {
         assert(tempDir.rmdir(collectionTempDir.dirName()));
     }
-    if (tempDir.exists()) assert(QDir::temp().rmdir(TEMP_DIR));
+    QDir::temp().rmdir(TEMP_DIR); //does not remove it if files still exist inside
 }
 
 void RocketImageList::refreshImages() {
@@ -78,7 +78,6 @@ void RocketImageList::setLocation(QString location) {
     
     //delete the old collection directory if one existed
     if (collectionTempDir != QDir() && collectionTempDir.exists()) {
-        assert(collectionTempDir.exists());
         assert(tempDir.rmdir(collectionTempDir.dirName()));
     }
     
