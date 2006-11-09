@@ -135,7 +135,7 @@ void RocketFilePreviewArea::listChanged(RocketImageList::ListChangeType type, in
             connect(preview, SIGNAL(questionClicked(RocketImage *)),
                     SLOT(questionClickedEvent(RocketImage *)));
         }
-        updateSize();
+        QTimer::singleShot(0, this, SLOT(updateSize()));
         horizontalScrollBar()->setValue(scrollPos.x());
         verticalScrollBar()->setValue(scrollPos.y());
     }
