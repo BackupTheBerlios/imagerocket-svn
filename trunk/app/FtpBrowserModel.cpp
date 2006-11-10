@@ -80,6 +80,18 @@ void FtpBrowserModel::deleteFiles(const QModelIndexList &indexes) {
     refresh();
 }
 
+void FtpBrowserModel::uploadFile(const QByteArray &array, const QString &name) {
+    ftp->put(array, name);
+    refresh();
+}
+
+void FtpBrowserModel::uploadFiles(const QList < DataAndName > &entries) {
+    foreach (DataAndName entry, entries) {
+        ftp->put(entry.first, entry.second);
+    }
+    refresh();
+}
+
 void FtpBrowserModel::listInfo(const QUrlInfo &i) {
     bool hide = !showHiddenFiles && i.name().startsWith(".");
     bool dirOrFile = i.isFile() || i.isDir();

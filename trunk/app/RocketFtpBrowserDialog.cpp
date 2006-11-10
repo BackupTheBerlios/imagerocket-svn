@@ -20,23 +20,32 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketImage.h"
 #include "RocketImageList.h"
 
+Q_DECLARE_METATYPE(RocketImage *)
+
 RocketFtpBrowserDialog::RocketFtpBrowserDialog(
         QString server, int port, QString user, QString password, QString path,
         RocketImageList *list, QWidget *parent) : QDialog(parent) {
     setupUi(this);
     images = list;
-    foreach (RocketImage *img, *images->getVector()) {
-        QListWidgetItem *item = new QListWidgetItem(img->getShortFileName(), lstImages);
+    tblImages->verticalHeader()->hide();
+    tblImages->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
+    tblImages->setRowCount(images->size());
+    tblImages->setColumnCount(1);
+    for (int a=0;a<images->getVector()->size();++a) {
+        RocketImage *img = (*images->getVector())[a];
+        QTableWidgetItem *item = new QTableWidgetItem();
         item->setIcon(img->getThumbnail());
+        item->setData(Qt::UserRole, QVariant::fromValue< RocketImage * >(img));
+        item->setText(img->getShortFileName());
+        tblImages->setItem(a, 0, item);
     }
-    lstImages->updateSize();
-    tblFtpView->setShowGrid(false);
     model = new FtpBrowserModel(server, port, user, password, tblFtpView);
     connect(model, SIGNAL(directoryChanged()), SLOT(updateAddress()));
     connect(model, SIGNAL(stateChanged(bool)), SLOT(stateChanged(bool)));
     connect(tblFtpView, SIGNAL(doubleClicked(const QModelIndex &)), model, SLOT(enter(const QModelIndex &)));
     connect(tblFtpView, SIGNAL(enterPressed(const QModelIndex &)), model, SLOT(enter(const QModelIndex &)));
     connect(btnUp, SIGNAL(clicked()), model, SLOT(cdUp()));
+    connect(btnUpload, SIGNAL(clicked()), SLOT(uploadClicked()));
     connect(btnDelete, SIGNAL(clicked()), SLOT(deleteClicked()));
     connect(btnRefresh, SIGNAL(clicked()), model, SLOT(refresh()));
     tblFtpView->setModel(model);
@@ -47,6 +56,7 @@ RocketFtpBrowserDialog::RocketFtpBrowserDialog(
     tblFtpView->setSelectionBehavior(QAbstractItemView::SelectRows);
     tblFtpView->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
     tblFtpView->verticalHeader()->hide();
+    //tblImages->updateSize();
 }
 
 void RocketFtpBrowserDialog::updateAddress() {
@@ -66,6 +76,14 @@ void RocketFtpBrowserDialog::stateChanged(bool value) {
 
 void RocketFtpBrowserDialog::deleteClicked() {
     model->deleteFiles(tblFtpView->selectionModel()->selectedIndexes());
+}
+
+void RocketFtpBrowserDialog::uploadClicked() {
+    foreach (QTableWidgetItem *i, tblImages->selectedItems()) {
+        RocketImage *img = i->data(Qt::UserRole).value< RocketImage * >();
+        qDebug() << img->getFileName(); 
+        //model->uploadFile();
+    }
 }
 
 void SmallListWidget::updateSize() {

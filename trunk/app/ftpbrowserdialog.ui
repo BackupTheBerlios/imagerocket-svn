@@ -8,8 +8,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>507</width>
-    <height>436</height>
+    <width>673</width>
+    <height>443</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -22,8 +22,111 @@
    <property name="spacing" >
     <number>6</number>
    </property>
-   <item row="0" column="1" >
+   <item row="1" column="0" colspan="10" >
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="EnterTableView" name="tblFtpView" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>7</hsizetype>
+         <vsizetype>7</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="showGrid" >
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QTableWidget" name="tblImages" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>5</hsizetype>
+         <vsizetype>7</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="showGrid" >
+        <bool>false</bool>
+       </property>
+       <column>
+        <property name="text" >
+         <string>Filename</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="5" >
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" >
+      <size>
+       <width>81</width>
+       <height>26</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="8" colspan="2" >
+    <widget class="QToolButton" name="btnSelectAllLocal" >
+     <property name="text" >
+      <string>Select All</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="6" >
+    <widget class="QToolButton" name="btnUpload" >
+     <property name="toolTip" >
+      <string>Upload</string>
+     </property>
+     <property name="text" >
+      <string>Upload</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="pixmaps.qrc" >:/pixmaps/back.png</iconset>
+     </property>
+     <property name="toolButtonStyle" >
+      <enum>Qt::ToolButtonTextBesideIcon</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="10" >
+    <widget class="QPushButton" name="btnClose" >
+     <property name="text" >
+      <string>Close</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="9" >
+    <widget class="QLineEdit" name="linFtpPosition" >
+     <property name="readOnly" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="9" >
     <widget class="QLabel" name="lblStatus" >
+     <property name="sizePolicy" >
+      <sizepolicy>
+       <hsizetype>0</hsizetype>
+       <vsizetype>0</vsizetype>
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="frameShape" >
       <enum>QFrame::Box</enum>
      </property>
@@ -35,138 +138,63 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0" >
-    <widget class="QLineEdit" name="linFtpPosition" >
-     <property name="readOnly" >
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="2" >
-    <widget class="QSplitter" name="splitter" >
+   <item row="2" column="7" >
+    <widget class="Line" name="line_2" >
      <property name="orientation" >
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QWidget" name="layoutWidget" >
-      <layout class="QGridLayout" >
-       <property name="margin" >
-        <number>3</number>
-       </property>
-       <property name="spacing" >
-        <number>6</number>
-       </property>
-       <item row="1" column="0" >
-        <widget class="QToolButton" name="btnUp" >
-         <property name="toolTip" >
-          <string>Up One Directory</string>
-         </property>
-         <property name="text" >
-          <string/>
-         </property>
-         <property name="icon" >
-          <iconset resource="pixmaps.qrc" >:/pixmaps/up.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2" >
-        <widget class="Line" name="line" >
-         <property name="orientation" >
-          <enum>Qt::Vertical</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1" >
-        <widget class="QToolButton" name="btnRefresh" >
-         <property name="toolTip" >
-          <string>Refresh</string>
-         </property>
-         <property name="text" >
-          <string/>
-         </property>
-         <property name="icon" >
-          <iconset resource="pixmaps.qrc" >:/pixmaps/refresh.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3" >
-        <widget class="QToolButton" name="btnDelete" >
-         <property name="text" >
-          <string>Delete</string>
-         </property>
-         <property name="icon" >
-          <iconset resource="pixmaps.qrc" >:/pixmaps/remove.png</iconset>
-         </property>
-         <property name="toolButtonStyle" >
-          <enum>Qt::ToolButtonTextBesideIcon</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="4" colspan="2" >
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" >
-          <size>
-           <width>41</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="0" column="0" colspan="6" >
-        <widget class="EnterTableView" name="tblFtpView" />
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="layoutWidget" >
-      <layout class="QGridLayout" >
-       <property name="margin" >
-        <number>3</number>
-       </property>
-       <property name="spacing" >
-        <number>6</number>
-       </property>
-       <item row="1" column="2" >
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" >
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="0" colspan="2" >
-        <widget class="QToolButton" name="btnUpload" >
-         <property name="toolTip" >
-          <string>Upload</string>
-         </property>
-         <property name="text" >
-          <string>Upload</string>
-         </property>
-         <property name="icon" >
-          <iconset resource="pixmaps.qrc" >:/pixmaps/back.png</iconset>
-         </property>
-         <property name="toolButtonStyle" >
-          <enum>Qt::ToolButtonTextBesideIcon</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0" colspan="3" >
-        <widget class="SmallListWidget" name="lstImages" />
-       </item>
-      </layout>
-     </widget>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2" >
-    <widget class="QPushButton" name="btnCancel" >
+   <item row="2" column="0" >
+    <widget class="QToolButton" name="btnSelectAllRemote" >
      <property name="text" >
-      <string>Close</string>
+      <string>Select All</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" >
+    <widget class="QToolButton" name="btnUp" >
+     <property name="toolTip" >
+      <string>Up One Directory</string>
+     </property>
+     <property name="text" >
+      <string/>
+     </property>
+     <property name="icon" >
+      <iconset resource="pixmaps.qrc" >:/pixmaps/up.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3" >
+    <widget class="Line" name="line" >
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2" >
+    <widget class="QToolButton" name="btnRefresh" >
+     <property name="toolTip" >
+      <string>Refresh</string>
+     </property>
+     <property name="text" >
+      <string/>
+     </property>
+     <property name="icon" >
+      <iconset resource="pixmaps.qrc" >:/pixmaps/refresh.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="4" >
+    <widget class="QToolButton" name="btnDelete" >
+     <property name="text" >
+      <string>Delete</string>
+     </property>
+     <property name="icon" >
+      <iconset resource="pixmaps.qrc" >:/pixmaps/remove.png</iconset>
+     </property>
+     <property name="toolButtonStyle" >
+      <enum>Qt::ToolButtonTextBesideIcon</enum>
      </property>
     </widget>
    </item>
@@ -174,13 +202,6 @@
  </widget>
  <pixmapfunction></pixmapfunction>
  <customwidgets>
-  <customwidget>
-   <class>SmallListWidget</class>
-   <extends>QListWidget</extends>
-   <header>RocketFtpBrowserDialog.h</header>
-   <container>0</container>
-   <pixmap></pixmap>
-  </customwidget>
   <customwidget>
    <class>EnterTableView</class>
    <extends>QTableView</extends>
@@ -194,18 +215,50 @@
  </resources>
  <connections>
   <connection>
-   <sender>btnCancel</sender>
+   <sender>btnClose</sender>
    <signal>clicked()</signal>
    <receiver>FtpBrowserDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>369</x>
-     <y>253</y>
+     <x>378</x>
+     <y>433</y>
     </hint>
     <hint type="destinationlabel" >
      <x>179</x>
      <y>282</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnSelectAllRemote</sender>
+   <signal>clicked()</signal>
+   <receiver>tblFtpView</receiver>
+   <slot>selectAll()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>43</x>
+     <y>384</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>87</x>
+     <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnSelectAllLocal</sender>
+   <signal>clicked()</signal>
+   <receiver>tblImages</receiver>
+   <slot>selectAll()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>468</x>
+     <y>388</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>447</x>
+     <y>218</y>
     </hint>
    </hints>
   </connection>

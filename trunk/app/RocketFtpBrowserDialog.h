@@ -51,6 +51,7 @@ protected slots:
     void updateAddress();
     void stateChanged(bool);
     void deleteClicked();
+    void uploadClicked();
 public:
     RocketFtpBrowserDialog(QString server, int port, QString user,
             QString password, QString path, RocketImageList *list, QWidget *parent);

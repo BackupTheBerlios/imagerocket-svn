@@ -29,6 +29,7 @@ protected:
     QFtp *ftp;
     int currentlyListing;
     bool showHiddenFiles;
+    typedef QPair < QByteArray, QString > DataAndName;
 protected slots:
     void listInfo(const QUrlInfo &i);
     void commandStarted(int id);
@@ -55,6 +56,8 @@ public slots:
     void cdUp();
     void enter(const QModelIndex &index);
     void deleteFiles(const QModelIndexList &indexes);
+    void uploadFile(const QByteArray &array, const QString &name);
+    void uploadFiles(const QList < DataAndName > &entries);
 signals:
     void directoryChanged();
     void stateChanged(bool);
