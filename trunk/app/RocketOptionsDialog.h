@@ -30,9 +30,10 @@ protected:
     QColor watermarkColor;
     QFont watermarkFont;
     void setColorButtonColor(QColor color);
+public slots:
+    void accept();
+    void reject();
 protected slots:
-    void okClicked();
-    void cancelClicked();
     void positionClicked(int index);
     void colorClicked();
     void opacityChanged();

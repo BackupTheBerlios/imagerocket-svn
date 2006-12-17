@@ -1,7 +1,4 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>RocketOptionsDialog</class>
  <widget class="QDialog" name="RocketOptionsDialog" >
   <property name="geometry" >
@@ -563,48 +560,17 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
+    <widget class="QDialogButtonBox" name="buttonBox" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
      </property>
-     <property name="spacing" >
-      <number>6</number>
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
      </property>
-     <item>
-      <spacer>
-       <property name="orientation" >
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" >
-        <size>
-         <width>131</width>
-         <height>31</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btnOk" >
-       <property name="text" >
-        <string>OK</string>
-       </property>
-       <property name="default" >
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btnCancel" >
-       <property name="text" >
-        <string>Cancel</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    </widget>
    </item>
   </layout>
  </widget>
- <pixmapfunction></pixmapfunction>
  <tabstops>
   <tabstop>chkAlwaysMakeThumbnails</tabstop>
   <tabstop>chkAskBeforeDeleting</tabstop>
@@ -612,8 +578,6 @@
   <tabstop>chkShowRollover</tabstop>
   <tabstop>chkCenterOnSelection</tabstop>
   <tabstop>tabWidget</tabstop>
-  <tabstop>btnOk</tabstop>
-  <tabstop>btnCancel</tabstop>
   <tabstop>chkAddWatermark</tabstop>
   <tabstop>radWatermarkText</tabstop>
   <tabstop>txtWatermarkText</tabstop>
@@ -643,12 +607,44 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>210</x>
-     <y>145</y>
+     <x>110</x>
+     <y>63</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>49</x>
-     <y>112</y>
+     <x>60</x>
+     <y>63</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>RocketOptionsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>435</x>
+     <y>360</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>540</x>
+     <y>308</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>RocketOptionsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>392</x>
+     <y>366</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>542</x>
+     <y>212</y>
     </hint>
    </hints>
   </connection>

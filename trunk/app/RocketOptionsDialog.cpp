@@ -69,8 +69,6 @@ RocketOptionsDialog::RocketOptionsDialog(QWidget *parent) : QDialog(parent) {
     sldOpacity->setValue(watermarkColor.alpha());
     settings.endGroup();
     
-    connect(btnOk, SIGNAL(clicked()), SLOT(okClicked()));
-    connect(btnCancel, SIGNAL(clicked()), SLOT(cancelClicked()));
     connect(btnColor, SIGNAL(clicked()), SLOT(colorClicked()));
     connect(sldOpacity, SIGNAL(valueChanged(int)), SLOT(opacityChanged()));
     connect(btnFont, SIGNAL(clicked()), SLOT(fontClicked()));
@@ -78,7 +76,7 @@ RocketOptionsDialog::RocketOptionsDialog(QWidget *parent) : QDialog(parent) {
     connect(btnPreview, SIGNAL(clicked()), SLOT(previewClicked()));
 }
 
-void RocketOptionsDialog::okClicked() {
+void RocketOptionsDialog::accept() {
     QSettings settings;
     settings.beginGroup("thumbnail");
     settings.setValue("alwaysMakeThumbnails", chkAlwaysMakeThumbnails->isChecked());
@@ -104,11 +102,11 @@ void RocketOptionsDialog::okClicked() {
     }
     settings.setValue("image", linImage->text());
     settings.endGroup();
-    accept();
+    QDialog::accept();
 }
 
-void RocketOptionsDialog::cancelClicked() {
-    reject();
+void RocketOptionsDialog::reject() {
+    QDialog::reject();
 }
 
 void RocketOptionsDialog::positionClicked(int index) {
