@@ -48,27 +48,12 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
         popupMenu->addAction(tr("&Rename"))->setObjectName("rename");
         //load images and create shared pixmaps of various opacities for fading
         floppyIcon = new QPixmap(":/pixmaps/floppy.png");
-        trashIcon[255] = new QPixmap(":/pixmaps/trash.png");
-        trashLitIcon[255] = new QPixmap(":/pixmaps/trashLit.png");
-        renameIcon[255] = new QPixmap(":/pixmaps/rename.png");
-        renameLitIcon[255] = new QPixmap(":/pixmaps/renameLit.png");
-        questionIcon[255] = new QPixmap(":/pixmaps/question.png");
-        questionLitIcon[255] = new QPixmap(":/pixmaps/questionLit.png");
-        for (int a=1;a<TBOX_STEPS;a++) {
-            int alpha = 255/TBOX_STEPS*a;
-            trashIcon[alpha] = new QPixmap(QPixmap::fromImage(
-                    createAlphaErasedImage(trashIcon[255]->toImage(), alpha)));
-            trashLitIcon[alpha] = new QPixmap(QPixmap::fromImage(
-                    createAlphaErasedImage(trashLitIcon[255]->toImage(), alpha)));
-            renameIcon[alpha] = new QPixmap(QPixmap::fromImage(
-                    createAlphaErasedImage(renameIcon[255]->toImage(), alpha)));
-            renameLitIcon[alpha] = new QPixmap(QPixmap::fromImage(
-                    createAlphaErasedImage(renameLitIcon[255]->toImage(), alpha)));
-            questionIcon[alpha] = new QPixmap(QPixmap::fromImage(
-                    createAlphaErasedImage(questionIcon[255]->toImage(), alpha)));
-            questionLitIcon[alpha] = new QPixmap(QPixmap::fromImage(
-                    createAlphaErasedImage(questionLitIcon[255]->toImage(), alpha)));
-        }
+        trashIcon = new QPixmap(":/pixmaps/trash.png");
+        trashLitIcon = new QPixmap(":/pixmaps/trashLit.png");
+        renameIcon = new QPixmap(":/pixmaps/rename.png");
+        renameLitIcon = new QPixmap(":/pixmaps/renameLit.png");
+        questionIcon = new QPixmap(":/pixmaps/question.png");
+        questionLitIcon = new QPixmap(":/pixmaps/questionLit.png");
     }
     setMouseTracking(true);
     updatePreview();
@@ -152,9 +137,9 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         p.drawRect(0, 0, width()-1, height()-1);
     }
     
-    QRect trash(buttonRect(1, LeftToRight, *trashIcon[255]));
-    QRect rename(buttonRect(2, LeftToRight, *renameIcon[255]));
-    QRect question(buttonRect(3, LeftToRight, *questionIcon[255]));
+    QRect trash(buttonRect(1, LeftToRight, *trashIcon));
+    QRect rename(buttonRect(2, LeftToRight, *renameIcon));
+    QRect question(buttonRect(3, LeftToRight, *questionIcon));
     if (onWidget || toolboxFading) {
         int toolboxAlpha = 192/TBOX_STEPS * toolboxFading;
         int buttonAlpha = (toolboxFading != TBOX_STEPS)
@@ -167,12 +152,10 @@ void RocketFilePreviewWidget::paintEvent(QPaintEvent *event) {
         rgn = rgn.subtract(QRect(rct.left(), rct.top(), 1, 1));
         rgn = rgn.subtract(QRect(rct.right(), rct.top(), 1, 1));
         foreach (QRect r, rgn.rects()) p.drawRect(r);
-        p.drawPixmap(trash.x(), trash.y(),
-                onTrash ? *trashLitIcon[buttonAlpha] : *trashIcon[buttonAlpha]);
-        p.drawPixmap(rename.x(), rename.y(),
-                onRename ? *renameLitIcon[buttonAlpha] : *renameIcon[buttonAlpha]);
-        p.drawPixmap(question.x(), question.y(),
-                onQuestion ? *questionLitIcon[buttonAlpha] : *questionIcon[buttonAlpha]);
+        p.setOpacity(1.0/255.0 * buttonAlpha);
+        p.drawPixmap(trash.x(), trash.y(), onTrash ? *trashLitIcon : *trashIcon);
+        p.drawPixmap(rename.x(), rename.y(), onRename ? *renameLitIcon : *renameIcon);
+        p.drawPixmap(question.x(), question.y(), onQuestion ? *questionLitIcon : *questionIcon);
     }
 }
 
@@ -226,15 +209,15 @@ void RocketFilePreviewWidget::leaveEvent(QEvent *event) {
 
 void RocketFilePreviewWidget::mouseMoveEvent(QMouseEvent *event) {
     bool showRollover = QSettings().value("ui/showRollover").toBool();
-    onTrash = showRollover && positionOnButton(event->pos(), 1, LeftToRight, *trashIcon[255]);
+    onTrash = showRollover && positionOnButton(event->pos(), 1, LeftToRight, *trashIcon);
     if (onTrash) {
         setToolTip(tr("Delete"));
     }
-    onRename = showRollover && positionOnButton(event->pos(), 2, LeftToRight, *renameIcon[255]);
+    onRename = showRollover && positionOnButton(event->pos(), 2, LeftToRight, *renameIcon);
     if (onRename) {
         setToolTip(tr("Rename"));
     }
-    onQuestion = showRollover && positionOnButton(event->pos(), 3, LeftToRight, *questionIcon[255]);
+    onQuestion = showRollover && positionOnButton(event->pos(), 3, LeftToRight, *questionIcon);
     if (onQuestion) {
         setToolTip(tr("Info"));
     }
@@ -304,13 +287,13 @@ void RocketFilePreviewWidget::doAction(int action) {
 void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
     bool showRollover = QSettings().value("ui/showRollover").toBool();
     bool leftClick = event->button() == Qt::LeftButton;
-    if (showRollover && positionOnButton(event->pos(), 1, LeftToRight, *trashIcon[255])
+    if (showRollover && positionOnButton(event->pos(), 1, LeftToRight, *trashIcon)
                 && leftClick) {
         doAction(1);
-    } else if (showRollover && positionOnButton(event->pos(), 2, LeftToRight, *renameIcon[255])
+    } else if (showRollover && positionOnButton(event->pos(), 2, LeftToRight, *renameIcon)
                 && leftClick) {
         doAction(2);
-    } else if (showRollover && positionOnButton(event->pos(), 3, LeftToRight, *questionIcon[255])
+    } else if (showRollover && positionOnButton(event->pos(), 3, LeftToRight, *questionIcon)
                 && leftClick) {
         doAction(3);
     } else if (leftClick && !active) {
@@ -357,13 +340,13 @@ QRect RocketFilePreviewWidget::buttonRect(int num, Direction d, const QPixmap &p
     int y = std::min(height()-pixmap.height(), height()/2+int(thumbnailSize*.6));
     if (d == LeftToRight) {
         int x = std::max(margin, std::min(lastDrawnPosition.x(), width()/3)-margin)
-                + (trashIcon[255]->width()+2)*(num-1);
-        return QRect(x, y, trashIcon[255]->width(), trashIcon[255]->height());
+                + (trashIcon->width()+2)*(num-1);
+        return QRect(x, y, trashIcon->width(), trashIcon->height());
     } else {
         int iw = img->getThumbnail().width();
         int x = std::max(margin, std::min(lastDrawnPosition.x()+iw,
                         int(width()*(2.0/3.0)))+margin)
-                - (trashIcon[255]->width()+2)*(num-1);
+                - (trashIcon->width()+2)*(num-1);
         return QRect(x, y, pixmap.width(), pixmap.height());
     }
 }

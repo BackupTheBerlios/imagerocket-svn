@@ -26,8 +26,9 @@ class RocketFileRenameEdit;
 class RocketFilePreviewWidget : public QWidget {
 Q_OBJECT
 protected:
-    static QMap < int, QPixmap * > trashIcon, trashLitIcon,
-            renameIcon, renameLitIcon, questionIcon, questionLitIcon;
+    static QPixmap *trashIcon, *trashLitIcon,
+            *renameIcon, *renameLitIcon,
+            *questionIcon, *questionLitIcon;
     static QPixmap *floppyIcon;
     static QPointer < QMenu > popupMenu;
     QFont font;
