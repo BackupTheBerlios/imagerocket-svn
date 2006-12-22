@@ -22,7 +22,6 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketFtpDialog.h"
 #include "RocketSaveDialog.h"
 #include "RocketFilePreviewWidget.h"
-#include "ProgramStarter.h"
 #ifdef Q_OS_LINUX
 #include "scannerdialog.h"
 #endif
@@ -406,10 +405,6 @@ void RocketWindow::initObject() {
     //QTimer::singleShot(random() % 100, this, SLOT(close()));
 }
 
-#ifdef Q_WS_WIN
-#include <windows.h>
-#endif
-
 //! This iterates the given directory and looks in its child directories for plugins.
 void RocketWindow::loadPlugins(QString dirPath, QHash < QString, PluginListItemEntry > &entries) {
     //This could use some cleanup. The error handling code could be streamlined. - WJC
@@ -428,27 +423,17 @@ void RocketWindow::loadPlugins(QString dirPath, QHash < QString, PluginListItemE
                 qDebug(QString("Loading ").append(f).toAscii());
                 QLibrary *lib = new QLibrary(f);
                 if (!lib->load()) {
-                    QString msg;
-#ifdef Q_WS_WIN
-                    long err = GetLastError();
-                    LPTSTR s;
-                    if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                            NULL, err, 0, (LPTSTR)&s, 0, NULL) == 0) {
-                        msg = tr("Error: %1").arg(err);
-                    } else {
-                        msg = tr("Error: %1 (%2)").arg(QString::fromUtf16((ushort*)s)).arg(err);
-                    }
-#endif
                     QMessageBox::warning(this, tr("Plugin Loading Failed"),
                             tr("Plugin %1 is not a valid library and could not be loaded.\n%2")
-                            .arg(f).arg(msg));
+                            .arg(f).arg(lib->errorString()));
                     delete lib;
                     continue;
                 }
                 QPluginLoader *plugin = new QPluginLoader(f);
                 if (!plugin->load()) {
                     QMessageBox::warning(this, tr("Plugin Loading Failed"),
-                            tr("Plugin %1 is not a valid plugin and could not be loaded.").arg(f));
+                            tr("Plugin %1 is not a valid plugin and could not be loaded.\n%2")
+                            .arg(f).arg(plugin->errorString()));
                     delete lib;
                     delete plugin;
                     continue;
@@ -930,12 +915,12 @@ void RocketWindow::toolClicked(QListWidgetItem *item) {
         assert(tool);
         QPixmap *pix = new QPixmap(images.getSelection()->getPixmap());
         setToolSettingsToolBar(tool->getSettingsToolBar(pix));
-        item->setBackgroundColor(palette().highlight().color());
-        item->setTextColor(palette().highlightedText().color());
+        item->setBackground(palette().highlight());
+        item->setForeground(palette().highlightedText());
         PixmapViewTool *t = tool->getViewTool();
         view->setTool(t);
     } else if (item && !item->text().isEmpty()
-            && item->backgroundColor() == palette().highlight().color()) {
+            && item->background().style() != Qt::NoBrush) {
         delete toolSettingsToolBar;
     }
 }
@@ -967,10 +952,10 @@ void RocketWindow::imageSaveSettingsToggled(bool value) {
 void RocketWindow::toolSettingsToolBarDestroyed() {
     bool done = false;
     for (int a=0;a<toolbox->count();a++) {
-        if (toolbox->item(a)->backgroundColor().isValid()) {
+        if (toolbox->item(a)->background().style() != Qt::NoBrush) {
             done = true;
-            toolbox->item(a)->setBackgroundColor(QColor());
-            toolbox->item(a)->setTextColor(QColor());
+            toolbox->item(a)->setBackground(QBrush());
+            toolbox->item(a)->setForeground(palette().text());
             break;
         }
     }
@@ -998,7 +983,7 @@ void RocketWindow::updateCheckerDone(bool error) {
             RocketUpdateDialog *d = updateChecker->createDialog(this);
             d->exec();
             if (d->getSelected() == 1) {
-                ProgramStarter::instance()->openWebBrowser(
+                QDesktopServices::openUrl(
                         QString(HOMEPAGE) + tr("/", "language-specific homepage subdirectory"));
             }
         } else {

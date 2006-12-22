@@ -16,7 +16,6 @@ HEADERS =   RocketWindow.h \
             RocketSaveSettingsTool.h \
             RocketFtpDialog.h \
             RocketFtpBrowserDialog.h \
-            ProgramStarter.h \
             ThreadedImageLoader.h \
             FtpBrowserModel.h \
             interfaces.h \
@@ -37,7 +36,6 @@ SOURCES =   main.cpp \
             RocketSaveSettingsTool.cpp \
             RocketFtpDialog.cpp \
             RocketFtpBrowserDialog.cpp \
-            ProgramStarter.cpp \
             ThreadedImageLoader.cpp \
             FtpBrowserModel.cpp
 
@@ -50,7 +48,7 @@ FORMS =     aboutdialog.ui \
             ftpdialog.ui \
             ftpbrowserdialog.ui
 RESOURCES = pixmaps.qrc app.qrc
-INCLUDEPATH += ../lua ../pixmapview .
+INCLUDEPATH += ../pixmapview .
 unix {
     INCLUDEPATH += ../kscan
 }

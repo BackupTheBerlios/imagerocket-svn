@@ -16,10 +16,10 @@ program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
 #include "RocketAboutDialog.h"
-#include "ProgramStarter.h"
 #include "consts.h"
 #include <QFile>
 #include <QTextStream>
+#include <QDesktopServices>
 
 RocketAboutDialog::RocketAboutDialog(QWidget *parent)
         : QDialog(parent) {
@@ -54,6 +54,6 @@ RocketAboutDialog::RocketAboutDialog(QWidget *parent)
 }
 
 void RocketAboutDialog::homepageButtonClicked() {
-    ProgramStarter::instance()->openWebBrowser(
+    QDesktopServices::openUrl(
             QString(HOMEPAGE) + tr("/", "language-specific homepage subdirectory"));
 }
