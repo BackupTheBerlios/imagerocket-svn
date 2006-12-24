@@ -45,6 +45,7 @@ protected:
     bool isOnNwSe(const QRect &r, const QPoint p);
     virtual void paintEvent(QPainter &p, QPaintEvent *e);
     virtual void mousePressEvent(QMouseEvent *e);
+    virtual void mouseReleaseEvent(QMouseEvent *e);
     virtual void mouseDoubleClickEvent(QMouseEvent *e);
     virtual void mouseMoveEvent(QMouseEvent *e);
     virtual void setParent(PixmapView *parent);

@@ -219,5 +219,15 @@ void CropViewTool::mousePressEvent(QMouseEvent *e) {
 }
 
 void CropViewTool::mouseDoubleClickEvent(QMouseEvent *e) {
-    emit selected();
+    if (!selection.isNull()) {
+        emit selected();
+    }
+}
+
+void CropViewTool::mouseReleaseEvent(QMouseEvent *e) {
+    if (selection.size() == QSize(1, 1)) {
+        emit selectionChanged(ImageRect());
+        selection = ImageRect();
+        parentView->viewport()->update();
+    }
 }
