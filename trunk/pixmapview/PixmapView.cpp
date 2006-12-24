@@ -3,9 +3,6 @@ A widget which displays images in a scrollable container at any zoom level.
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
-Note that this class may not be used by programs not under the GPL without permission.
-Email me if you wish to discuss the use of this class in non-GPL programs.
-
 You can redistribute and/or modify this software under the terms of the GNU
 General Public License as published by the Free Software Foundation;
 either version 2 of the License, or (at your option) any later version.
@@ -19,6 +16,7 @@ program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
 #include "PixmapView.h"
+#include "imagerotate.h"
 #include <QtGui>
 #include <cassert>
 #include <algorithm>
@@ -91,68 +89,8 @@ void PixmapView::createBorders() {
     }
     p.end();
     horizontalBorder = pix;
+    verticalBorder = rotate90(horizontalBorder);
     
-    pix = QPixmap(1, borderSize);
-    p.begin(&pix);
-    p.setPen(pen);
-    p.drawLine(0, 0, 0, borderSize);
-    p.setPen(pen2);
-    for (int a=0;a<borderSize;a+=8) {
-        p.drawLine(0, a, 0, a+3);
-    }
-    p.end();
-    verticalBorder = pix;
-    
-    pix = QPixmap(cornerCapSize, cornerCapSize);
-    pix.fill(QColor(0, 0, 0, 0));
-    p.begin(&pix);
-    p.setPen(penBorderCorner);
-    p.drawRect(0, 0, cornerCapSize, cornerCapSize);
-    p.end();
-    nwBorderCorner = pix;
-    
-    pix = QPixmap(cornerCapSize, cornerCapSize);
-    pix.fill(QColor(0, 0, 0, 0));
-    p.begin(&pix);
-    p.setPen(penBorderCorner);
-    p.drawRect(-1, 0, cornerCapSize, cornerCapSize);
-    p.end();
-    neBorderCorner = pix;
-    
-    pix = QPixmap(cornerCapSize, cornerCapSize);
-    pix.fill(QColor(0, 0, 0, 0));
-    p.begin(&pix);
-    p.setPen(penBorderCorner);
-    p.drawRect(0, -1, cornerCapSize, cornerCapSize);
-    p.end();
-    swBorderCorner = pix;
-    
-    pix = QPixmap(cornerCapSize, cornerCapSize);
-    pix.fill(QColor(0, 0, 0, 0));
-    p.begin(&pix);
-    p.setPen(penBorderCorner);
-    p.drawRect(-1, -1, cornerCapSize, cornerCapSize);
-    p.end();
-    seBorderCorner = pix;
-    
-    /* This code fails on Qt/Windows 4.0.1. It should replace the code above when Qt is fixed.
-    This is issue 85128 on TrollTech's Task Tracker. - WJC
-    QMatrix matrix;
-    
-    QPixmap pix(borderSize, 1);
-    p.begin(&pix);
-    p.setPen(pen);
-    p.drawLine(0, 0, borderSize, 0);
-    p.setPen(pen2);
-    for (int a=0;a<borderSize;a+=8) {
-        p.drawLine(a, 0, a+3, 0);
-    }
-    p.end();
-    horizontalBorder = pix;
-    matrix.rotate(90);
-    verticalBorder = horizontalBorder.transformed(matrix);
-    
-    matrix.reset();
     QPixmap pix2(cornerCapSize, cornerCapSize);
     pix2.fill(QColor(0, 0, 0, 0));
     p.begin(&pix2);
@@ -160,13 +98,9 @@ void PixmapView::createBorders() {
     p.drawRect(0, 0, cornerCapSize, cornerCapSize);
     p.end();
     nwBorderCorner = pix2;
-    matrix.rotate(90);
-    neBorderCorner = nwBorderCorner.transformed(matrix);
-    matrix.rotate(90);
-    seBorderCorner = nwBorderCorner.transformed(matrix);
-    matrix.rotate(90);
-    swBorderCorner = nwBorderCorner.transformed(matrix);
-    */
+    neBorderCorner = rotate90(nwBorderCorner);
+    seBorderCorner = rotate180(nwBorderCorner);
+    swBorderCorner = rotate270(nwBorderCorner);
 }
 
 //! This loads the file and displays it. The widget displays error text if the load fails.
@@ -291,20 +225,17 @@ void PixmapView::resetToBlank() {
 }
 
 //! This sets the parameters of the scrollbars.
-void PixmapView::resizeContents(int w, int h) {
+void PixmapView::resizeContents(QSize newSize) {
     preloadPoints.clear();
-    int iw=0, ih=0;
+    QSize imageSize;
     if (!pix.isNull()) {
-        iw = squares.getScaledWidth();
-        ih = squares.getScaledHeight();
+        imageSize = squares.getScaledSize();
     }
-    
-    int vw = viewport()->width(), vh = viewport()->height();
-    QSize vSize = viewport()->size();
-    QSize maxSize = maximumViewportSize();
-    int rw = w - vw, rh = h - vh;
+    QSize viewportSize = viewport()->size();
+    QSize maxViewportSize = maximumViewportSize(); //viewport size + space taken by scrollbars 
+    QSize overflowSize = newSize - viewportSize;
     blockDrawing = true;
-    if (iw <= maxSize.width() && ih <= maxSize.height()) {
+    if (imageSize.width() <= maxViewportSize.width() && imageSize.height() <= maxViewportSize.height()) {
         //This is necessary due to a QAbstractArea flaw which fails
         //to hide both if they are both barely eligible to be hidden.
         horizontalScrollBar()->setRange(0, 0);
@@ -312,10 +243,10 @@ void PixmapView::resizeContents(int w, int h) {
     } else {
         QScrollBar *hs = horizontalScrollBar();
         QScrollBar *vs = verticalScrollBar();
-        hs->setRange(0, rw);
-        hs->setPageStep(vw);
-        vs->setRange(0, rh);
-        vs->setPageStep(vh);
+        hs->setRange(0, overflowSize.width());
+        hs->setPageStep(viewportSize.width());
+        vs->setRange(0, overflowSize.height());
+        vs->setPageStep(viewportSize.height());
     }
     blockDrawing = false;
 }
@@ -343,11 +274,17 @@ void PixmapView::resizeEvent(QResizeEvent *e) {
 \sa setFitToWidget(bool)
 */
 void PixmapView::updateZoomForSize() {
-    QSize w(size()), i(pix.size()), padding(10, 10);
-    w -= padding;
-    QSize tmp(i);
-    tmp.scale(w, Qt::KeepAspectRatio);
-    double z = double(tmp.width()) / i.width();
+    QSize winSize(size()), pixmapSize(pix.size()), padding(10, 10);
+    winSize -= padding;
+    QSize tmp(pixmapSize);
+    tmp.scale(winSize, Qt::KeepAspectRatio);
+    double z = 0.0;
+    //figure zoom with largest dimension
+    if (tmp.width() > tmp.height()) {
+        z = double(tmp.width()) / pixmapSize.width();
+    } else {
+        z = double(tmp.height()) / pixmapSize.height();
+    }
     setZoom(z ? z : .01);
 }
 
@@ -390,13 +327,10 @@ void PixmapView::mouseReleaseEvent(QMouseEvent *e) {
 
 void PixmapView::mouseMoveEvent(QMouseEvent *e) {
     if (middleButtonScrollPoint.x() > -1) {
-        int newX = e->x();
-        int newY = e->y();
-        int dx = middleButtonScrollPoint.x() - newX;
-        int dy = middleButtonScrollPoint.y() - newY;
-        horizontalScrollBar()->setValue(horizontalScrollBar()->value() + dx);
-        verticalScrollBar()->setValue(verticalScrollBar()->value() + dy);
-        middleButtonScrollPoint = QPoint(newX, newY);
+        QPoint diff = middleButtonScrollPoint - e->pos();
+        horizontalScrollBar()->setValue(horizontalScrollBar()->value() + diff.x());
+        verticalScrollBar()->setValue(verticalScrollBar()->value() + diff.y());
+        middleButtonScrollPoint = e->pos();
     }
     if (tool) {
         tool->mouseMoveEvent(e);
@@ -452,6 +386,7 @@ QSize PixmapView::getMargin() const {
 }
 
 void PixmapView::setTool(PixmapViewTool *tool) {
+    viewport()->unsetCursor();
     this->tool = tool;
     if (tool) {
         tool->setParent(this);
@@ -475,7 +410,7 @@ void PixmapView::setZoom(double zoomFactor, int x, int y) {
         ImagePoint centerPoint(toImagePoint(getVisibleCenter()));
         squares.setZoom(zoomFactor);
         //qDebug("Total Squares: %d", squares.getPieceCount());
-        resizeContents(int(pix.width() * zoomFactor), int(pix.height() * zoomFactor));
+        resizeContents(pix.size() * zoomFactor);
         int cx = int((x == -1) ? centerPoint.x() * zoomFactor : x * zoomFactor);
         int cy = int((y == -1) ? centerPoint.y() * zoomFactor : y * zoomFactor);
         center(cx, cy);

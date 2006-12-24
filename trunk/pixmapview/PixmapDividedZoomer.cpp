@@ -3,9 +3,6 @@ A class which takes a pixmap and provides pieces of the images zoomed to any siz
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
-Note that this class may not be used by programs not under the GPL without permission.
-Email me if you wish to discuss the use of this class in non-GPL programs.
-
 You can redistribute and/or modify this software under the terms of the GNU
 General Public License as published by the Free Software Foundation;
 either version 2 of the License, or (at your option) any later version.
@@ -42,6 +39,7 @@ int inMemory = 0;
 class CountingPixmap : public QPixmap {
 public:
     CountingPixmap(int w, int h) : QPixmap(w, h) {++inMemory;}
+    CountingPixmap(QSize size) : QPixmap(size) {++inMemory;}
     CountingPixmap(QPixmap pix) : QPixmap(pix) {++inMemory;}
     ~CountingPixmap() {--inMemory;}
 };
@@ -97,23 +95,20 @@ void PixmapDividedZoomer::setCached(int x, int y, bool newState) {
     if (newState && !pieces[index]) {
         QTime timing(QTime::currentTime());
         QSize scaled(getPieceSize(x, y));
+        QPixmap temp(source.copy(
+                int(x * transparent.width() / zoom),
+                int(y * transparent.height() / zoom),
+                std::max(int(ceil(scaled.width() / zoom)), 1),
+                std::max(int(ceil(scaled.height() / zoom)), 1)));
         if (hasTransparency) {
-            QPixmap temp(source.copy(
-                    int(ceil(x * transparent.width() / zoom)),
-                    int(ceil(y * transparent.height() / zoom)),
-                    int(ceil(scaled.width() / zoom)),
-                    int(ceil(scaled.height() / zoom))));
             assert(!temp.isNull());
-            pieces[index] = new CountingPixmap(scaled.width(), scaled.height());
+            pieces[index] = new CountingPixmap(scaled);
             QPainter pPiece(pieces[index]);
             pPiece.drawPixmap(0, 0, transparent);
-            pPiece.drawPixmap(0, 0, temp.scaled(scaled.width(), scaled.height()));
+            pPiece.drawPixmap(0, 0, temp.scaled(scaled));
         } else {
-            QPixmap temp(source.copy(
-                    int(x * transparent.width() / zoom), int(y * transparent.height() / zoom),
-                    std::max(int(scaled.width() / zoom), 1), std::max(int(scaled.height() / zoom), 1)));
             assert(!temp.isNull());
-            pieces[index] = new CountingPixmap(temp.scaled(scaled.width(), scaled.height()));
+            pieces[index] = new CountingPixmap(temp.scaled(scaled));
         }
         /*if (x < 5 && y == 0) { //DEBUG timing
             qDebug("Time to Generate %d, %d = %d ms", x, y, t.elapsed());

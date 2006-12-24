@@ -3,9 +3,6 @@ A widget which displays images in a scrollable container at any zoom level
 Copyright (C) 2005 Wesley Crossman
 Email: wesley@crossmans.net
 
-Note that this class may not be used by programs not under the GPL without permission.
-Email me if you wish to discuss the use of this class in non-GPL programs.
-
 You can redistribute and/or modify this software under the terms of the GNU
 General Public License as published by the Free Software Foundation;
 either version 2 of the License, or (at your option) any later version.
