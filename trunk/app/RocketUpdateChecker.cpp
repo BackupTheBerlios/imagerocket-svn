@@ -18,21 +18,14 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketUpdateChecker.h"
 #include "consts.h"
 
-#ifdef false //Q_WS_WIN
-BOOL InternetGetConnectedState(
-    LPDWORD lpdwFlags,
-    DWORD dwReserved
-);
-#define INTERNET_CONNECTION_CONFIGURED 0x40
-#define INTERNET_CONNECTION_LAN 0x02
-#define INTERNET_CONNECTION_MODEM 0x01
-#define INTERNET_CONNECTION_OFFLINE 0x20
-#define INTERNET_CONNECTION_PROXY 0x04
-#define INTERNET_RAS_INSTALLED 0x10
+#ifdef Q_WS_WIN
+#include <wininet.h>
 #endif
 
-RocketUpdateChecker::RocketUpdateChecker(QObject *parent) : QObject(parent) {
+RocketUpdateChecker::RocketUpdateChecker(QObject *parent, bool userRequestedCheck)
+	    : QObject(parent) {
     returned = upgradable = error = false;
+    this->userRequestedCheck = userRequestedCheck;
     connect(&http, SIGNAL(done(bool)), SLOT(httpDone(bool)));
     http.setHost("www.crossmans.net");
     http.get("/imagerocket-update.htm", &getBuffer);
@@ -43,17 +36,22 @@ RocketUpdateChecker::~RocketUpdateChecker() {
 
 bool RocketUpdateChecker::mayBeConnected() {
     bool connected = true;
-#ifdef false //Q_WS_WIN
-    if (!InternetGetConnectionState(INTERNET_CONNECTION_LAN, 0)
-                && !InternetGetConnectionState(INTERNET_CONNECTION_MODEM, 0)) {
+#ifdef Q_WS_WIN
+    if (!InternetGetConnectedState(NULL, 0)) {
         connected = false;
     }
+    qDebug() << connected;
 #endif
     return connected;
 }
 
 RocketUpdateDialog *RocketUpdateChecker::createDialog(QWidget *parent) {
-    return new RocketUpdateDialog(html);
+    RocketUpdateDialog *dialog = new RocketUpdateDialog(html);
+    if (userRequestedCheck) {
+        //makes no sense in this context
+        dialog->dontTellMeButton->setVisible(false);
+    }
+    return dialog;
 }
 
 void RocketUpdateChecker::httpDone(bool error) {

@@ -31,9 +31,9 @@ protected:
     QBuffer getBuffer;
     QHttp http;
     QString html;
-    bool upgradable, returned, error;
+    bool upgradable, returned, error, userRequestedCheck;
 public:
-    RocketUpdateChecker(QObject *parent = NULL);
+    RocketUpdateChecker(QObject *parent = NULL, bool userRequestedCheck = false);
     virtual ~RocketUpdateChecker();
     RocketUpdateDialog *createDialog(QWidget *parent);
     bool isUpgradable() {

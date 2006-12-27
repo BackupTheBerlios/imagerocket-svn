@@ -62,6 +62,6 @@ RCC_DIR = tmp
 CONFIG += warn_on precompile_header
 CONFIG -= debug_and_release
 QT += network
-win32:LIBS += ../pixview.dll
+win32:LIBS += ../pixview.dll -lwininet
 unix:LIBS += ../libpixview.so ../libkscan.so -lsane
 

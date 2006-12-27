@@ -21,6 +21,9 @@
    </property>
    <item>
     <widget class="QTabWidget" name="tabWidget" >
+     <property name="currentIndex" >
+      <number>0</number>
+     </property>
      <widget class="QWidget" name="tab" >
       <attribute name="title" >
        <string>&amp;Interface</string>
@@ -35,14 +38,14 @@
        <item>
         <widget class="QCheckBox" name="chkAlwaysMakeThumbnails" >
          <property name="text" >
-          <string>Make Thumbnails for Large Images</string>
+          <string>Make thumbnails for large images</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QCheckBox" name="chkAskBeforeDeleting" >
          <property name="text" >
-          <string>Ask before Deleting Images</string>
+          <string>Ask before deleting images</string>
          </property>
          <property name="checked" >
           <bool>true</bool>
@@ -52,7 +55,7 @@
        <item>
         <widget class="QCheckBox" name="chkUseFading" >
          <property name="text" >
-          <string>Use Subtle Fading Effects</string>
+          <string>Use subtle fading effects</string>
          </property>
          <property name="checked" >
           <bool>true</bool>
@@ -62,7 +65,7 @@
        <item>
         <widget class="QCheckBox" name="chkShowRollover" >
          <property name="text" >
-          <string>Show Rollover Menus on Thumbnails</string>
+          <string>Show rollover menus on thumbnails</string>
          </property>
          <property name="checked" >
           <bool>true</bool>
@@ -72,7 +75,7 @@
        <item>
         <widget class="QCheckBox" name="chkCenterOnSelection" >
          <property name="text" >
-          <string>Center Thumbnail Toolbox on Selected Image</string>
+          <string>Center thumbnail toolbox on selected image</string>
          </property>
          <property name="checked" >
           <bool>true</bool>
@@ -154,6 +157,31 @@
            <widget class="QLabel" name="label_2" >
             <property name="text" >
              <string>RAM to be used for storing images:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_5" >
+         <property name="title" >
+          <string>Other</string>
+         </property>
+         <layout class="QVBoxLayout" >
+          <property name="margin" >
+           <number>9</number>
+          </property>
+          <property name="spacing" >
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="chkCheckForUpdates" >
+            <property name="text" >
+             <string>Check for updates when starting</string>
+            </property>
+            <property name="checked" >
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -368,7 +396,7 @@
        <item row="0" column="0" colspan="2" >
         <widget class="QCheckBox" name="chkAddWatermark" >
          <property name="text" >
-          <string>&amp;Add Watermark to Images</string>
+          <string>&amp;Add watermark to images</string>
          </property>
         </widget>
        </item>
@@ -578,12 +606,16 @@
   <tabstop>chkShowRollover</tabstop>
   <tabstop>chkCenterOnSelection</tabstop>
   <tabstop>tabWidget</tabstop>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>spnRamForImages</tabstop>
+  <tabstop>chkCheckForUpdates</tabstop>
   <tabstop>chkAddWatermark</tabstop>
   <tabstop>radWatermarkText</tabstop>
   <tabstop>txtWatermarkText</tabstop>
-  <tabstop>btnColor</tabstop>
   <tabstop>btnFont</tabstop>
+  <tabstop>btnColor</tabstop>
   <tabstop>radImage</tabstop>
+  <tabstop>linImage</tabstop>
   <tabstop>btnImageSelect</tabstop>
   <tabstop>radPosition1</tabstop>
   <tabstop>radPosition2</tabstop>

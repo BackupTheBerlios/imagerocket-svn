@@ -401,6 +401,17 @@ void RocketWindow::initObject() {
             toolbox->updateMinimumSize();
         }
     }
+
+    QVariant lastChecked = settings.value("program/lastCheckedForUpdates");
+    bool dontCheck = !settings.value("program/checkForUpdates").toBool();
+    bool longEnoughWait = lastChecked.isNull()
+            || lastChecked.toDate().daysTo(QDate::currentDate()) > 14;
+    if (!dontCheck && longEnoughWait && RocketUpdateChecker::mayBeConnected()) {
+        delete updateChecker;
+        updateChecker = new RocketUpdateChecker(this);
+        connect(updateChecker, SIGNAL(done(bool)), SLOT(updateCheckerDone(bool)));
+        statusBar()->showMessage(tr("Checking for Updates..."), 4000);
+    }
     ////debugging crash test - use with prog_test.sh
     //QTimer::singleShot(random() % 100, this, SLOT(close()));
 }
@@ -972,26 +983,35 @@ void RocketWindow::optionsTriggered() {
 
 void RocketWindow::checkForUpdatesTriggered() {
     delete updateChecker;
-    updateChecker = new RocketUpdateChecker(this);
+    updateChecker = new RocketUpdateChecker(this, true);
     connect(updateChecker, SIGNAL(done(bool)), SLOT(updateCheckerDone(bool)));
-    statusBar()->showMessage(tr("Checking for Updates..."), 3000);
+    statusBar()->showMessage(tr("Checking for Updates..."), 4000);
 }
 
 void RocketWindow::updateCheckerDone(bool error) {
     if (!error) {
+        QSettings settings;
+        settings.setValue("program/lastCheckedForUpdates", QDate::currentDate());
         if (updateChecker->isUpgradable()) {
             RocketUpdateDialog *d = updateChecker->createDialog(this);
             d->exec();
-            if (d->getSelected() == 1) {
+            switch (d->getSelected()) {
+            case 0:
+                settings.setValue("program/checkForUpdates", true);
+                break;
+            case 1:
                 QDesktopServices::openUrl(
                         QString(HOMEPAGE) + tr("/", "language-specific homepage subdirectory"));
+                break;
+            case 2:
+                settings.setValue("program/checkForUpdates", false);
+                break;
             }
         } else {
-            QMessageBox::information(this, tr("Check for Updates"),
-                    tr("No updates are currently available."));
+            statusBar()->showMessage(tr("No updates are currently available."), 2000);
         }
     } else {
-        QMessageBox::information(this, tr("Check for Updates"),
-                tr("Check failed. Check your connection and try again later."));
+        statusBar()->showMessage(
+                tr("Could not check for updates. You may not be connected to the internet."), 2000);
     }
 }

@@ -44,12 +44,18 @@ RocketOptionsDialog::RocketOptionsDialog(QWidget *parent) : QDialog(parent) {
     chkCenterOnSelection->setChecked(settings.value("centerOnSelection").toBool());
     settings.endGroup();
     spnRamForImages->setValue(settings.value("image/ramForImages").toInt());
+    chkCheckForUpdates->setChecked(settings.value("program/checkForUpdates").toBool());
     settings.beginGroup("watermark");
-    //I don't know why changing the radio buttons requires a single-shot timer. - WJC
+    watermarkFont = settings.value("font").value< QFont >();
+    QFont textFont = watermarkFont;
+    textFont.setPointSize(txtWatermarkText->font().pointSize());
+    txtWatermarkText->setFont(textFont); //disregard point size
+    spnMargin->setValue(settings.value("margin").toInt());
+    txtWatermarkText->setPlainText(settings.value("text").toString());
     if (settings.value("selected").toString() == "text") {
-        QTimer::singleShot(0, radWatermarkText, SLOT(click()));
+        radWatermarkText->setChecked(true);
     } else {
-        QTimer::singleShot(0, radImage, SLOT(click()));
+        radImage->setChecked(true);
     }
     if (QFile(settings.value("image").toString()).exists()) {
         linImage->setText(settings.value("image").toString());
@@ -60,12 +66,6 @@ RocketOptionsDialog::RocketOptionsDialog(QWidget *parent) : QDialog(parent) {
     QColor buttonColor = watermarkColor;
     buttonColor.setAlpha(255);
     setColorButtonColor(buttonColor); //disregard alpha
-    watermarkFont = settings.value("font").value< QFont >();
-    QFont textFont = watermarkFont;
-    textFont.setPointSize(txtWatermarkText->font().pointSize());
-    txtWatermarkText->setFont(textFont); //disregard point size
-    spnMargin->setValue(settings.value("margin").toInt());
-    txtWatermarkText->setPlainText(settings.value("text").toString());
     sldOpacity->setValue(watermarkColor.alpha());
     settings.endGroup();
     
@@ -88,6 +88,7 @@ void RocketOptionsDialog::accept() {
     settings.setValue("centerOnSelection", chkCenterOnSelection->isChecked());
     settings.endGroup();
     settings.setValue("image/ramForImages", spnRamForImages->value());
+    settings.setValue("program/checkForUpdates", chkCheckForUpdates->isChecked());
     settings.beginGroup("watermark");
     settings.setValue("on", chkAddWatermark->isChecked());
     settings.setValue("position", positionGroup.id(positionGroup.checkedButton()));
