@@ -18,7 +18,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #ifndef ROCKET_FTP_DIALOG
 #define ROCKET_FTP_DIALOG
 
-#include <QDialog>
+#include <QtGui>
 #include "ui_ftpdialog.h"
 #include <QFtp>
 

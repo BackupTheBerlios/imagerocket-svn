@@ -18,6 +18,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #ifndef ROCKET_FTP_BROWSER_DIALOG
 #define ROCKET_FTP_BROWSER_DIALOG
 
+#include <QtGui>
 #include <QUrlInfo>
 #include <QFtp>
 class RocketImageList;

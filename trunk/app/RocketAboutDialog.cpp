@@ -20,6 +20,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include <QFile>
 #include <QTextStream>
 #include <QDesktopServices>
+#include <QUrl>
 
 RocketAboutDialog::RocketAboutDialog(QWidget *parent)
         : QDialog(parent) {
@@ -55,5 +56,5 @@ RocketAboutDialog::RocketAboutDialog(QWidget *parent)
 
 void RocketAboutDialog::homepageButtonClicked() {
     QDesktopServices::openUrl(
-            QString(HOMEPAGE) + tr("/", "language-specific homepage subdirectory"));
+            QUrl(QString(HOMEPAGE) + tr("/", "language-specific homepage subdirectory")));
 }
