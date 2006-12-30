@@ -1,6 +1,5 @@
 set(CMAKE_VERBOSE_MAKEFILE true)
 set(QT_USE_QTNETWORK true)
-set(QT_USE_QTMAIN true)
 set(EXECUTABLE_OUTPUT_PATH ..)
 include(${QT_USE_FILE})
 
@@ -58,9 +57,19 @@ set(imagerocket_UIS
     savesettingstool.ui
     updatedialog.ui
 )
+
+set(imagerocket_RES
+    app.qrc
+    pixmaps.qrc
+)
+
 qt4_wrap_cpp(imagerocket_MOC_SRCS ${imagerocket_MOC_HDRS})
 qt4_wrap_ui(imagerocket_UIS_H ${imagerocket_UIS})
-qt4_automoc(${imagerocket_SRCS})
-add_executable(imagerocket WIN32 ${imagerocket_SRCS} ${imagerocket_MOC_SRCS} ${imagerocket_UIS_H} )
-target_link_libraries(imagerocket ${QT_LIBRARIES} pixmapview wininet)
+qt4_add_resources(imagerocket_RES_SRCS ${imagerocket_RES})
+add_executable(imagerocket WIN32 ${imagerocket_SRCS} ${imagerocket_MOC_SRCS} ${imagerocket_UIS_H} ${imagerocket_RES_SRCS})
+target_link_libraries(imagerocket ${QT_LIBRARIES} pixmapview)
+if (WIN32)
+    target_link_libraries(imagerocket wininet)
+endif (WIN32)
+
 

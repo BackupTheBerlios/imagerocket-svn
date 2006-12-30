@@ -6,5 +6,5 @@ find_package(Qt4 REQUIRED)
 
 add_subdirectory(pixmapview)
 add_subdirectory(app)
-
+add_subdirectory(plugins)
 
