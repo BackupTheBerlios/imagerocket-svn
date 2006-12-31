@@ -1,3 +1,7 @@
+#needed for importing generated UIs in out-of-source compiles
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
 set(plugin_SRCS
     crop.cpp
     CropViewTool.cpp

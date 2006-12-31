@@ -22,7 +22,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketFtpDialog.h"
 #include "RocketSaveDialog.h"
 #include "RocketFilePreviewWidget.h"
-#ifdef Q_OS_LINUX
+#ifdef SANE
 #include "scannerdialog.h"
 #endif
 
@@ -140,7 +140,7 @@ void RocketWindow::initGui() {
     a->setShortcut(QKeySequence(tr("Ctrl+A", "add images")));
     connect(a, SIGNAL(triggered()), SLOT(addImagesTriggered()));
     mFile->addAction(a);
-#ifdef Q_OS_LINUX
+#ifdef SANE
     a = aScanImages = new QAction(tr("&Scan Images..."), this);
     a->setShortcut(QKeySequence(tr("Ctrl+Shift+S", "scan images")));
     connect(a, SIGNAL(triggered()), SLOT(scanImagesTriggered()));
@@ -635,7 +635,7 @@ void RocketWindow::addImagesTriggered() {
 }
 
 void RocketWindow::scanImagesTriggered() {
-#ifdef Q_OS_LINUX
+#ifdef SANE
     ScannerDialog *dialog = new ScannerDialog(this);
     connect(dialog, SIGNAL(imageScanned(const QPixmap &)), &images, SLOT(addScannedFile(const QPixmap &)));
     dialog->setWindowTitle(tr("Scan Images"));

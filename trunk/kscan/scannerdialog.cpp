@@ -87,6 +87,9 @@ ScannerDialog::ScannerDialog(QWidget *parent) : QDialog(parent) {
         QMessageBox::warning(this, tr("Scanner"), tr("No scanners found."));
         scannerConnected = false;
     }
+    if (!scannerConnected) {
+        return;
+    }
     layout->addWidget(btnScan, 1, 0);
     layout->addWidget(btnClose, 1, 1);
     QFrame *vline = new QFrame(this);

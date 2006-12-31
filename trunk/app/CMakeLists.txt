@@ -1,3 +1,7 @@
+#needed for importing generated UIs in out-of-source compiles
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
 set(QT_USE_QTNETWORK true)
 set(EXECUTABLE_OUTPUT_PATH ..)
 include(${QT_USE_FILE})
@@ -65,13 +69,16 @@ set(imagerocket_RES
 qt4_wrap_cpp(imagerocket_MOC_SRCS ${imagerocket_MOC_HDRS})
 qt4_wrap_ui(imagerocket_UIS_H ${imagerocket_UIS})
 qt4_add_resources(imagerocket_RES_SRCS ${imagerocket_RES})
+if (SANE_FOUND)
+    add_definitions(-DSANE)
+endif (SANE_FOUND)
 add_executable(imagerocket WIN32 ${imagerocket_SRCS} ${imagerocket_MOC_SRCS} ${imagerocket_UIS_H} ${imagerocket_RES_SRCS})
 target_link_libraries(imagerocket ${QT_LIBRARIES} pixmapview)
 if (WIN32)
     target_link_libraries(imagerocket wininet)
 endif (WIN32)
-if (UNIX)
+if (SANE_FOUND)
     target_link_libraries(imagerocket kscan)
-endif (UNIX)
+endif (SANE_FOUND)
 
 
