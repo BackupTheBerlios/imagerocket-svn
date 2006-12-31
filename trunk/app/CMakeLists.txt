@@ -1,4 +1,3 @@
-set(CMAKE_VERBOSE_MAKEFILE true)
 set(QT_USE_QTNETWORK true)
 set(EXECUTABLE_OUTPUT_PATH ..)
 include(${QT_USE_FILE})
@@ -71,5 +70,8 @@ target_link_libraries(imagerocket ${QT_LIBRARIES} pixmapview)
 if (WIN32)
     target_link_libraries(imagerocket wininet)
 endif (WIN32)
+if (UNIX)
+    target_link_libraries(imagerocket kscan)
+endif (UNIX)
 
 
