@@ -40,4 +40,5 @@ qt4_wrap_cpp(kscan_MOC_SRCS ${kscan_MOC_HDRS})
 qt4_automoc(${kscan_SRCS})
 add_library(kscan SHARED ${kscan_SRCS} ${kscan_MOC_SRCS} ${kscan_UIS})
 target_link_libraries(kscan ${QT_LIBRARIES} ${SANE_LIBRARY})
+install(TARGETS kscan DESTINATION lib)
 

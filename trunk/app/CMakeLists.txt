@@ -30,6 +30,17 @@ set(imagerocket_SRCS
     ThreadedImageLoader.cpp
     main.cpp
 )
+if(MINGW)
+    # resource compilation for mingw
+    ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/windows.o
+    COMMAND windres.exe -I${CMAKE_CURRENT_SOURCE_DIR} -i${CMAKE_CURRENT_SOURCE_DIR}/windows.rc -o ${CMAKE_CURRENT_BINARY_DIR}/windows.o)
+    SET(imagerocket_SRCS ${imagerocket_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/windows.o)
+else(MINGW)
+    if (WIN32)
+        SET(imagerocket_SRCS ${imagerocket_SRCS} windows.rc)
+    endif (WIN32)
+endif(MINGW)
+
 
 set(imagerocket_MOC_HDRS
     RocketWindow.h
@@ -80,5 +91,9 @@ endif (WIN32)
 if (SANE_FOUND)
     target_link_libraries(imagerocket kscan)
 endif (SANE_FOUND)
-
+if (UNIX)
+    install(TARGETS imagerocket DESTINATION bin)
+else (UNIX)
+    install(TARGETS imagerocket DESTINATION .)
+endif (UNIX)
 
