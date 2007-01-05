@@ -17,22 +17,17 @@ endif (SANE_FOUND)
 add_subdirectory(app)
 add_subdirectory(plugins)
 
-set(DLLS_TO_INSTALL
-    "mingwm10.dll"
-    "QtCore4.dll"
-    "QtGui4.dll"
-    "QtNetwork4.dll"
-)
-set(ROOT ${QT_LIBRARY_DIR}/..)
-message("root: ${ROOT}")
-foreach (A ${DLLS_TO_INSTALL})
-    message(${A})
-    find_file(LOCATION ${A} ${ROOT})
-    if (NOTFOUND)
-        message("Failed!")
-    endif (NOTFOUND)
-    message(${LOCATION})
-    install(FILES ${LOCATION} DESTINATION .)
-endforeach (A)
-
+if (WIN32)
+    set(ROOT ${QT_LIBRARY_DIR}/..)
+    install(FILES ${ROOT}/bin/mingwm10.dll DESTINATION .)
+    if (DEBUG)
+        install(FILES ${ROOT}/bin/QtCored4.dll DESTINATION .)
+        install(FILES ${ROOT}/bin/QtGuid4.dll DESTINATION .)
+        install(FILES ${ROOT}/bin/QtNetworkd4.dll DESTINATION .)
+    else (DEBUG)
+        install(FILES ${ROOT}/bin/QtCore4.dll DESTINATION .)
+        install(FILES ${ROOT}/bin/QtGui4.dll DESTINATION .)
+        install(FILES ${ROOT}/bin/QtNetwork4.dll DESTINATION .)
+    endif (DEBUG)
+endif (WIN32)
 

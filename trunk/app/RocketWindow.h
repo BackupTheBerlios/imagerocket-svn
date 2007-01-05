@@ -51,6 +51,7 @@ protected:
     QMenu *mFile, *mEdit, *mView, *mImage, *mHelp;
     QAction *aOpenFolder, *aSaveFolder, *aAddImages, *aScanImages, *aUploadToServer, *aPrint, *aExit;
     QAction *aFirst, *aBack, *aForward, *aLast;
+    QAction *aDelete;
     QAction *aUseLargeThumbnails;
     QAction *aZoomOut, *aZoom100, *aZoomIn, *aZoomFit;
     QSignalMapper rotateMapper;
@@ -94,6 +95,7 @@ protected slots:
     void backTriggered();
     void forwardTriggered();
     void lastTriggered();
+    void deleteTriggered();
     void switchImageBlockedTimeout();
     
     void indexChanged(RocketImage *oldSelection);

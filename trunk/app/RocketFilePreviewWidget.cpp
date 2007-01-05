@@ -253,9 +253,9 @@ void RocketFilePreviewWidget::doAction(int action) {
         if (settings.value("ui/askBeforeDeleting").toBool()) {
             response = QMessageBox::question(this, img->getFileName(),
                     tr("Are you sure you want to delete\n%1?").arg(img->getShortFileName()),
-                    QMessageBox::Yes, QMessageBox::No);
+                    QMessageBox::Ok|QMessageBox::Cancel, QMessageBox::Ok);
         }
-        if (response == QMessageBox::No) {
+        if (response == QMessageBox::Cancel) {
             return;
         }
         QTimer::singleShot(0, img, SLOT(guiDeleteFile()));

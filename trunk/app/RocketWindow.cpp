@@ -182,6 +182,13 @@ void RocketWindow::initGui() {
     a->setShortcut(QKeySequence(tr("End", "to last")));
     connect(a, SIGNAL(triggered()), SLOT(lastTriggered()));
     mainToolBar->addAction(a);
+    mainToolBar->addSeparator();
+    mFile->addAction(a);
+    mFile->addSeparator();
+    a = aDelete = new QAction(QIcon(":/pixmaps/delete.png"), tr("&Delete"), this);
+    a->setShortcut(QKeySequence(tr("Del", "delete")));
+    connect(a, SIGNAL(triggered()), SLOT(deleteTriggered()));
+    mainToolBar->addAction(a);
     mFile->addAction(a);
     mFile->addSeparator();
     a = aZoomIn = new QAction(QIcon(":/pixmaps/zoom-in.png"),
@@ -814,6 +821,21 @@ void RocketWindow::lastTriggered() {
         switchImageBlocked = true;
         images.setSelection(images.last());
     }
+}
+
+void RocketWindow::deleteTriggered() {
+    RocketImage *img = images.getSelection();
+    int response = 0;
+    QSettings settings;
+    if (settings.value("ui/askBeforeDeleting").toBool()) {
+        response = QMessageBox::question(this, img->getFileName(),
+                tr("Are you sure you want to delete\n%1?").arg(img->getShortFileName()),
+                QMessageBox::Ok|QMessageBox::Cancel, QMessageBox::Ok);
+    }
+    if (response == QMessageBox::Cancel) {
+        return;
+    }
+    img->guiDeleteFile();
 }
 
 void RocketWindow::switchImageBlockedTimeout() {
