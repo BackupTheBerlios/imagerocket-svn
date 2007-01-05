@@ -530,6 +530,7 @@ void RocketWindow::updateGui() {
     aRedo->setEnabled(selection ? selection->canRedo() : false);
     aRedo->setText((selection && selection->canRedo())
             ? tr("&Redo %1").arg(selection->getDescriptionOfNext()) : tr("&Redo"));
+    aDelete->setEnabled(selection);
     aSaveFolder->setEnabled(images.size());
     aAddImages->setEnabled(!images.getLocation().isNull());
     aPrint->setEnabled(images.size());
