@@ -16,7 +16,7 @@ program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
 #include "RocketAboutDialog.h"
-#include "consts.h"
+#include "config.h"
 #include <QFile>
 #include <QTextStream>
 #include <QDesktopServices>

@@ -19,6 +19,9 @@
    Boston, MA 02110-1301, USA.
 */
 
+#ifndef SCANNER_DIALOG_H
+#define SCANNER_DIALOG_H
+
 #include <QtGui>
 class KScanDevice;
 class LightPreviewWidget;
@@ -50,3 +53,5 @@ protected slots:
     void setScanRect(QRect sel);
     void setRealScanRect(QRect sel);
 };
+
+#endif

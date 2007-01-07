@@ -1,5 +1,4 @@
 project(imagerocket)
-include(CPack)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -9,6 +8,17 @@ find_package(Qt4 REQUIRED)
 if (UNIX)
     find_package(Sane)
 endif (UNIX)
+
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ImageRocket")
+SET(CPACK_PACKAGE_VERSION "0.5")
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "5")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_VENDOR "Wesley Crossman")
+#set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/readme.txt")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/license.txt")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_DESCRIPTION_SUMMARY} ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
+set(CPACK_NSIS_URL_INFO_ABOUT "http://developer.berlios.de/projects/imagerocket")
 
 add_subdirectory(pixmapview)
 if (SANE_FOUND)
@@ -30,4 +40,11 @@ if (WIN32)
         install(FILES ${ROOT}/bin/QtNetwork4.dll DESTINATION .)
     endif (DEBUG)
 endif (WIN32)
+install(FILES license.txt DESTINATION .)
+if (UNIX)
+    install(PROGRAMS imagerocket.sh DESTINATION bin)
+endif (UNIX)
+
+INCLUDE(InstallRequiredSystemLibraries)
+include(CPack)
 

@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 program; if not, write to the Free Software Foundation, Inc., 59 Temple Place,
 Suite 330, Boston, MA 02111-1307 USA */
 
+#include "config.h"
 #include "RocketWindow.h"
 #include "RocketImage.h"
 #include "RocketAboutDialog.h"
@@ -22,14 +23,11 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketFtpDialog.h"
 #include "RocketSaveDialog.h"
 #include "RocketFilePreviewWidget.h"
-#ifdef SANE
+#ifdef SANE_FOUND
 #include "scannerdialog.h"
 #endif
-
 #include "ImageTools.h"
-
 #include "interfaces.h"
-#include "consts.h"
 #include <cassert>
 
 #define PIECE_SIZE 192
@@ -140,7 +138,7 @@ void RocketWindow::initGui() {
     a->setShortcut(QKeySequence(tr("Ctrl+A", "add images")));
     connect(a, SIGNAL(triggered()), SLOT(addImagesTriggered()));
     mFile->addAction(a);
-#ifdef SANE
+#ifdef SANE_FOUND
     a = aScanImages = new QAction(tr("&Scan Images..."), this);
     a->setShortcut(QKeySequence(tr("Ctrl+Shift+S", "scan images")));
     connect(a, SIGNAL(triggered()), SLOT(scanImagesTriggered()));
@@ -643,7 +641,7 @@ void RocketWindow::addImagesTriggered() {
 }
 
 void RocketWindow::scanImagesTriggered() {
-#ifdef SANE
+#ifdef SANE_FOUND
     ScannerDialog *dialog = new ScannerDialog(this);
     connect(dialog, SIGNAL(imageScanned(const QPixmap &)), &images, SLOT(addScannedFile(const QPixmap &)));
     dialog->setWindowTitle(tr("Scan Images"));

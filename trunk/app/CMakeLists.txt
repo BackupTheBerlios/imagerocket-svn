@@ -36,6 +36,7 @@ if(MINGW)
     COMMAND windres.exe -I${CMAKE_CURRENT_SOURCE_DIR} -i${CMAKE_CURRENT_SOURCE_DIR}/windows.rc -o ${CMAKE_CURRENT_BINARY_DIR}/windows.o)
     SET(imagerocket_SRCS ${imagerocket_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/windows.o)
 else(MINGW)
+    # resource compilation for non-mingw compilers -- untested! -- WJC
     if (WIN32)
         SET(imagerocket_SRCS ${imagerocket_SRCS} windows.rc)
     endif (WIN32)
@@ -80,9 +81,9 @@ set(imagerocket_RES
 qt4_wrap_cpp(imagerocket_MOC_SRCS ${imagerocket_MOC_HDRS})
 qt4_wrap_ui(imagerocket_UIS_H ${imagerocket_UIS})
 qt4_add_resources(imagerocket_RES_SRCS ${imagerocket_RES})
-if (SANE_FOUND)
-    add_definitions(-DSANE)
-endif (SANE_FOUND)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+
 add_executable(imagerocket WIN32 ${imagerocket_SRCS} ${imagerocket_MOC_SRCS} ${imagerocket_UIS_H} ${imagerocket_RES_SRCS})
 target_link_libraries(imagerocket ${QT_LIBRARIES} pixmapview)
 if (WIN32)
