@@ -42,6 +42,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 RocketWindow::RocketWindow() : QMainWindow() {
     dFiles = NULL;
     
+    //load the default settings from file and set any that aren't set already
     QSettings defaults(":/defaults.ini", QSettings::IniFormat);
     QSettings settings;
     foreach (QString key, defaults.allKeys()) {
@@ -79,7 +80,7 @@ void RocketWindow::initGui() {
     connect(&images, SIGNAL(selectionChanged(RocketImage *)), SLOT(indexChanged(RocketImage *)));
     connect(&images, SIGNAL(listChanged(RocketImageList::ListChangeType, int)), SLOT(updateGui()));
     
-    //Size and center the window
+    //size and center the window
     //I need to check whether this is useful, since
     //window managers may manage it well enough. - WJC
     int screen = 0;
@@ -97,6 +98,7 @@ void RocketWindow::initGui() {
     move(rect.width()/2 - frameGeometry().width()/2,
          rect.height()/2 - frameGeometry().height()/2);
     
+    //set up the statusbar
     QStatusBar *status = new QStatusBar(this);
     statusIndex = new QLabel(status);
     statusIndex->setMargin(1);
@@ -112,6 +114,7 @@ void RocketWindow::initGui() {
     status->addWidget(statusSize, 14);
     setStatusBar(status);
     
+    //set up the toolbars and menus
     QToolBar *mainToolBar = addToolBar(tr("Main Toolbar"));
     QToolBar *imageToolBar = addToolBar(tr("Image Toolbar"));
     mFile = menuBar()->addMenu(tr("&File"));
@@ -286,9 +289,11 @@ void RocketWindow::initGui() {
     connect(a, SIGNAL(triggered()), SLOT(aboutTriggered()));
     mHelp->addAction(a);
     
+    //create instances of these classes, so they can be used later to create tool widgets
     saveSettingsTool = new RocketSaveSettingsTool(this);
     infoTool = new RocketInfoTool(this);
     
+    //set up the tool palette -- actual loading of plugins occurs in initObject
     dPalette = new QDockWidget(this);
     dPalette->setWindowTitle(tr("Tools"));
     dPalette->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
@@ -309,7 +314,7 @@ void RocketWindow::initGui() {
     dPalette->setWidget(toolboxContainer);
     addDockWidget(Qt::RightDockWidgetArea, dPalette);
     
-    //add toolbars and dock widgets toggles to View menu
+    //add toolbar and dock widget togglers to View menu
     mView->addSeparator();
     QList < QToolBar * > toolbars = qFindChildren< QToolBar * >(this);
     if (toolbars.size()) {
@@ -328,6 +333,7 @@ void RocketWindow::initGui() {
         }
     }
     
+    //set up the image viewing/editing widget
     viewportContainer = new QWidget(this);
     viewportContainerLayout = new QVBoxLayout(viewportContainer);
     viewportContainer->setLayout(viewportContainerLayout);
@@ -340,21 +346,26 @@ void RocketWindow::initGui() {
     connect(view, SIGNAL(zoomChanged(double)), this, SLOT(updateGui()));
     setAcceptDrops(true);
     installEventFilter(this);
+
+    //set up the file thumbnails toolbox
+    useLargeThumbnailsToggled(false);
     
+    //set up a hack to prevent image switching shortcut keypresses from queueing up
     switchImageBlocked = false;
     switchImageBlockedTimer.setSingleShot(true);
     connect(&switchImageBlockedTimer, SIGNAL(timeout()), SLOT(switchImageBlockedTimeout()));
-    useLargeThumbnailsToggled(false);
-    
+
     //This works around the problem with QMainWindow in which the dock widgets get shrunk if the
     //window is resized smaller than their height. I hope this will be fixed upstream. - WJC
     setMinimumSize(500, 400);
     
+    //update the GUI state
     updateGui();
 }
 
 //! This does the delayed setup for the class.
 void RocketWindow::initObject() {
+    //* load plugins and finish setting up tool palette *
     connect(&pluginShortcutMapper, SIGNAL(mapped(int)),
             SLOT(toolShortcutPressed(int)));
     QHash < QString, PluginListItemEntry > entries;
@@ -407,6 +418,7 @@ void RocketWindow::initObject() {
         }
     }
 
+    //* check for plugins if conditions are met *
     QVariant lastChecked = settings.value("program/lastCheckedForUpdates");
     bool dontCheck = !settings.value("program/checkForUpdates").toBool();
     bool longEnoughWait = lastChecked.isNull()
@@ -417,13 +429,13 @@ void RocketWindow::initObject() {
         connect(updateChecker, SIGNAL(done(bool)), SLOT(updateCheckerDone(bool)));
         statusBar()->showMessage(tr("Checking for Updates..."), 4000);
     }
-    ////debugging crash test - use with prog_test.sh
+
+    //* debugging crash test - use with prog_test.sh *
     //QTimer::singleShot(random() % 100, this, SLOT(close()));
 }
 
 //! This iterates the given directory and looks in its child directories for plugins.
 void RocketWindow::loadPlugins(QString dirPath, QHash < QString, PluginListItemEntry > &entries) {
-    //This could use some cleanup. The error handling code could be streamlined. - WJC
     QDir dir(QDir::convertSeparators(dirPath));
     if (!dir.exists()) {
         return;
