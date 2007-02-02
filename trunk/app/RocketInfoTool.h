@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005 Wesley Crossman
+Copyright (C) 2005-2007 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -26,6 +26,8 @@ class RocketInfoWidget : public QWidget, public Ui::RocketInfoTool {
 Q_OBJECT
 public:
     RocketInfoWidget();
+protected:
+    void mouseReleaseEvent(QMouseEvent *);
 };
 
 class RocketInfoTool : public QObject {

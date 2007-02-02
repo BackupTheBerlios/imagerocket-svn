@@ -1,6 +1,6 @@
 /* ImageRocket
 An image-editing program written for editing speed and ease of use.
-Copyright (C) 2005-2006 Wesley Crossman
+Copyright (C) 2005-2007 Wesley Crossman
 Email: wesley@crossmans.net
 
 You can redistribute and/or modify this software under the terms of the GNU
@@ -36,8 +36,8 @@ RocketAboutDialog::RocketAboutDialog(QWidget *parent)
 #ifndef NDEBUG
             "Debug Mode<br>"
 #endif
-            "&copy; 2005-2006 Wesley Crossman<br>"
-            "Qt toolkit &copy; 1994-2006 Trolltech AS<br>"
+            "&copy; 2005-2007 Wesley Crossman<br>"
+            "Qt toolkit &copy; 1994-2007 Trolltech AS<br>"
             "Icons are from Red Hat's Bluecurve and The Gimp's default icon theme"
             "</h4></br>"));
     //Credits
