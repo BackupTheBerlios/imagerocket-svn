@@ -244,6 +244,9 @@ void RocketWindow::initGui() {
     connect(a, SIGNAL(toggled(bool)), SLOT(useLargeThumbnailsToggled(bool)));
     a->setCheckable(true);
     mView->addAction(a);
+    mView->addSeparator();
+    mToolboxes = mView->addMenu("&Toolboxes");
+    connect(mToolboxes, SIGNAL(aboutToShow()), SLOT(menuToolboxesAboutToShow()));
     a = aExit = new QAction(tr("E&xit"), this);
     connect(a, SIGNAL(triggered()), SLOT(exitTriggered()));
     mFile->addAction(a);
@@ -313,25 +316,6 @@ void RocketWindow::initGui() {
     toolbox->setFrameStyle(QFrame::Box|QFrame::Plain);
     dPalette->setWidget(toolboxContainer);
     addDockWidget(Qt::RightDockWidgetArea, dPalette);
-    
-    //add toolbar and dock widget togglers to View menu
-    mView->addSeparator();
-    QList < QToolBar * > toolbars = qFindChildren< QToolBar * >(this);
-    if (toolbars.size()) {
-        foreach (QToolBar *tb, toolbars) {
-            if (tb->parentWidget() == this) {
-                mView->addAction(tb->toggleViewAction());
-            }
-        }
-    }
-    QList < QDockWidget * > dockwidgets = qFindChildren< QDockWidget * >(this);
-    if (dockwidgets.size()) {
-        foreach (QDockWidget *dock, dockwidgets) {
-            if (dock->parentWidget() == this) {
-                mView->addAction(dock->toggleViewAction());
-            }
-        }
-    }
     
     //set up the image viewing/editing widget
     viewportContainer = new QWidget(this);
@@ -926,9 +910,6 @@ void RocketWindow::mirrorTriggered() {
 }
 
 void RocketWindow::useLargeThumbnailsToggled(bool value) {
-    //XXX Deleting everything is causes flicker and removes the preview toggle from
-    //the View menu. The latter must especially be fixed! The proper fix for the underlying
-    //problem will take some work, I expect. - WJC
     delete dFiles;
     dFiles = new QDockWidget(this);
     dFiles->setWindowTitle(tr("File Thumbnails"));
@@ -1012,6 +993,27 @@ void RocketWindow::aboutTriggered() {
 
 void RocketWindow::optionsTriggered() {
     RocketOptionsDialog(this).exec();
+}
+
+void RocketWindow::menuToolboxesAboutToShow() {
+    mToolboxes->clear();
+    QList < QDockWidget * > dockwidgets = qFindChildren< QDockWidget * >(this);
+    if (dockwidgets.size()) {
+        foreach (QDockWidget *dock, dockwidgets) {
+            if (dock->parentWidget() == this) {
+                mToolboxes->addAction(dock->toggleViewAction());
+            }
+        }
+    }
+    mToolboxes->addSeparator();
+    QList < QToolBar * > toolbars = qFindChildren< QToolBar * >(this);
+    if (toolbars.size()) {
+        foreach (QToolBar *tb, toolbars) {
+            if (tb->parentWidget() == this) {
+                mToolboxes->addAction(tb->toggleViewAction());
+            }
+        }
+    }
 }
 
 void RocketWindow::checkForUpdatesTriggered() {

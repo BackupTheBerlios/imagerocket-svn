@@ -48,7 +48,7 @@ protected:
     RocketInfoTool *infoTool;
     QPointer < RocketUpdateChecker > updateChecker;
     QLabel *statusFile, *statusIndex, *statusZoom, *statusSize;
-    QMenu *mFile, *mEdit, *mView, *mImage, *mHelp;
+    QMenu *mFile, *mEdit, *mView, *mToolboxes, *mImage, *mHelp;
     QAction *aOpenFolder, *aSaveFolder, *aAddImages, *aScanImages, *aUploadToServer, *aPrint, *aExit;
     QAction *aFirst, *aBack, *aForward, *aLast;
     QAction *aDelete;
@@ -124,6 +124,8 @@ protected slots:
     
     void questionClicked(RocketImage *img);
     
+    void menuToolboxesAboutToShow();
+
     void updateGui();
     void updateCheckerDone(bool error);
     
