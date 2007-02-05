@@ -37,13 +37,13 @@ RocketAboutDialog::RocketAboutDialog(QWidget *parent)
             "Debug Mode<br>"
 #endif
             "&copy; 2005-2007 Wesley Crossman<br>"
-            "Qt toolkit &copy; 1994-2007 Trolltech AS<br>"
+            "Qt " QT_VERSION_STR " &copy; Trolltech AS<br>"
             "Icons are from Red Hat's Bluecurve and The Gimp's default icon theme"
             "</h4></br>"));
-    //Credits
-    tmp.append(tr("<h3>Thanks To</h3><br><ul>"
-            "<li></li>"
-            "</ul>"));
+    //Credits - Your name here!
+    //tmp.append(tr("<h3>Thanks To</h3><br><ul>"
+    //        "<li></li>"
+    //        "</ul>"));
     //License
     QFile f(":/license.htm");
     f.open(QFile::ReadOnly);

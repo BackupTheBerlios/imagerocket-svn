@@ -583,6 +583,7 @@ void RocketWindow::indexChanged(RocketImage *oldSelection) {
     if (oldSelection != selection && !isInfoWidget) {
         recheckSettingsButton = fileSettingsButton->isChecked();
         delete toolSettingsToolBar;
+        toolSettingsToolBar = NULL;
     }
     if (images.size()) {
         view->resetZoomAndPosition();
@@ -947,6 +948,7 @@ void RocketWindow::toolClicked(QListWidgetItem *item) {
     } else if (item && !item->text().isEmpty()
             && item->background().style() != Qt::NoBrush) {
         delete toolSettingsToolBar;
+        toolSettingsToolBar = NULL;
     }
 }
 
@@ -967,10 +969,13 @@ void RocketWindow::setToolSettingsToolBar(QWidget *widget) {
 }
 
 void RocketWindow::imageSaveSettingsToggled(bool value) {
-    delete toolSettingsToolBar;
-    toolSettingsToolBar = NULL;
     if (value) {
+        fileSettingsButton->blockSignals(true); //prevent recursion
         setToolSettingsToolBar(saveSettingsTool->getSettingsToolBar(images.getSelection()));
+        fileSettingsButton->setChecked(true);
+        fileSettingsButton->blockSignals(false);
+    } else {
+        setToolSettingsToolBar(NULL);
     }
 }
 
