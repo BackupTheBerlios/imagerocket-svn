@@ -97,9 +97,7 @@ void RocketFilePreviewArea::updateSize() {
 
 void RocketFilePreviewArea::updateSelection() {
     const QVector < RocketImage * > *v = images->getVector();
-    for (int a=0;a<list.size();++a) {
-        list[a]->setActive(a == v->indexOf(images->getSelection()));
-    }
+    list[v->indexOf(images->getSelection())]->setChecked(true);
     centerOnPosition();
 }
 
@@ -112,10 +110,7 @@ void RocketFilePreviewArea::listChanged(RocketImageList::ListChangeType type, in
     if (type == RocketImageList::EntryDeleted) {
         delete list[changeIndex];
         list.remove(changeIndex);
-        foreach (RocketImage *i, *images->getVector()) {
-            int a = images->getVector()->indexOf(i);
-            list[a]->setActive(a == index);
-        }
+        if (list.size()) list[index]->setChecked(true);
         updateSize();
     } else {
         foreach (RocketFilePreviewWidget *w, list) {
@@ -126,7 +121,6 @@ void RocketFilePreviewArea::listChanged(RocketImageList::ListChangeType type, in
         foreach (RocketImage *i, *images->getVector()) {
             RocketFilePreviewWidget *preview =
                     new RocketFilePreviewWidget(widget, i, thumbnailSize);
-            preview->setActive(list.size() == index);
             preview->setOrientation(usingHorizontalLayout);
             list.append(preview);
             widget->layout()->addWidget(preview);
@@ -135,6 +129,7 @@ void RocketFilePreviewArea::listChanged(RocketImageList::ListChangeType type, in
             connect(preview, SIGNAL(questionClicked(RocketImage *)),
                     SLOT(questionClickedEvent(RocketImage *)));
         }
+	if (images->size()) list[index]->setChecked(true);
         QTimer::singleShot(0, this, SLOT(updateSize()));
         horizontalScrollBar()->setValue(scrollPos.x());
         verticalScrollBar()->setValue(scrollPos.y());

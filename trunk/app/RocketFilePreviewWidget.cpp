@@ -34,14 +34,26 @@ const int TBOX_STEPS = 3, SELECT_STEPS = 3;
 */
 
 RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *img,
-            int thumbnailSize) : QWidget(parent) {
+            int thumbnailSize) : QAbstractButton(parent) {
     this->thumbnailSize = thumbnailSize;
     this->img = img;
-    connect(img, SIGNAL(changed()), this, SLOT(updatePreview()));
-    onTrash = onQuestion = onWidget = active = usingHorizontalLayout = false;
+    onTrash = onQuestion = onWidget = usingHorizontalLayout = false;
+    toolboxFading = activeFading = 0;
     font.setPointSize(10);
+    fadeTimer.setInterval(50);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setCheckable(true);
+    setAutoExclusive(true);
+    setMouseTracking(true);
+    
+    connect(img, SIGNAL(changed()), this, SLOT(updatePreview()));
+    connect(&fadeTimer, SIGNAL(timeout()), SLOT(fadeEvent()));
+    connect(this, SIGNAL(toggled(bool)), SLOT(toggledSlot(bool)));
+    
+    updatePreview();
+    
     if (!popupMenu) {
-        //create shared popup menu
+        //create static popup menu to be shared between instances
         popupMenu = new QMenu(parent);
         popupMenu->addAction(tr("&Info"))->setObjectName("info");
         popupMenu->addAction(tr("&Delete"))->setObjectName("delete");
@@ -55,12 +67,6 @@ RocketFilePreviewWidget::RocketFilePreviewWidget(QWidget *parent, RocketImage *i
         questionIcon = new QPixmap(":/pixmaps/question.png");
         questionLitIcon = new QPixmap(":/pixmaps/questionLit.png");
     }
-    setMouseTracking(true);
-    updatePreview();
-    fadeTimer.setInterval(50);
-    connect(&fadeTimer, SIGNAL(timeout()), SLOT(fadeEvent()));
-    toolboxFading = 0;
-    activeFading = 0;
 }
 
 void RocketFilePreviewWidget::updatePreview() {
@@ -169,21 +175,19 @@ QImage RocketFilePreviewWidget::createAlphaErasedImage(const QImage &img, int al
     return src;
 }
 
-void RocketFilePreviewWidget::setActive(bool value) {
-    if (active != value) {
-        if (value) {
-            activeFading = SELECT_STEPS;
+void RocketFilePreviewWidget::toggledSlot(bool value) {
+    qDebug() << "setChecked" << value;
+    if (value) {
+        activeFading = SELECT_STEPS;
+    } else {
+        if (QSettings().value("ui/useFading").toBool()) {
+            if (!fadeTimer.isActive()) fadeTimer.start();
         } else {
-            if (QSettings().value("ui/useFading").toBool()) {
-                if (!fadeTimer.isActive()) fadeTimer.start();
-            } else {
-                activeFading = 0;
-            }
+            activeFading = 0;
         }
-        update();
-        active = value;
-        if (renameWidget) renameFinishedEvent();
     }
+    update();
+    if (renameWidget) renameFinishedEvent();
 }
 
 void RocketFilePreviewWidget::setOrientation(bool horizontal) {
@@ -296,7 +300,7 @@ void RocketFilePreviewWidget::mousePressEvent(QMouseEvent *event) {
     } else if (showRollover && positionOnButton(event->pos(), 3, LeftToRight, *questionIcon)
                 && leftClick) {
         doAction(3);
-    } else if (leftClick && !active) {
+    } else if (leftClick && !isChecked()) {
         emit clicked(img);
     } else if (event->button() == Qt::RightButton) {
         popupMenu->disconnect();
@@ -314,7 +318,7 @@ void RocketFilePreviewWidget::fadeEvent() {
         ++toolboxFading;
         done = false;
     }
-    if (!active && activeFading) {
+    if (!isChecked() && activeFading) {
         --activeFading;
         done = false;
     }

@@ -23,7 +23,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 class RocketFileRenameEdit;
 
-class RocketFilePreviewWidget : public QWidget {
+class RocketFilePreviewWidget : public QAbstractButton {
 Q_OBJECT
 protected:
     static QPixmap *trashIcon, *trashLitIcon,
@@ -38,7 +38,7 @@ protected:
     int thumbnailSize;
     bool onTrash, onRename, onQuestion, onWidget;
     int toolboxFading;
-    bool active, usingHorizontalLayout;
+    bool usingHorizontalLayout;
     int activeFading;
     QSize oldPrefSize;
     QTimer fadeTimer;
@@ -58,10 +58,6 @@ public:
     RocketImage *getImage() {
         return img;
     }
-    void setActive(bool value);
-    bool getActive() {
-        return active;
-    }
     void setOrientation(bool horizontal);
     bool usingHorizontalOrientation() {
         return usingHorizontalLayout;
@@ -71,6 +67,7 @@ protected slots:
     void fadeEvent();
     void renameFinishedEvent();
     void renameCanceledEvent();
+    void toggledSlot(bool value);
     void mouseLeft() {leaveEvent(NULL);}
 public slots:
     void updatePreview();
