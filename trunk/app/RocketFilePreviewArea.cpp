@@ -96,9 +96,11 @@ void RocketFilePreviewArea::updateSize() {
 }
 
 void RocketFilePreviewArea::updateSelection() {
-    const QVector < RocketImage * > *v = images->getVector();
-    list[v->indexOf(images->getSelection())]->setChecked(true);
-    centerOnPosition();
+    if (images->getSelection()) {
+        const QVector < RocketImage * > *v = images->getVector();
+        list[v->indexOf(images->getSelection())]->setChecked(true);
+        centerOnPosition();
+    }
 }
 
 void RocketFilePreviewArea::questionClickedEvent(RocketImage *w) {

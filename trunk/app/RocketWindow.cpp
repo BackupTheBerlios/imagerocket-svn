@@ -94,7 +94,7 @@ void RocketWindow::initGui() {
         screen = desktop->screenNumber(this);
     }
     QRect rect(desktop->availableGeometry(screen));
-    resize(int(rect.width() * (2.0/3.0)), int(rect.height() * (2.0/3.0)));
+    resize(int(rect.width() * .75), int(rect.height() * .8));
     move(rect.width()/2 - frameGeometry().width()/2,
          rect.height()/2 - frameGeometry().height()/2);
     
@@ -300,7 +300,9 @@ void RocketWindow::initGui() {
     dPalette = new QDockWidget(this);
     dPalette->setWindowTitle(tr("Tools"));
     dPalette->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
-    dPalette->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    dPalette->setFeatures(QDockWidget::DockWidgetClosable
+            |QDockWidget::DockWidgetMovable
+            |QDockWidget::DockWidgetFloatable);
     toolboxContainer = new QWidget(dPalette);
     new QVBoxLayout(toolboxContainer);
     toolboxContainer->layout()->setMargin(1);
@@ -923,7 +925,9 @@ void RocketWindow::useLargeThumbnailsToggled(bool value) {
     connect(filePreviewArea, SIGNAL(questionClicked(RocketImage *)),
             SLOT(questionClicked(RocketImage *)));
     dFiles->setAllowedAreas(Qt::TopDockWidgetArea|Qt::BottomDockWidgetArea);
-    dFiles->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    dFiles->setFeatures(QDockWidget::DockWidgetClosable
+            |QDockWidget::DockWidgetMovable
+            |QDockWidget::DockWidgetFloatable);
     dFiles->setWidget(filePreviewArea);
     addDockWidget(Qt::BottomDockWidgetArea, dFiles);
 }

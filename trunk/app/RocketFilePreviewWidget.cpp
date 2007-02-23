@@ -21,8 +21,8 @@ Suite 330, Boston, MA 02111-1307 USA */
 namespace RocketFilePreviewWidget {
     QPointer < QMenu > RocketFilePreviewWidget::popupMenu;
     QPixmap *floppyIcon = 0;
-    QMap < int, QPixmap * > trashIcon, trashLitIcon,
-            renameIcon, renameLitIcon, questionIcon, questionLitIcon;
+    QPixmap *trashIcon, *trashLitIcon,
+            *renameIcon, *renameLitIcon, *questionIcon, *questionLitIcon;
 }
 
 const int TBOX_STEPS = 3, SELECT_STEPS = 3;
@@ -176,7 +176,6 @@ QImage RocketFilePreviewWidget::createAlphaErasedImage(const QImage &img, int al
 }
 
 void RocketFilePreviewWidget::toggledSlot(bool value) {
-    qDebug() << "setChecked" << value;
     if (value) {
         activeFading = SELECT_STEPS;
     } else {

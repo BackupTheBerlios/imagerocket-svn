@@ -31,27 +31,38 @@ RocketAboutDialog::RocketAboutDialog(QWidget *parent)
     
     //Title
     QString tmp;
-    tmp.append(tr("<h2>" PROGRAM_NAME " " VERSION "</h2>"
-            "<h4>"
+    tmp += "<h2>";
+    tmp += tr("%1 %2", "about dialog header").arg(PROGRAM_NAME).arg(VERSION);
+    tmp += "</h2><h4>";
 #ifndef NDEBUG
-            "Debug Mode<br>"
+    tmp += tr("Debug Mode", "about dialog message");
+    tmp += "<br><br>";
 #endif
-            "&copy; 2005-2007 Wesley Crossman<br>"
-            "Qt " QT_VERSION_STR " &copy; Trolltech AS<br>"
-            "Icons are from Red Hat's Bluecurve and The Gimp's default icon theme"
-            "</h4></br>"));
+    tmp += tr("&copy; 2005-2007 Wesley Crossman", "about dialog");
+    tmp += "<br>";
+    tmp += tr("Qt %1 &copy; Trolltech AS", "about dialog").arg(QT_VERSION_STR);
+    tmp += "<br>";
+    tmp += tr("Icons are from Red Hat's Bluecurve and The Gimp's default icon theme",
+            "about dialog");
+    tmp += "</h4></br>";
+    //tmp += "<h3>";
+    //tmp += tr("Thanks To");
+    //tmp += "</h3><br><ul>";
     //Credits - Your name here!
-    //tmp.append(tr("<h3>Thanks To</h3><br><ul>"
-    //        "<li></li>"
-    //        "</ul>"));
+    //tmp += "<li></li>";
+    //tmp += "</ul>";
     //License
     QFile f(":/license.htm");
     f.open(QFile::ReadOnly);
     QTextStream in(&f);
     QString license(in.readAll());
-    tmp.append(tr("<h3>License</h3><br><tt>"
-            "<i>This program is distributed under the GPL, version 2 or later.</i>"
-            "<br>%1</tt>").arg(license));
+    tmp += "<br><h3>";
+    tmp += tr("License", "about dialog");
+    tmp += "</h3><br><br><tt>";
+    tmp += tr("<i>This program is distributed under the GPL, version 2 or later.</i>", "about dialog");
+    tmp += "<br>";
+    tmp += license;
+    tmp += "</tt>";
     aboutEdit->setHtml(tmp);
     
     aboutEdit->setReadOnly(true);
