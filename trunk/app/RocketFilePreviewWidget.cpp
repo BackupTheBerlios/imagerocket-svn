@@ -19,7 +19,7 @@ Suite 330, Boston, MA 02111-1307 USA */
 #include "RocketFilePreviewArea.h"
 
 namespace RocketFilePreviewWidget {
-    QPointer < QMenu > RocketFilePreviewWidget::popupMenu;
+    QPointer < QMenu > popupMenu;
     QPixmap *floppyIcon = 0;
     QPixmap *trashIcon, *trashLitIcon,
             *renameIcon, *renameLitIcon, *questionIcon, *questionLitIcon;

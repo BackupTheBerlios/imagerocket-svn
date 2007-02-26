@@ -44,7 +44,7 @@ Q_OBJECT
         void clearEntries();
         int getThumbnailSize() {return thumbnailSize;}
         void setOrientation(bool horizontal);
-        QSize RocketFilePreviewArea::sizeHint() const;
+        QSize sizeHint() const;
     signals:
         void questionClicked(RocketImage *);
 };

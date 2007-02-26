@@ -5,6 +5,7 @@
 #include <QColor>
 #include <cmath>
 #include <cstdio>
+#include <cassert>
 
 namespace ImageTools {
     inline int clamp(int n, int lower, int upper) {
