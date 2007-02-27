@@ -44,6 +44,7 @@ endif (UNIX)
 
 
 add_subdirectory(pixmapview)
+add_subdirectory(qtconcurrent)
 if (SANE_FOUND)
     add_subdirectory(kscan)
 endif (SANE_FOUND)

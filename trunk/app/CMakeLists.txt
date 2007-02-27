@@ -85,7 +85,7 @@ qt4_add_resources(imagerocket_RES_SRCS ${imagerocket_RES})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 add_executable(imagerocket WIN32 ${imagerocket_SRCS} ${imagerocket_MOC_SRCS} ${imagerocket_UIS_H} ${imagerocket_RES_SRCS})
-target_link_libraries(imagerocket ${QT_LIBRARIES} pixmapview)
+target_link_libraries(imagerocket ${QT_LIBRARIES} pixmapview qtconcurrent)
 if (WIN32)
     target_link_libraries(imagerocket wininet)
 endif (WIN32)
