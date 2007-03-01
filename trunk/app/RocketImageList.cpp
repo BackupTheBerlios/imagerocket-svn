@@ -30,13 +30,11 @@ Suite 330, Boston, MA 02111-1307 USA */
 
 RocketImageList::RocketImageList() {
     selection = NULL;
-    generator = new ThreadedImageLoader();
     srand(unsigned(time(NULL)));
     qRegisterMetaType<QImage>("QImage");
     connect(&saveToDiskTimer, SIGNAL(timeout()), SLOT(saveToDiskTimeout()));
     saveToDiskTimer.start(5000);
-    connect(generator, SIGNAL(imageLoaded(const QString, const QImage)),
-            this, SLOT(updateThumbnail(const QString, const QImage)));
+    connect(&watcher, SIGNAL(resultReady(const QVariant)), SLOT(updateThumbnail(const QVariant)));
     QDir temp = QDir::temp();
     if (!temp.exists(TEMP_DIR)) {
         bool tempDirCreated = temp.mkdir(TEMP_DIR);
@@ -50,7 +48,6 @@ RocketImageList::RocketImageList() {
 }
 
 RocketImageList::~RocketImageList() {
-    delete generator;
     foreach (RocketImage *i, list) {
         delete i;
     }
@@ -192,8 +189,8 @@ void RocketImageList::continueThumbnailGeneration() {
             if (info.size() > maxFileSize && !alwaysMakeThumbnails) {
                 i->setThumbnail(RocketImage::TooLarge);
             } else {
-                generator->loadImage(i->getFileName(), QSize(thumbnailSize, thumbnailSize),
-                        Qt::KeepAspectRatio);
+                //generator->loadImage(i->getFileName(), QSize(thumbnailSize, thumbnailSize),
+                //        Qt::KeepAspectRatio);
                 block = true;
             }
         }
@@ -228,6 +225,9 @@ RocketImage *RocketImageList::previous(RocketImage *index) {
 RocketImage *RocketImageList::next(RocketImage *index) {
     int i = list.indexOf(index);
     return (i > -1 && i < list.size()-1) ? list[i+1] : NULL;
+}
+
+void RocketImageList::updateThumbnail(const QVariant &result) {
 }
 
 void RocketImageList::updateThumbnail(const QString fileName, const QImage thumbnail) {
@@ -307,3 +307,4 @@ QString RocketImageList::generateRandomString(int length) {
     }
     return str;
 }
+

@@ -7,6 +7,7 @@ set(EXECUTABLE_OUTPUT_PATH ..)
 include(${QT_USE_FILE})
 
 include_directories(../pixmapview)
+include_directories(../qtconcurrent ../qtconcurrent/private)
 if (UNIX)
     include_directories(../kscan)
 endif (UNIX)

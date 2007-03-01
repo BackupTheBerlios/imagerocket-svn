@@ -10,6 +10,7 @@ set(qtconcurrent_SRCS
     run.cpp
     private/threadpool.cpp
     private/threadmanager.cpp
+    private/taskmanager.cpp
     private/futureengine.cpp
     private/futureresult.cpp
 )

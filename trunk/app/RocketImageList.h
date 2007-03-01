@@ -18,9 +18,9 @@ Suite 330, Boston, MA 02111-1307 USA */
 #ifndef ROCKET_IMAGE_LIST
 #define ROCKET_IMAGE_LIST
 
-#include "ThreadedImageLoader.h"
-class RocketImage;
+#include "futurewatcher.h"
 #include <QtGui>
+class RocketImage;
 
 class RocketImageList : public QObject {
 Q_OBJECT
@@ -28,7 +28,7 @@ protected:
     QString location;
     RocketImage *selection;
     QVector < RocketImage * > list;
-    ThreadedImageLoader *generator;
+    QtConcurrent::QFutureWatcher watcher;
     QTimer saveToDiskTimer;
     QDir tempDir, collectionTempDir;
     void continueThumbnailGeneration();
@@ -55,6 +55,7 @@ public:
 public slots:
     void setSelection(RocketImage *index);
     void addScannedFile(const QPixmap &pixmap);
+    void updateThumbnail(const QVariant &result);
     void updateThumbnail(const QString fileName, const QImage thumbnail);
 protected slots:
     void removeMeEvent();
